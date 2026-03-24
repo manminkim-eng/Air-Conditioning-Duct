@@ -282,11 +282,12 @@ input[type="number"]{-moz-appearance:textfield;}
   background:#4b5563;
   padding:24px 16px 40px;
   display:flex;
-  justify-content:flex-start;   /* JS scale 후 left 기준 정렬 */
+  justify-content:flex-start;
   align-items:flex-start;
   min-height:calc(100vh - 130px);
   border-radius:10px;
-  overflow:hidden;              /* scale 후 삐져나온 부분 숨김 */
+  /* overflow:hidden 제거 — scale 후 콘텐츠 잘림 방지 */
+  overflow:visible;
 }
 
 /* ── ISO A4 규격 페이지 (210mm × 297mm) ── */
@@ -301,7 +302,14 @@ input[type="number"]{-moz-appearance:textfield;}
   flex-shrink:0;
   position:relative;
   /* transform은 JS(scaleA4Page)가 동적으로 주입 */
-  transform-origin:top left;   /* JS 계산 기준점 */
+  transform-origin:top left;
+}
+
+/* 모바일: 패딩 최소화로 가용 폭 최대화 */
+@media(max-width:640px){
+  .a4-preview-wrap{
+    padding:16px 8px 32px;
+  }
 }
 .a4-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2.5px solid #0f766e;padding-bottom:10px;margin-bottom:14px;}
 .a4-company{font-size:9px;color:#64748b;}
@@ -1662,7 +1670,15 @@ function switchTab(id, btn){
   document.querySelectorAll('.tb').forEach(function(b){ b.classList.remove('active'); });
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
-  if(id === 'tab-print') { updateA4(); scaleA4Page(); }
+  if(id === 'tab-print') {
+    updateA4();
+    // display:block 적용 후 2프레임 대기 → 레이아웃 reflow 완료 보장
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        scaleA4Page();
+      });
+    });
+  }
   if(id === 'tab-mobile'){
     if(state.result) renderMobileResult(state.result);
     // 산정 결과 없으면 안내 텍스트 유지 (이미 초기화됨)
@@ -2520,48 +2536,85 @@ function scaleA4Page(){
   var wrap = page && page.closest('.a4-preview-wrap');
   if(!page || !wrap) return;
 
-  // 인쇄 중이면 transform 제거
+  // ① 인쇄 중이면 transform 완전 제거
   if(window.matchMedia('print').matches){
-    page.style.transform = '';
-    page.style.marginBottom = '';
+    page.style.cssText = '';
     wrap.style.minHeight = '';
+    wrap.style.justifyContent = '';
     return;
   }
 
-  // 래퍼 수평 패딩(좌우 각 16px 기본)
-  var wrapStyle   = getComputedStyle(wrap);
-  var wrapPadLR   = parseFloat(wrapStyle.paddingLeft) + parseFloat(wrapStyle.paddingRight);
-  var availWidth  = wrap.clientWidth - wrapPadLR;
+  // ② tab-print 패널이 숨겨진 상태면 건너뜀 (offsetWidth=0 방지)
+  var tabPanel = document.getElementById('tab-print');
+  if(tabPanel && !tabPanel.classList.contains('active')){
+    return;
+  }
 
-  // 페이지 자연 너비(210mm = ~794px @96dpi) — offsetWidth로 읽기
-  var pageNatW = page.offsetWidth;   // transform 적용 전 실제 픽셀 폭
-  if(pageNatW <= 0) pageNatW = 794;  // 폴백
+  // ③ 래퍼 가용 폭 계산 — clientWidth 0이면 rAF로 재시도
+  var wrapStyle  = getComputedStyle(wrap);
+  var wrapPadLR  = parseFloat(wrapStyle.paddingLeft) + parseFloat(wrapStyle.paddingRight);
+  var availWidth = wrap.clientWidth - wrapPadLR;
+  if(availWidth <= 0){
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){ scaleA4Page(); });
+    });
+    return;
+  }
+
+  // ④ A4 자연 너비: offsetWidth 우선, 0이면 getBoundingClientRect 폴백
+  var pageNatW = page.offsetWidth;
+  if(pageNatW <= 0){
+    var bcr = page.getBoundingClientRect();
+    pageNatW = bcr.width;
+  }
+  // 그래도 0이면 96dpi 기준 210mm = 794px 사용
+  if(pageNatW <= 0) pageNatW = Math.round(210 * 96 / 25.4);
 
   var scale = availWidth / pageNatW;
 
   if(scale >= 1){
-    // 충분한 공간 → 스케일 불필요
-    page.style.transform   = '';
-    page.style.marginBottom = '';
-    // 래퍼를 중앙 정렬로 복귀
+    // 공간 충분 → scale 제거, 중앙 정렬
+    page.style.transform      = '';
+    page.style.marginBottom   = '';
+    page.style.marginLeft     = '';
     wrap.style.justifyContent = 'center';
-    wrap.style.paddingLeft    = '';
+    wrap.style.minHeight      = '';
   } else {
-    // 스케일 필요 — transform-origin:top left 기준
-    page.style.transform      = 'scale(' + scale.toFixed(4) + ')';
-    // 스케일 후 실제 차지 높이 = 자연 높이 × scale
-    var pageNatH    = page.scrollHeight;
-    var scaledH     = pageNatH * scale;
-    // 레이아웃 공간 보정: 스케일로 줄어든 만큼 음수 마진 적용
-    var excess      = pageNatH - scaledH;
-    page.style.marginBottom = '-' + excess.toFixed(0) + 'px';
-    // 래퍼 좌측 정렬 유지 (transform-origin:top left 와 일치)
-    wrap.style.justifyContent = 'flex-start';
-    // 래퍼 최소 높이를 스케일된 높이 + 상하 패딩으로 재설정
+    // ⑤ scale 적용 — transform-origin:top left
+    //    좌측 패딩만큼 marginLeft로 중앙 보정 제거 (top-left 기준 단순화)
+    page.style.transform      = 'scale(' + scale.toFixed(5) + ')';
+    page.style.marginLeft     = '0';
+
+    // ⑥ 높이 보정: scrollHeight(실제 콘텐츠 높이) × scale
+    var pageNatH  = page.scrollHeight;
+    if(pageNatH <= 0) pageNatH = Math.round(297 * 96 / 25.4);
+    var scaledH   = pageNatH * scale;
+    var excess    = pageNatH - scaledH;
+    page.style.marginBottom = '-' + Math.floor(excess) + 'px';
+
+    // ⑦ 래퍼 최소 높이 = scale된 높이 + 상하 패딩 + 여유
     var wrapPadTB = parseFloat(wrapStyle.paddingTop) + parseFloat(wrapStyle.paddingBottom);
-    wrap.style.minHeight = (scaledH + wrapPadTB + 20) + 'px';
+    wrap.style.minHeight      = (scaledH + wrapPadTB + 24) + 'px';
+    wrap.style.justifyContent = 'flex-start';
   }
 }
+
+// ── ResizeObserver: wrap 크기 변경 시 자동 재계산 ──────────────
+(function(){
+  if(typeof ResizeObserver === 'undefined') return;
+  document.addEventListener('DOMContentLoaded', function(){
+    var wrap = document.querySelector('.a4-preview-wrap');
+    if(!wrap) return;
+    var ro = new ResizeObserver(function(){
+      // tab-print가 활성 상태일 때만 재계산
+      var tab = document.getElementById('tab-print');
+      if(tab && tab.classList.contains('active')){
+        scaleA4Page();
+      }
+    });
+    ro.observe(wrap);
+  });
+})();
 
 function exportA4Jpg(){
   if(!state.result){ showToast('⚠️ 먼저 덕트 규격을 산정하세요'); return; }
@@ -2628,7 +2681,12 @@ document.addEventListener('DOMContentLoaded', function(){
 
   // A4 미리보기 동적 스케일 — 리사이즈 시 재계산
   window.addEventListener('resize', function(){ scaleA4Page(); });
-  scaleA4Page();
+  // 초기 실행: 2프레임 대기로 레이아웃 완전 확정 후 계산
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      scaleA4Page();
+    });
+  });
 });
 
 // ══════════════════════════════════════════
