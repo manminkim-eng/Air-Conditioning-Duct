@@ -1,0 +1,3162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<title>공조 덕트 규격 산정 시스템 [MANMIN-Ver2.0]</title>
+<meta name="description" content="공조 풍량에 따른 덕트 규격 자동 산정 — 기계설비 기술기준 (국토교통부 고시 제2021-851호)"/>
+<meta name="theme-color" content="#0f766e"/>
+
+<!-- ══ PWA 매니페스트 ══ -->
+<link rel="manifest" href="manifest.json"/>
+
+<!-- ══ iOS Safari PWA ══ -->
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="덕트산정"/>
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/>
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png"/>
+<link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192x192.png"/>
+
+<!-- ══ 파비콘 ══ -->
+<link rel="icon" href="icons/favicon.ico" sizes="any"/>
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png"/>
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png"/>
+
+<!-- ══ OG / SNS 공유 카드 ══ -->
+<meta property="og:title" content="공조 덕트 규격 산정 시스템"/>
+<meta property="og:description" content="기계설비 기술기준 국토교통부 고시 제2021-851호 기반 덕트 자동 산정"/>
+<meta property="og:image" content="icons/icon-512x512.png"/>
+<meta property="og:type" content="website"/>
+<meta name="msapplication-TileImage" content="icons/icon-144x144.png"/>
+<meta name="msapplication-TileColor" content="#0f766e"/>
+
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif!important;}
+html,body{min-height:100vh;background:#f0fdfa;color:#0c1a2e;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:#f0fdfa;}
+::-webkit-scrollbar-thumb{background:#99f6e4;border-radius:10px;}
+input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+input[type="number"]{-moz-appearance:textfield;}
+.mono{font-family:'JetBrains Mono','Courier New',monospace!important;}
+
+/* ── HEADER ── */
+.app-header{background:#ccfbf1;position:sticky;top:0;z-index:50;box-shadow:0 2px 16px rgba(15,118,110,.3);}
+.header-inner{max-width:1300px;margin:0 auto;padding:0 14px;height:58px;display:flex;align-items:center;gap:10px;}
+.brand-logo{display:flex;align-items:center;gap:9px;flex:1;min-width:0;}
+.brand-icon{width:36px;height:36px;background:#0f766e;border-radius:9px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(15,118,110,.4);flex-shrink:0;font-size:18px;}
+.brand-texts{min-width:0;}
+.brand-title{font-size:13px;font-weight:900;color:#0c1a2e;letter-spacing:-.02em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.brand-sub{font-size:9px;color:#0d9488;margin-top:1px;font-weight:700;white-space:nowrap;}
+.hdr-btns{display:flex;gap:5px;flex-shrink:0;}
+.btn-g{background:#fff;color:#374151;border:1.5px solid #cbd5e1;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;font-family:inherit;transition:all .15s;white-space:nowrap;}
+.btn-g:hover{border-color:#0f766e;color:#0f766e;background:#f0fdfa;}
+.btn-b{background:#0f766e;color:#fff;border:none;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:4px;font-family:inherit;transition:all .15s;white-space:nowrap;}
+.btn-b:hover{background:#115e59;}
+@media(max-width:600px){.brand-title{font-size:11px;}.btn-g .btn-txt,.btn-b .btn-txt{display:none;}.hdr-btns{gap:3px;}.btn-g,.btn-b{padding:6px 8px;}}
+@media(max-width:380px){.brand-title{font-size:10px;}}
+
+/* ── TAB BAR ── */
+.tab-bar{background:#99f6e4;border-top:1px solid rgba(15,118,110,.25);overflow-x:auto;scrollbar-width:none;}
+.tab-bar::-webkit-scrollbar{display:none;}
+.tab-bar-inner{max-width:1300px;margin:0 auto;padding:0 5px;display:flex;}
+.tb{background:none;border:none;cursor:pointer;color:#115e59;font-family:inherit;padding:8px 12px;font-size:11px;font-weight:700;position:relative;transition:color .15s,background .15s;display:flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0;}
+.tb:hover{color:#0c1a2e;background:rgba(15,118,110,.08);}
+.tb.active{color:#0c1a2e;}
+.tb.active::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:#f97316;border-radius:2px 2px 0 0;}
+
+/* ── LAYOUT ── */
+.main-wrap{max-width:1300px;margin:0 auto;padding:13px 13px 80px;}
+.tab-panel{display:none;}.tab-panel.active{display:block;}
+
+/* 3열 메인 그리드 */
+.calc-grid{display:grid;grid-template-columns:300px 1fr 1fr;gap:13px;align-items:start;}
+.calc-project-row{grid-column:1/-1;}
+.calc-col-left{grid-column:1;}
+.calc-col-mid{grid-column:2;}
+.calc-col-right{grid-column:3;position:sticky;top:72px;max-height:calc(100vh - 82px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#99f6e4 transparent;}
+.calc-col-right::-webkit-scrollbar{width:4px;}
+.calc-col-right::-webkit-scrollbar-thumb{background:#99f6e4;border-radius:4px;}
+@media(max-width:1100px){.calc-grid{grid-template-columns:260px 1fr 1fr;}}
+@media(max-width:900px){.calc-grid{grid-template-columns:1fr 1fr;}.calc-project-row{grid-column:1/-1;}.calc-col-left{grid-column:1;}.calc-col-mid{grid-column:2;}.calc-col-right{grid-column:1/-1;position:static;max-height:none;}}
+@media(max-width:640px){.calc-grid{grid-template-columns:1fr;}.calc-col-left,.calc-col-mid,.calc-col-right{grid-column:1;}.calc-col-right{position:static;max-height:none;}}
+
+/* 2열 그리드 */
+.two-col{display:grid;grid-template-columns:440px 1fr;gap:13px;align-items:start;}
+@media(max-width:1100px){.two-col{grid-template-columns:1fr 1fr;}}
+@media(max-width:760px){.two-col{grid-template-columns:1fr;}}
+
+/* ── CARD ── */
+.card{background:#fff;border:1px solid #d1faf5;border-radius:12px;box-shadow:0 1px 4px rgba(15,118,110,.07);overflow:hidden;margin-bottom:12px;}
+.card-head{display:flex;align-items:center;gap:8px;padding:10px 13px;border-bottom:1px solid #ccfbf1;}
+.card-ico{width:25px;height:25px;border-radius:6px;background:#f0fdfa;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;}
+.card-tit{font-size:11px;font-weight:800;color:#0c1a2e;letter-spacing:.04em;flex:1;}
+.cbadge{font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:20px;background:#f0fdfa;color:#0f766e;border:1px solid #99f6e4;white-space:nowrap;}
+.cbadge.org{background:#fff7ed;color:#c2410c;border-color:#fed7aa;}
+.cbadge.grn{background:#f0fdf4;color:#15803d;border-color:#bbf7d0;}
+.cbadge.red{background:#fef2f2;color:#dc2626;border-color:#fecaca;}
+.cbadge.pur{background:#faf5ff;color:#7e22ce;border-color:#e9d5ff;}
+.cbadge.sky{background:#f0fdfa;color:#0d9488;border-color:#5eead4;}
+.card-body{padding:12px 13px;}
+
+/* ── FORM ── */
+.flbl{font-size:9.5px;font-weight:700;color:#3d6b64;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px;display:block;}
+.finput{width:100%;padding:7px 10px;background:#f8fafc;border:1.5px solid #99f6e4;border-radius:7px;color:#0c1a2e;font-size:12.5px;font-weight:600;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s;height:38px;box-sizing:border-box;}
+.finput:focus{border-color:#0f766e;box-shadow:0 0 0 3px rgba(15,118,110,.12);background:#fff;}
+.fselect{width:100%;padding:7px 24px 7px 9px;background:#f8fafc;border:1.5px solid #99f6e4;border-radius:7px;color:#0c1a2e;font-size:11.5px;font-weight:700;font-family:inherit;outline:none;cursor:pointer;transition:border-color .15s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%230f766e' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;height:38px;box-sizing:border-box;}
+.fselect:focus{border-color:#0f766e;box-shadow:0 0 0 3px rgba(15,118,110,.12);}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;align-items:end;}
+@media(max-width:360px){.frow{grid-template-columns:1fr;}}
+.frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;align-items:end;}
+@media(max-width:480px){.frow3{grid-template-columns:1fr 1fr;}}
+.fgrp{display:flex;flex-direction:column;gap:3px;}
+.fgrp.full{grid-column:1/-1;}
+.input-sfx{display:flex;height:38px;}
+.input-sfx .finput{border-radius:7px 0 0 7px;height:100%;}
+.sfx{padding:7px 10px;background:#f0fdfa;border:1.5px solid #99f6e4;border-left:none;border-radius:0 7px 7px 0;font-size:11.5px;font-weight:700;color:#0d9488;white-space:nowrap;display:flex;align-items:center;box-sizing:border-box;}
+
+/* ── STEP BAR ── */
+.step-bar{display:flex;align-items:center;margin-bottom:13px;background:#fff;border:1px solid #d1faf5;border-radius:10px;padding:8px 12px;overflow-x:auto;gap:0;scrollbar-width:none;}
+.step-bar::-webkit-scrollbar{display:none;}
+.step-item{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.sc{width:22px;height:22px;border-radius:50%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#94a3b8;flex-shrink:0;transition:all .2s;}
+.sc.done{background:#22c55e;color:#fff;}
+.sc.active{background:#0f766e;color:#fff;box-shadow:0 0 0 3px rgba(15,118,110,.2);}
+.sl{font-size:10.5px;font-weight:700;color:#94a3b8;white-space:nowrap;}
+.sl.active{color:#0f766e;}.sl.done{color:#16a34a;}
+.sdiv{width:16px;height:2px;background:#e2e8f0;margin:0 3px;flex-shrink:0;transition:background .2s;}
+.sdiv.done{background:#22c55e;}
+
+/* ── NOTICE BOX ── */
+.nb{border-radius:9px;padding:9px 11px;margin-bottom:9px;}
+.nb.blue{background:#f0fdfa;border:1.5px solid #99f6e4;}
+.nb.org{background:#fff7ed;border:1.5px solid #fed7aa;}
+.nb.grn{background:#f0fdf4;border:1.5px solid #bbf7d0;}
+.nb.red{background:#fef2f2;border:1.5px solid #fecaca;}
+.nb.sky{background:#f0fdfa;border:1.5px solid #5eead4;}
+.nb-tit{font-size:10.5px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:4px;}
+.nb.blue .nb-tit{color:#115e59;}.nb.org .nb-tit{color:#c2410c;}.nb.grn .nb-tit{color:#15803d;}.nb.red .nb-tit{color:#dc2626;}.nb.sky .nb-tit{color:#0f766e;}
+.nb-txt{font-size:10.5px;line-height:1.75;}
+.nb.blue .nb-txt{color:#0c1a2e;}.nb.org .nb-txt{color:#78350f;}.nb.grn .nb-txt{color:#14532d;}.nb.red .nb-txt{color:#7f1d1d;}.nb.sky .nb-txt{color:#115e59;}
+
+/* ── DUCT TYPE GRID ── */
+.dtype-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:5px;margin-bottom:10px;}
+.dtype-card{border:1.5px solid #99f6e4;border-radius:9px;padding:8px 5px;cursor:pointer;transition:all .15s;text-align:center;background:#f8fafc;}
+.dtype-card:hover{border-color:#0d9488;background:#f0fdfa;}
+.dtype-card.sel{border-color:#0f766e;background:#d1faf5;box-shadow:0 0 0 2px rgba(15,118,110,.15);}
+.dt-ico{font-size:18px;margin-bottom:3px;}
+.dt-nm{font-size:10px;font-weight:800;color:#0c1a2e;}
+.dt-cat{font-size:9px;color:#0d9488;font-weight:700;margin-top:1px;}
+
+/* ── RESULT HERO ── */
+.duct-result-hero{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+@media(max-width:360px){.duct-result-hero{grid-template-columns:1fr;}}
+.drh-box{border-radius:11px;padding:14px;text-align:center;color:#fff;}
+.drh-box.rect{background:linear-gradient(135deg,#0c1a2e,#0f766e);}
+.drh-box.circ{background:linear-gradient(135deg,#134e4a,#0f766e);}
+.drh-box.flat{background:linear-gradient(135deg,#2d1b69,#5b21b6);}
+.drh-box.vel{background:linear-gradient(135deg,#7c2d12,#c2410c);}
+.drh-lbl{font-size:9.5px;font-weight:700;opacity:.7;margin-bottom:3px;}
+.drh-val{font-size:32px;font-weight:900;font-family:'JetBrains Mono',monospace!important;color:#fde047;line-height:1;}
+.drh-unit{font-size:11px;font-weight:700;opacity:.8;margin-top:2px;}
+.drh-sub{font-size:9px;opacity:.65;margin-top:4px;line-height:1.5;}
+
+/* ── STAT GRID ── */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+@media(max-width:380px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+.sbox{background:#fff;border:1px solid #d1faf5;border-radius:10px;padding:10px;text-align:center;}
+.sico{font-size:16px;margin-bottom:3px;}
+.sval{font-size:18px;font-weight:900;color:#0f766e;font-family:'JetBrains Mono',monospace!important;line-height:1.1;}
+.slbl{font-size:9.5px;color:#3d6b64;font-weight:700;margin-top:2px;}
+
+/* ── TABLE ── */
+.twrap{overflow-x:auto;border-radius:9px;border:1px solid #d1faf5;}
+.rtbl{width:100%;border-collapse:collapse;font-size:11px;}
+.rtbl th{background:#f0fdfa;padding:7px 8px;text-align:center;font-weight:800;color:#115e59;border:1px solid #99f6e4;font-size:10px;height:32px;box-sizing:border-box;white-space:nowrap;}
+.rtbl td{padding:7px 8px;text-align:center;border:1px solid #d1faf5;color:#0c1a2e;font-weight:600;height:32px;box-sizing:border-box;white-space:nowrap;}
+.rtbl tr:nth-child(even) td{background:#f8fafc;}
+.rtbl .highlight td{background:#d1faf5!important;border-color:#5eead4!important;font-weight:900;}
+.rtbl .highlight td{color:#0c1a2e;}
+
+/* ── GUIDE TABLE ── */
+.gtbl{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:12px;}
+.gtbl th{background:#f0fdfa;padding:7px 8px;text-align:center;font-weight:800;color:#115e59;border:1px solid #99f6e4;font-size:10px;height:32px;box-sizing:border-box;white-space:nowrap;}
+.gtbl td{padding:6px 8px;text-align:center;border:1px solid #d1faf5;font-weight:600;color:#0c1a2e;height:32px;box-sizing:border-box;white-space:nowrap;}
+.gtbl tr:nth-child(even) td{background:#f8fafc;}
+
+/* ── 공사정보 반응형 그리드 ── */
+.project-info-grid{display:grid;grid-template-columns:1fr 160px 110px;gap:8px;align-items:end;}
+@media(max-width:768px){.project-info-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto auto;}.project-name-grp{grid-column:1/-1;}.project-date-grp{grid-column:1;}.project-author-grp{grid-column:2;}}
+@media(max-width:400px){.project-info-grid{grid-template-columns:1fr;}.project-name-grp,.project-date-grp,.project-author-grp{grid-column:1;}}
+
+/* ── CALC BOX ── */
+.cbox{background:#f0fdfa;border:1px solid #99f6e4;border-radius:8px;padding:10px;margin-top:9px;}
+.cbox-tit{font-size:9.5px;font-weight:800;color:#3d6b64;letter-spacing:.06em;margin-bottom:7px;}
+.crow{display:flex;justify-content:space-between;font-size:10.5px;padding:3px 0;border-bottom:1px dashed #99f6e4;}
+.crow:last-child{border-bottom:none;font-weight:800;color:#0f766e;}
+.ck{color:#475569;font-weight:600;}
+.cv{font-weight:700;font-family:'JetBrains Mono',monospace!important;}
+
+/* ── REF BOX ── */
+.ref-box{background:#f0fdfa;border:1px solid #99f6e4;border-radius:8px;padding:11px;margin-top:12px;}
+.ref-tit{font-size:10.5px;font-weight:800;color:#475569;margin-bottom:6px;}
+.ref-item{font-size:10px;color:#64748b;line-height:1.8;display:flex;gap:5px;}
+.ref-item::before{content:'•';color:#0d9488;flex-shrink:0;}
+
+/* ── DUCT SIZE TAG ── */
+.duct-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:900;font-family:'JetBrains Mono',monospace!important;}
+.duct-tag.rect{background:#0f766e;color:#fff;}
+.duct-tag.circ{background:#134e4a;color:#fff;}
+.duct-tag.ok{background:#f0fdfa;color:#0f766e;border:1px solid #99f6e4;}
+.duct-tag.warn{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;}
+
+/* ── SEG CONTROL ── */
+.seg-ctrl{display:flex;background:#f0fdfa;border:1.5px solid #99f6e4;border-radius:9px;padding:2px;gap:2px;margin-bottom:10px;}
+.seg-btn{flex:1;padding:5px 8px;border:none;border-radius:6px;background:none;font-size:10.5px;font-weight:700;color:#3d6b64;cursor:pointer;transition:all .15s;font-family:inherit;white-space:nowrap;}
+.seg-btn.active{background:#0f766e;color:#fff;box-shadow:0 2px 6px rgba(15,118,110,.3);}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:86px;left:50%;transform:translateX(-50%) translateY(14px);background:#0c1a2e;color:#fff;padding:8px 16px;border-radius:16px;font-size:12px;font-weight:700;opacity:0;transition:all .28s;z-index:9999;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── MODAL ── */
+.modal-ov{position:fixed;inset:0;background:rgba(12,26,46,.55);z-index:200;display:none;align-items:center;justify-content:center;padding:12px;}
+.modal-ov.open{display:flex;}
+.modal-box{background:#fff;border-radius:15px;max-width:780px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(15,118,110,.2);}
+.modal-head{padding:15px 17px 13px;border-bottom:1px solid #d1faf5;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1;border-radius:15px 15px 0 0;}
+.modal-tit{font-size:14px;font-weight:900;color:#115e59;}
+.modal-cls{width:29px;height:29px;border:none;background:#f0fdfa;border-radius:7px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
+.modal-cls:hover{background:#d1faf5;}
+.modal-body{padding:15px 17px;}
+@media(max-width:479px){.modal-ov{padding:6px;}.modal-box{border-radius:12px;max-height:95vh;}.modal-head{padding:12px 14px 10px;}.modal-tit{font-size:13px;}}
+
+/* ── GUIDE MODAL TABS ── */
+.gm-tab{background:none;border:none;padding:9px 13px;font-size:10.5px;font-weight:700;color:#3d6b64;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;border-bottom:2px solid transparent;transition:all .15s;}
+.gm-tab:hover{color:#0f766e;background:rgba(15,118,110,.06);}
+.gm-tab.active{color:#0f766e;border-bottom-color:#0f766e;background:#fff;}
+.gm-panel{display:none;}
+.gm-panel.active{display:block;}
+/* 마스터 모달 패널 */
+.master-modal-body .gm-panel.active{display:block;}
+
+/* ── RESULT PLACEHOLDER ── */
+.result-placeholder{text-align:center;padding:36px 20px;color:#94a3b8;}
+.rph-ico{font-size:40px;margin-bottom:10px;opacity:.4;}
+.rph-tit{font-size:13px;font-weight:800;margin-bottom:5px;}
+.rph-sub{font-size:11px;line-height:1.6;}
+
+/* ── BATCH TABLE ── */
+.batch-row{display:grid;grid-template-columns:40px 1fr 1fr 1fr 1fr 90px;gap:6px;align-items:center;padding:7px 8px;border-bottom:1px solid #d1faf5;}
+.batch-row:last-child{border-bottom:none;}
+.batch-row.header{background:#f0fdfa;font-size:10px;font-weight:800;color:#115e59;border-radius:8px 8px 0 0;}
+.batch-row.data{font-size:11px;font-weight:600;}
+.batch-row.data:hover{background:#f8fafc;}
+@media(max-width:600px){.batch-row{grid-template-columns:30px 1fr 1fr 80px;}.batch-row .hide-sm{display:none;}}
+@media(max-width:400px){.batch-row{grid-template-columns:1fr 1fr 80px;}.batch-row .hide-xs{display:none;}}
+
+/* ── VELOCITY GAUGE ── */
+.vel-gauge{height:10px;background:#e2e8f0;border-radius:5px;overflow:hidden;margin-top:6px;}
+.vel-bar{height:100%;border-radius:5px;transition:width .5s ease;}
+.vel-bar.ok{background:linear-gradient(90deg,#22c55e,#16a34a);}
+.vel-bar.hi{background:linear-gradient(90deg,#f97316,#dc2626);}
+.vel-bar.lo{background:linear-gradient(90deg,#60a5fa,#0f766e);}
+
+/* ── A4 PRINT ── */
+@media print{
+  .app-header,.tab-bar,.hdr-btns,.no-print{display:none!important;}
+  .main-wrap{padding:0!important;}
+  .calc-grid{grid-template-columns:1fr!important;}
+  .card{box-shadow:none!important;border:1px solid #ccc!important;}
+  body{background:#fff!important;}
+  .a4-preview-wrap{background:transparent!important;padding:0!important;}
+  .a4-page{box-shadow:none!important;margin:0!important;}
+}
+
+/* ── A4 미리보기 래퍼 (중앙 배치) ── */
+.a4-preview-wrap{
+  background:#64748b;
+  padding:28px 16px 40px;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  min-height:calc(100vh - 130px);
+  border-radius:10px;
+}
+
+/* ── ISO A4 규격 페이지 (210mm × 297mm) ── */
+.a4-page{
+  background:#fff;
+  width:210mm;
+  min-height:297mm;
+  padding:18mm 16mm 20mm;
+  box-shadow:0 4px 32px rgba(0,0,0,.35), 0 1px 6px rgba(0,0,0,.2);
+  border-radius:2px;
+  box-sizing:border-box;
+  flex-shrink:0;
+  position:relative;
+}
+
+/* 태블릿·모바일에서 A4 스케일 조정 */
+@media(max-width:900px){
+  .a4-preview-wrap{padding:20px 10px 32px;}
+  .a4-page{
+    width:100%;
+    max-width:210mm;
+    min-height:auto;
+    padding:14mm 12mm 16mm;
+    transform-origin:top center;
+  }
+}
+@media(max-width:600px){
+  .a4-preview-wrap{padding:14px 6px 24px;background:#475569;}
+  .a4-page{
+    transform:scale(0.72);
+    transform-origin:top center;
+    margin-bottom:calc(-297mm * 0.28 + 20px);
+  }
+}
+@media(max-width:400px){
+  .a4-page{
+    transform:scale(0.58);
+    margin-bottom:calc(-297mm * 0.42 + 16px);
+  }
+}
+.a4-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2.5px solid #0f766e;padding-bottom:10px;margin-bottom:14px;}
+.a4-company{font-size:9px;color:#64748b;}
+.a4-title{font-size:16px;font-weight:900;color:#0c1a2e;margin-bottom:2px;}
+.a4-subtitle{font-size:10px;color:#0f766e;font-weight:700;}
+.a4-meta-table{width:100%;border-collapse:collapse;margin-bottom:14px;}
+.a4-meta-table td{padding:4px 8px;font-size:10px;border:1px solid #d1faf5;}
+.a4-meta-table .k{background:#f0fdfa;font-weight:700;color:#115e59;width:100px;}
+.a4-section-tit{font-size:11px;font-weight:800;color:#0f766e;margin-bottom:6px;padding-bottom:3px;border-bottom:1.5px solid #99f6e4;}
+
+/* ── MULTI CALC ── */
+.multi-item{background:#f8fafc;border:1px solid #d1faf5;border-radius:10px;padding:10px 12px;margin-bottom:8px;position:relative;}
+.multi-item-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.multi-item-title{font-size:11px;font-weight:800;color:#0c1a2e;}
+.multi-del{background:none;border:none;cursor:pointer;color:#dc2626;font-size:14px;padding:2px 6px;border-radius:5px;}
+.multi-del:hover{background:#fef2f2;}
+.add-item-btn{width:100%;padding:9px;border:1.5px dashed #99f6e4;border-radius:8px;background:none;color:#0f766e;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;}
+.add-item-btn:hover{border-color:#0f766e;background:#f0fdfa;}
+
+/* ── VELOCITY STANDARDS ── */
+.vel-std-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:8px;}
+.vel-std-item{background:#fff;border:1px solid #d1faf5;border-radius:8px;padding:9px 11px;}
+.vsi-label{font-size:10px;font-weight:800;color:#0c1a2e;margin-bottom:4px;}
+.vsi-range{font-size:13px;font-weight:900;color:#0f766e;font-family:'JetBrains Mono',monospace!important;}
+.vsi-unit{font-size:9px;color:#64748b;font-weight:700;}
+
+/* ── 결과 카드 강조 ── */
+.result-main-val{font-size:38px;font-weight:900;font-family:'JetBrains Mono',monospace!important;color:#0f766e;line-height:1;letter-spacing:-.02em;}
+.result-main-unit{font-size:13px;font-weight:700;color:#0d9488;margin-top:3px;}
+.result-alt{font-size:12px;font-weight:700;color:#64748b;margin-top:5px;}
+
+/* ── 풍량-덕트 대응표 강조행 ── */
+.tbl-input-row td{background:#f0fdfa!important;font-weight:800!important;color:#1e40af!important;}
+.tbl-recommend-row td{background:#ccfbf1!important;font-weight:900!important;color:#115e59!important;border:2px solid #0f766e!important;}
+
+/* ── 계산식 모달 ── */
+.formula-block{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:13px 15px;margin-bottom:12px;}
+.formula-title{font-size:10.5px;font-weight:800;color:#115e59;letter-spacing:.05em;margin-bottom:8px;display:flex;align-items:center;gap:4px;}
+.formula-main{font-family:'JetBrains Mono','Courier New',monospace!important;font-size:15px;font-weight:700;color:#0c1a2e;background:#fff;border:1.5px solid #99f6e4;border-radius:8px;padding:10px 14px;letter-spacing:.02em;text-align:center;line-height:1.6;}
+.formula-box{display:flex;flex-direction:column;gap:4px;margin-top:9px;}
+.formula-row{display:flex;gap:8px;align-items:baseline;padding:4px 8px;border-radius:6px;}
+.formula-row:nth-child(even){background:#f0fdfa;}
+.formula-label{font-family:'JetBrains Mono','Courier New',monospace!important;font-size:11px;font-weight:800;color:#0f766e;min-width:90px;flex-shrink:0;}
+.formula-eq{font-size:11.5px;font-weight:600;color:#1e293b;line-height:1.5;}
+.formula-steps{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
+.fstep{display:flex;align-items:flex-start;gap:10px;}
+.fstep-num{width:24px;height:24px;background:#0f766e;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;margin-top:1px;}
+.fstep-txt{font-size:11.5px;color:#0c1a2e;line-height:1.6;font-weight:600;}
+
+/* ── 이용방법 ── */
+.howto-step-list{display:flex;flex-direction:column;gap:10px;margin-bottom:10px;}
+.howto-step{background:#f8fafc;border:1px solid #d1faf5;border-radius:10px;overflow:hidden;}
+.howto-step-hd{display:flex;align-items:center;gap:10px;padding:9px 13px;background:#f0fdfa;border-bottom:1px solid #d1faf5;}
+.howto-num{min-width:52px;height:26px;background:linear-gradient(135deg,#0f766e,#0d9488);color:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;letter-spacing:.03em;}
+.howto-title{font-size:12px;font-weight:800;color:#0c1a2e;}
+.howto-body{padding:10px 13px;display:flex;flex-direction:column;gap:6px;}
+.howto-item{font-size:11px;color:#1e293b;line-height:1.65;padding-left:14px;position:relative;}
+.howto-item::before{content:'•';position:absolute;left:4px;color:#0f766e;font-weight:900;}
+.feature-item{display:flex;gap:10px;padding:9px 11px;background:#f8fafc;border:1px solid #d1faf5;border-radius:9px;}
+.feature-icon{font-size:20px;flex-shrink:0;margin-top:1px;}
+.feature-title{font-size:11px;font-weight:800;color:#0c1a2e;margin-bottom:3px;}
+.feature-desc{font-size:10.5px;color:#475569;line-height:1.65;}
+
+/* ══ FAB ══ */
+.fab-calc{position:fixed;right:16px;bottom:20px;width:52px;height:52px;border-radius:50%;
+  background:linear-gradient(135deg,#0f766e,#0d9488);color:#fff;border:none;cursor:pointer;
+  font-size:22px;box-shadow:0 4px 20px rgba(15,118,110,.5);z-index:500;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;
+  animation:fab-pulse 2.5s ease-in-out infinite;}
+.fab-calc:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(15,118,110,.7);}
+@keyframes fab-pulse{0%,100%{box-shadow:0 4px 20px rgba(15,118,110,.5);}
+  50%{box-shadow:0 4px 30px rgba(15,118,110,.9),0 0 0 8px rgba(15,118,110,.12);}}
+.fab-tooltip{position:fixed;bottom:80px;right:16px;background:#0c1a2e;color:#fff;
+  padding:5px 11px;border-radius:8px;font-size:11px;font-weight:700;
+  opacity:0;pointer-events:none;transition:opacity .15s;z-index:501;white-space:nowrap;}
+.fab-tooltip.show{opacity:1;}
+
+/* ══ 통합 모달 (슬라이드업) ══ */
+.master-modal-ov{position:fixed;inset:0;background:rgba(12,26,46,.55);z-index:600;
+  display:none;align-items:flex-end;justify-content:center;}
+.master-modal-ov.open{display:flex;animation:modal-slideup .32s cubic-bezier(.16,1,.3,1);}
+@keyframes modal-slideup{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
+.master-modal-box{background:#fff;border-radius:18px 18px 0 0;max-width:900px;width:100%;
+  max-height:88vh;display:flex;flex-direction:column;
+  box-shadow:0 -8px 40px rgba(15,118,110,.25);}
+.master-modal-head{padding:14px 17px 12px;border-bottom:1px solid #d1faf5;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;background:#fff;z-index:1;
+  border-radius:18px 18px 0 0;flex-shrink:0;}
+.master-modal-tit{font-size:14px;font-weight:900;color:#115e59;}
+.master-modal-sub{font-size:9px;color:#0d9488;font-weight:700;margin-top:1px;}
+.master-modal-cls{width:30px;height:30px;border:none;background:#f0fdfa;border-radius:7px;
+  cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.master-modal-cls:hover{background:#d1faf5;}
+.master-modal-tabs{display:flex;background:#f0fdfa;border-bottom:1px solid #99f6e4;
+  overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
+.master-modal-tabs::-webkit-scrollbar{display:none;}
+.master-modal-body{padding:16px 17px 28px;overflow-y:auto;flex:1;}
+
+/* ══ Galaxy S24 Ultra 미리보기 ══ */
+.preview-action-bar{background:#fff;border:1px solid #d1faf5;border-radius:10px;
+  padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.preview-action-bar .bar-lbl{font-size:11px;font-weight:700;color:#3d6b64;}
+.btn-export{padding:7px 14px;border:none;border-radius:8px;cursor:pointer;font-size:11px;
+  font-weight:800;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:4px;white-space:nowrap;}
+.btn-jpg-dl{background:linear-gradient(135deg,#059669,#10b981);color:#fff;}
+.btn-jpg-dl:hover{background:linear-gradient(135deg,#047857,#059669);}
+.btn-share-dl{background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;animation:share-appear .3s ease;}
+.btn-share-dl:hover{background:linear-gradient(135deg,#6d28d9,#7c3aed);}
+@keyframes share-appear{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:translateX(0);}}
+
+/* ══ 반응형 추가 ══ */
+@media print{.master-modal-ov,.fab-calc,.fab-tooltip{display:none!important;}}
+@media(max-width:479px){
+  .master-modal-box{border-radius:14px 14px 0 0;max-height:92vh;}
+  .master-modal-head{padding:12px 13px 10px;}
+  .master-modal-tit{font-size:13px;}
+  .master-modal-body{padding:12px 13px 20px;}
+}
+
+
+/* ══ 반응형 추가 보강 ══ */
+@media(max-width:767px){
+  .main-wrap{padding:10px 9px 80px;}
+  .brand-sub{display:none;}
+}
+@media(max-width:479px){
+  .main-wrap{padding:8px 7px 75px;}
+  .header-inner{height:52px;padding:0 10px;}
+  .brand-icon{width:30px;height:30px;font-size:15px;}
+  .tb{padding:7px 9px;font-size:10px;}
+  .card-body{padding:10px 10px;}
+  .card-head{padding:8px 10px;}
+  .card-tit{font-size:10px;}
+}
+@media(hover:none) and (pointer:coarse){
+  .tb{min-height:40px;}
+  .btn-g,.btn-b{min-height:38px;}
+  .finput,.fselect{min-height:40px;height:40px;}
+  .input-sfx{height:40px;}
+  .dtype-card{min-height:64px;}
+}
+@media screen and (max-width:768px){
+  input[type="text"],input[type="number"],input[type="date"],select,textarea{font-size:16px!important;}
+}
+@media print{
+  .master-modal-ov,.fab-calc,.fab-tooltip,.tab-bar,.hdr-btns,.no-print{display:none!important;}
+  .main-wrap{padding:0!important;}
+  body{background:#fff!important;}
+}
+
+/* ══ PWA 설치 배너 (하단 슬라이드업) ══ */
+.pwa-banner{
+  position:fixed;bottom:0;left:0;right:0;z-index:8500;
+  background:linear-gradient(135deg,#0c1a2e 0%,#0f766e 100%);
+  padding:11px 16px calc(11px + env(safe-area-inset-bottom));
+  display:flex;align-items:center;gap:10px;flex-wrap:nowrap;
+  box-shadow:0 -3px 24px rgba(15,118,110,.5);
+  border-radius:16px 16px 0 0;
+  transform:translateY(100%);
+  transition:transform .35s cubic-bezier(.16,1,.3,1);
+}
+.pwa-banner.show{transform:translateY(0);}
+.pwa-banner-icon{width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0;}
+.pwa-banner-icon img{width:100%;height:100%;object-fit:cover;}
+.pwa-banner-text{flex:1;min-width:0;}
+.pwa-banner-title{font-size:12.5px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pwa-banner-sub{font-size:10px;color:#99f6e4;margin-top:1px;font-weight:600;}
+.pwa-banner-install{
+  background:#f0fdfa;color:#0f766e;border:none;
+  padding:8px 15px;border-radius:9px;
+  font-size:12px;font-weight:800;cursor:pointer;
+  font-family:inherit;white-space:nowrap;flex-shrink:0;
+  transition:all .15s;
+}
+.pwa-banner-install:hover{background:#fff;transform:scale(1.04);}
+.pwa-banner-close{
+  background:rgba(255,255,255,.15);border:none;color:#fff;
+  width:28px;height:28px;border-radius:7px;
+  cursor:pointer;font-size:14px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:inherit;transition:background .15s;
+}
+.pwa-banner-close:hover{background:rgba(255,255,255,.28);}
+
+/* ══ 헤더 설치 버튼 ══ */
+.btn-pwa{
+  background:linear-gradient(135deg,#0f766e,#0d9488);
+  color:#fff;border:none;padding:6px 10px;border-radius:8px;
+  font-size:11px;font-weight:800;cursor:pointer;
+  display:none;align-items:center;gap:4px;
+  font-family:inherit;transition:all .15s;white-space:nowrap;
+  animation:pwa-btn-pop .4s cubic-bezier(.34,1.5,.64,1);
+  flex-shrink:0;
+}
+.btn-pwa.show{display:flex;}
+.btn-pwa:hover{background:linear-gradient(135deg,#115e59,#0f766e);transform:translateY(-1px);}
+@keyframes pwa-btn-pop{
+  from{opacity:0;transform:scale(.8);}
+  to{opacity:1;transform:scale(1);}
+}
+@media(max-width:600px){.btn-pwa .btn-txt{display:none;}.btn-pwa{padding:6px 8px;}}
+
+/* ══ 업데이트 배너 ══ */
+.pwa-update-bar{
+  position:fixed;top:0;left:0;right:0;z-index:9100;
+  background:#f97316;color:#fff;
+  padding:9px 16px;display:none;
+  align-items:center;justify-content:center;gap:10px;
+  font-size:12px;font-weight:700;
+  box-shadow:0 2px 12px rgba(249,115,22,.4);
+}
+.pwa-update-bar.show{display:flex;}
+.pwa-update-bar button{
+  background:#fff;color:#f97316;border:none;
+  padding:4px 12px;border-radius:6px;
+  font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit;
+}
+
+/* ══ 오프라인 / 온라인 토스트 ══ */
+.net-toast{
+  position:fixed;top:68px;left:50%;
+  transform:translateX(-50%) translateY(-10px);
+  z-index:9200;background:#0c1a2e;color:#fff;
+  padding:7px 16px;border-radius:20px;
+  font-size:12px;font-weight:700;
+  opacity:0;pointer-events:none;
+  transition:all .28s;white-space:nowrap;
+}
+.net-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.net-toast.online{background:#0f766e;}
+
+/* ══ PWA 설치 완료 토스트 ══ */
+.pwa-done-toast{
+  position:fixed;top:70px;left:50%;
+  transform:translateX(-50%) translateY(-12px);
+  z-index:9300;background:#0f766e;color:#fff;
+  padding:9px 20px;border-radius:20px;
+  font-size:12px;font-weight:700;
+  opacity:0;pointer-events:none;
+  transition:all .3s;white-space:nowrap;
+  box-shadow:0 4px 20px rgba(15,118,110,.5);
+}
+.pwa-done-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media(max-width:480px){
+  .pwa-banner-sub{display:none;}
+  .pwa-banner-install{padding:7px 11px;font-size:11px;}
+}
+@media print{.pwa-banner,.pwa-update-bar,.net-toast,.pwa-done-toast,.btn-pwa{display:none!important;}}
+
+/* ══ 공유 모달 애니메이션 ══ */
+@keyframes modal-share-in{
+  from{opacity:0;transform:scale(.94) translateY(12px);}
+  to{opacity:1;transform:scale(1) translateY(0);}
+}
+@keyframes share-appear{
+  from{opacity:0;transform:translateX(-10px);}
+  to{opacity:1;transform:translateX(0);}
+}
+</style>
+</head>
+<body>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toastEl"></div>
+
+<!-- ── HEADER ── -->
+<header class="app-header">
+  <div class="header-inner">
+    <div class="brand-logo">
+      <div class="brand-icon">💨</div>
+      <div class="brand-texts">
+        <div class="brand-title">공조 덕트 규격 산정 시스템 [MANMIN-Ver2.0]</div>
+        <div class="brand-sub">기계설비 기술기준 국토교통부 고시 제2021-851호 · 별표 9</div>
+      </div>
+    </div>
+    <div class="hdr-btns">
+      <!-- PWA 설치 버튼 (설치 가능 시 자동 표시) -->
+      <button class="btn-pwa" id="btnPwaInstall" onclick="pwaTriggerInstall()" title="앱으로 설치하기">
+        📲 <span class="btn-txt">설치</span>
+      </button>
+      <button class="btn-g" onclick="resetAll()">🔄 <span class="btn-txt">초기화</span></button>
+      <button class="btn-b" onclick="exportJpg()">📸 <span class="btn-txt">JPG저장</span></button>
+    </div>
+  </div>
+</header>
+
+<!-- ── TAB BAR ── -->
+<div class="tab-bar">
+  <div class="tab-bar-inner">
+    <button class="tb active" onclick="switchTab('tab-single',this)">💨 단일 덕트 산정</button>
+    <button class="tb" onclick="switchTab('tab-multi',this)">📋 다중 덕트 산정</button>
+    <button class="tb" onclick="switchTab('tab-guide',this)">📐 설계 기준표</button>
+    <button class="tb" onclick="switchTab('tab-print',this)">📄 A4 미리보기</button>
+    <button class="tb" onclick="switchTab('tab-mobile',this)">📱 모바일 미리보기</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     TAB 1 : 단일 덕트 산정
+════════════════════════════════════ -->
+<div class="main-wrap">
+<div id="tab-single" class="tab-panel active">
+
+  <!-- STEP BAR -->
+  <div class="step-bar">
+    <div class="step-item"><div class="sc active" id="sc1">1</div><div class="sl active" id="sl1">공사 정보</div></div>
+    <div class="sdiv" id="sd1"></div>
+    <div class="step-item"><div class="sc" id="sc2">2</div><div class="sl" id="sl2">덕트 조건</div></div>
+    <div class="sdiv" id="sd2"></div>
+    <div class="step-item"><div class="sc" id="sc3">3</div><div class="sl" id="sl3">풍량 입력</div></div>
+    <div class="sdiv" id="sd3"></div>
+    <div class="step-item"><div class="sc" id="sc4">4</div><div class="sl" id="sl4">규격 산정</div></div>
+  </div>
+
+  <div class="calc-grid">
+
+    <!-- ── 공사 정보 row ── -->
+    <div class="calc-project-row">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-ico">🏗️</div>
+          <div class="card-tit">STEP 1 · 공사 정보</div>
+          <span class="cbadge">PROJECT INFO</span>
+        </div>
+        <div class="card-body">
+          <div class="project-info-grid">
+            <div class="fgrp project-name-grp">
+              <label class="flbl">공사(현장)명</label>
+              <input class="finput" id="projName" type="text" placeholder="예) ○○○ 빌딩 신축공사" oninput="updateStep(1)"/>
+            </div>
+            <div class="fgrp project-date-grp">
+              <label class="flbl">산정일자</label>
+              <input class="finput" id="projDate" type="date" oninput="updateStep(1)"/>
+            </div>
+            <div class="fgrp project-author-grp">
+              <label class="flbl">작성자</label>
+              <input class="finput" id="projAuthor" type="text" placeholder="홍길동" oninput="updateStep(1)"/>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 좌열: STEP2 덕트 조건 ── -->
+    <div class="calc-col-left">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-ico">🔧</div>
+          <div class="card-tit">STEP 2 · 덕트 조건</div>
+          <span class="cbadge org">CONDITIONS</span>
+        </div>
+        <div class="card-body">
+
+          <div class="nb blue" style="margin-bottom:10px;">
+            <div class="nb-tit">📌 덕트 형상 선택</div>
+            <div class="nb-txt">사각덕트: W×H 치수 산정 / 원형덕트: Φ 직경 산정</div>
+          </div>
+
+          <div class="dtype-grid" id="dtypeGrid">
+            <div class="dtype-card sel" data-dtype="rect" onclick="selectDtype(this)">
+              <div class="dt-ico">▭</div>
+              <div class="dt-nm">사각덕트</div>
+              <div class="dt-cat">RECT</div>
+            </div>
+            <div class="dtype-card" data-dtype="circ" onclick="selectDtype(this)">
+              <div class="dt-ico">⬤</div>
+              <div class="dt-nm">원형덕트</div>
+              <div class="dt-cat">CIRC</div>
+            </div>
+            <div class="dtype-card" data-dtype="flat" onclick="selectDtype(this)">
+              <div class="dt-ico">▬</div>
+              <div class="dt-nm">편평덕트</div>
+              <div class="dt-cat">FLAT AR≥3</div>
+            </div>
+          </div>
+
+          <div class="frow" style="margin-bottom:8px;">
+            <div class="fgrp">
+              <label class="flbl">설치 장소</label>
+              <select class="fselect" id="spaceType" onchange="calcDuct()">
+                <option value="supply_main">급기 주덕트</option>
+                <option value="supply_branch">급기 분기덕트</option>
+                <option value="return_main">환기 주덕트</option>
+                <option value="return_branch">환기 분기덕트</option>
+                <option value="exhaust_main">배기 주덕트</option>
+                <option value="exhaust_branch">배기 분기덕트</option>
+                <option value="outdoor_air">외기덕트</option>
+              </select>
+            </div>
+            <div class="fgrp">
+              <label class="flbl">마찰손실 기준</label>
+              <select class="fselect" id="frictionBase" onchange="calcDuct()">
+                <option value="0.8">0.8 Pa/m (저속)</option>
+                <option value="1.0" selected>1.0 Pa/m (표준)</option>
+                <option value="1.5">1.5 Pa/m (중속)</option>
+                <option value="2.0">2.0 Pa/m (고속)</option>
+                <option value="manual">직접입력</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="frow" id="manualFrictionRow" style="display:none;margin-bottom:8px;">
+            <div class="fgrp full">
+              <label class="flbl">마찰손실 직접입력 (Pa/m)</label>
+              <div class="input-sfx">
+                <input class="finput" id="manualFriction" type="number" value="1.0" min="0.1" max="5.0" step="0.1" oninput="calcDuct()"/>
+                <span class="sfx">Pa/m</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="frow">
+            <div class="fgrp">
+              <label class="flbl">덕트 재질</label>
+              <select class="fselect" id="ductMaterial" onchange="calcDuct()">
+                <option value="galv">아연도금강판</option>
+                <option value="alum">알루미늄</option>
+                <option value="ss">스테인리스</option>
+                <option value="flex">플렉시블</option>
+              </select>
+            </div>
+            <div class="fgrp">
+              <label class="flbl">종횡비 제한 (사각)</label>
+              <select class="fselect" id="arLimit" onchange="calcDuct()">
+                <option value="4">최대 4:1 (권장)</option>
+                <option value="6">최대 6:1</option>
+                <option value="8">최대 8:1 (한계)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="nb org" style="margin-top:4px;">
+            <div class="nb-tit">⚡ 권장 풍속 기준 (기계설비 기술기준)</div>
+            <div class="nb-txt" id="velStdText">급기 주덕트: 5~8 m/s / 급기 분기: 3~6 m/s</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 중열: STEP3 풍량 입력 ── -->
+    <div class="calc-col-mid">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-ico">🌬️</div>
+          <div class="card-tit">STEP 3 · 풍량 입력</div>
+          <span class="cbadge grn">AIRFLOW INPUT</span>
+        </div>
+        <div class="card-body">
+
+          <div class="seg-ctrl">
+            <button class="seg-btn active" onclick="setSeg('cmh',this)">CMH (m³/h)</button>
+            <button class="seg-btn" onclick="setSeg('cms',this)">CMS (m³/s)</button>
+            <button class="seg-btn" onclick="setSeg('cfm',this)">CFM</button>
+          </div>
+
+          <div class="fgrp" style="margin-bottom:10px;">
+            <label class="flbl" id="flowLabel">풍량 (CMH)</label>
+            <div class="input-sfx">
+              <input class="finput" id="flowInput" type="number" placeholder="예) 3600" min="1" step="1" oninput="calcDuct()" style="font-size:16px;font-weight:800;"/>
+              <span class="sfx" id="flowSfx">m³/h</span>
+            </div>
+          </div>
+
+          <!-- 단위 환산 표시 -->
+          <div class="cbox" id="convBox" style="display:none;">
+            <div class="cbox-tit">📐 단위 환산</div>
+            <div class="crow"><span class="ck">CMH (m³/h)</span><span class="cv" id="cv_cmh">—</span></div>
+            <div class="crow"><span class="ck">CMS (m³/s)</span><span class="cv" id="cv_cms">—</span></div>
+            <div class="crow"><span class="ck">CFM (ft³/min)</span><span class="cv" id="cv_cfm">—</span></div>
+          </div>
+
+          <!-- 풍량 빠른선택 -->
+          <div style="margin-top:10px;">
+            <div class="flbl" style="margin-bottom:6px;">⚡ 빠른 선택 (CMH)</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;">
+              <button class="btn-g" onclick="setFlow(500)">500</button>
+              <button class="btn-g" onclick="setFlow(1000)">1,000</button>
+              <button class="btn-g" onclick="setFlow(2000)">2,000</button>
+              <button class="btn-g" onclick="setFlow(3000)">3,000</button>
+              <button class="btn-g" onclick="setFlow(5000)">5,000</button>
+              <button class="btn-g" onclick="setFlow(8000)">8,000</button>
+              <button class="btn-g" onclick="setFlow(10000)">10,000</button>
+              <button class="btn-g" onclick="setFlow(15000)">15,000</button>
+              <button class="btn-g" onclick="setFlow(20000)">20,000</button>
+            </div>
+          </div>
+
+          <!-- 사각덕트 고정 치수 옵션 -->
+          <div id="fixDimBox" style="margin-top:10px;">
+            <div class="nb sky">
+              <div class="nb-tit">📏 사각덕트 치수 제한 (선택)</div>
+              <div class="nb-txt">높이(H) 또는 폭(W)을 고정하면 반대 치수를 자동 산정합니다</div>
+            </div>
+            <div class="frow" style="margin-top:6px;">
+              <div class="fgrp">
+                <label class="flbl">폭(W) 고정 mm</label>
+                <div class="input-sfx">
+                  <input class="finput" id="fixW" type="number" placeholder="미설정" min="100" max="3000" step="50" oninput="calcDuct()"/>
+                  <span class="sfx">mm</span>
+                </div>
+              </div>
+              <div class="fgrp">
+                <label class="flbl">높이(H) 고정 mm</label>
+                <div class="input-sfx">
+                  <input class="finput" id="fixH" type="number" placeholder="미설정" min="100" max="3000" step="50" oninput="calcDuct()"/>
+                  <span class="sfx">mm</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- CALC 버튼 -->
+      <button class="btn-b" onclick="calcDuct()" style="width:100%;height:44px;font-size:13px;border-radius:10px;margin-bottom:12px;">
+        ⚡ 덕트 규격 산정하기
+      </button>
+    </div>
+
+    <!-- ── 우열: STEP4 결과 sticky ── -->
+    <div class="calc-col-right">
+      <div class="card" id="resultCard">
+        <div class="card-head">
+          <div class="card-ico">📊</div>
+          <div class="card-tit">STEP 4 · 산정 결과</div>
+          <span class="cbadge pur" id="resultBadge">RESULT</span>
+        </div>
+        <div class="card-body" id="resultBody">
+          <div class="result-placeholder" id="resultPlaceholder">
+            <div class="rph-ico">💨</div>
+            <div class="rph-tit">풍량을 입력하고 산정하세요</div>
+            <div class="rph-sub">STEP 2 덕트 조건 설정 후<br/>STEP 3에서 풍량을 입력하세요</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /calc-grid -->
+</div><!-- /tab-single -->
+
+<!-- ════════════════════════════════════
+     TAB 2 : 다중 덕트 산정
+════════════════════════════════════ -->
+<div id="tab-multi" class="tab-panel">
+  <div class="nb blue" style="margin-bottom:13px;">
+    <div class="nb-tit">📋 다중 덕트 일괄 산정</div>
+    <div class="nb-txt">여러 구간의 덕트를 한 번에 산정합니다. 각 구간별 덕트 조건과 풍량을 입력하세요.</div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div id="multiItems"></div>
+      <button class="add-item-btn" onclick="addMultiItem()">＋ 덕트 구간 추가</button>
+      <button class="btn-b" onclick="calcMulti()" style="width:100%;height:44px;font-size:13px;border-radius:10px;margin-top:10px;">
+        ⚡ 전체 구간 일괄 산정
+      </button>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-head">
+          <div class="card-ico">📊</div>
+          <div class="card-tit">일괄 산정 결과</div>
+          <span class="cbadge pur">MULTI RESULT</span>
+        </div>
+        <div class="card-body" id="multiResult">
+          <div class="result-placeholder">
+            <div class="rph-ico">📋</div>
+            <div class="rph-tit">구간을 추가하고 산정하세요</div>
+            <div class="rph-sub">각 구간의 조건을 입력 후<br/>일괄 산정 버튼을 누르세요</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     TAB 3 : 설계 기준표
+════════════════════════════════════ -->
+<div id="tab-guide" class="tab-panel">
+  <div class="card">
+    <div class="card-head">
+      <div class="card-ico">📐</div>
+      <div class="card-tit">덕트 설계 기준표</div>
+      <span class="cbadge">기계설비 기술기준 별표 9</span>
+    </div>
+    <div class="card-body">
+      <div style="display:flex;overflow-x:auto;border-bottom:1px solid #d1faf5;margin-bottom:14px;scrollbar-width:none;">
+        <button class="gm-tab active" onclick="switchGmTab('g-vel',this)">풍속 기준</button>
+        <button class="gm-tab" onclick="switchGmTab('g-friction',this)">마찰손실 기준</button>
+        <button class="gm-tab" onclick="switchGmTab('g-rect',this)">사각덕트 규격</button>
+        <button class="gm-tab" onclick="switchGmTab('g-circ',this)">원형덕트 규격</button>
+        <button class="gm-tab" onclick="switchGmTab('g-material',this)">재질·판두께</button>
+      </div>
+
+      <!-- 풍속 기준 -->
+      <div id="g-vel" class="gm-panel active">
+        <div class="nb grn"><div class="nb-tit">✅ 권장 풍속 (기계설비 기술기준 기반)</div><div class="nb-txt">덕트 내 과도한 풍속은 소음과 압력손실을 증가시킵니다.</div></div>
+        <div class="twrap">
+          <table class="rtbl">
+            <thead><tr>
+              <th>구분</th><th>저속 (m/s)</th><th>권장 (m/s)</th><th>최대 (m/s)</th><th>비고</th>
+            </tr></thead>
+            <tbody>
+              <tr><td>급기 주덕트</td><td>4~5</td><td>5~8</td><td>10</td><td>메인 공조기 출구</td></tr>
+              <tr><td>급기 분기덕트</td><td>2~4</td><td>3~6</td><td>8</td><td>각 실 공급</td></tr>
+              <tr><td>환기 주덕트</td><td>3~5</td><td>4~6</td><td>8</td><td>환기 팬 흡입</td></tr>
+              <tr><td>환기 분기덕트</td><td>2~3</td><td>3~5</td><td>6</td><td>각 실 흡입</td></tr>
+              <tr><td>배기 주덕트</td><td>3~5</td><td>5~7</td><td>10</td><td>외기 배출</td></tr>
+              <tr><td>배기 분기덕트</td><td>2~3</td><td>3~5</td><td>7</td><td>국소 배기</td></tr>
+              <tr><td>외기덕트</td><td>2~4</td><td>3~5</td><td>6</td><td>외기 취입</td></tr>
+              <tr><td>플렉시블덕트</td><td>1~2</td><td>2~4</td><td>5</td><td>최대 1.5m 이내</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="vel-std-grid">
+          <div class="vel-std-item"><div class="vsi-label">급기 주덕트</div><div class="vsi-range">5~8</div><div class="vsi-unit">m/s 권장</div></div>
+          <div class="vel-std-item"><div class="vsi-label">급기 분기덕트</div><div class="vsi-range">3~6</div><div class="vsi-unit">m/s 권장</div></div>
+          <div class="vel-std-item"><div class="vsi-label">환기 주덕트</div><div class="vsi-range">4~6</div><div class="vsi-unit">m/s 권장</div></div>
+          <div class="vel-std-item"><div class="vsi-label">환기 분기덕트</div><div class="vsi-range">3~5</div><div class="vsi-unit">m/s 권장</div></div>
+          <div class="vel-std-item"><div class="vsi-label">배기 주덕트</div><div class="vsi-range">5~7</div><div class="vsi-unit">m/s 권장</div></div>
+          <div class="vel-std-item"><div class="vsi-label">외기덕트</div><div class="vsi-range">3~5</div><div class="vsi-unit">m/s 권장</div></div>
+        </div>
+      </div>
+
+      <!-- 마찰손실 기준 -->
+      <div id="g-friction" class="gm-panel">
+        <div class="nb org"><div class="nb-tit">⚠️ 마찰손실 등분법 설계 기준</div><div class="nb-txt">일반적으로 0.8~1.5 Pa/m 범위에서 설계합니다.</div></div>
+        <div class="twrap">
+          <table class="rtbl">
+            <thead><tr><th>설계방법</th><th>마찰손실</th><th>적용</th><th>특징</th></tr></thead>
+            <tbody>
+              <tr><td>저속 설계</td><td>0.5~0.8 Pa/m</td><td>주거, 병원</td><td>저소음, 대구경</td></tr>
+              <tr><td class="highlight">표준 설계</td><td class="highlight">1.0 Pa/m</td><td class="highlight">일반 공조</td><td class="highlight">표준 기준</td></tr>
+              <tr><td>중속 설계</td><td>1.0~1.5 Pa/m</td><td>사무소, 상업</td><td>중간 절충</td></tr>
+              <tr><td>고속 설계</td><td>1.5~2.5 Pa/m</td><td>소규모 덕트</td><td>소구경 경제적</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="ref-box">
+          <div class="ref-tit">📌 마찰손실 계산식 (Darcy-Weisbach)</div>
+          <div class="ref-item">ΔP/L = λ × (ρ × V²) / (2 × Dh) [Pa/m]</div>
+          <div class="ref-item">λ : 마찰계수 (아연강판 ≒ 0.02, 플렉시블 ≒ 0.05)</div>
+          <div class="ref-item">Dh : 수력직경 = 4A/P [m] (A: 단면적, P: 둘레)</div>
+          <div class="ref-item">ρ : 공기밀도 ≒ 1.2 kg/m³ (20°C, 1atm)</div>
+        </div>
+      </div>
+
+      <!-- 사각덕트 규격 -->
+      <div id="g-rect" class="gm-panel">
+        <div class="nb blue"><div class="nb-tit">📐 사각덕트 표준 규격 (KS B 6141)</div><div class="nb-txt">종횡비(AR)는 1:4 이하를 권장합니다. 1:8을 초과하면 안됩니다.</div></div>
+        <div class="twrap">
+          <table class="rtbl">
+            <thead><tr><th>폭 W (mm)</th><th>높이 H (mm)</th><th>단면적 (m²)</th><th>수력직경 Dh (mm)</th><th>종횡비</th></tr></thead>
+            <tbody id="rectTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 원형덕트 규격 -->
+      <div id="g-circ" class="gm-panel">
+        <div class="nb sky"><div class="nb-tit">⭕ 원형덕트 표준 규격</div><div class="nb-txt">원형덕트는 동일 단면적 대비 마찰손실이 가장 낮습니다.</div></div>
+        <div class="twrap">
+          <table class="rtbl">
+            <thead><tr><th>직경 Φ (mm)</th><th>단면적 (cm²)</th><th>둘레 (mm)</th><th>용도</th></tr></thead>
+            <tbody id="circTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 재질·판두께 -->
+      <div id="g-material" class="gm-panel">
+        <div class="nb grn"><div class="nb-tit">🔩 덕트 재질별 판두께 기준 (기계설비 기술기준 별표 9)</div></div>
+        <div class="twrap">
+          <table class="rtbl">
+            <thead><tr><th>장변 길이 (mm)</th><th>아연도금강판 (mm)</th><th>스테인리스 (mm)</th><th>알루미늄 (mm)</th></tr></thead>
+            <tbody>
+              <tr><td>450 이하</td><td>0.5</td><td>0.5</td><td>0.6</td></tr>
+              <tr><td>451~750</td><td>0.6</td><td>0.6</td><td>0.8</td></tr>
+              <tr><td>751~1000</td><td>0.8</td><td>0.8</td><td>1.0</td></tr>
+              <tr><td>1001~1500</td><td>1.0</td><td>1.0</td><td>1.2</td></tr>
+              <tr><td>1501~2200</td><td>1.2</td><td>1.2</td><td>1.5</td></tr>
+              <tr><td>2200 초과</td><td>1.5</td><td>1.5</td><td>1.8</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="ref-box" style="margin-top:12px;">
+          <div class="ref-tit">📌 보강 기준</div>
+          <div class="ref-item">장변 750mm 초과: 2.4m 간격 이내 보강재 설치</div>
+          <div class="ref-item">장변 1,500mm 초과: 1.8m 간격 이내 보강재 설치</div>
+          <div class="ref-item">플랜지 접합: 1,200mm 이하 간격으로 설치</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     TAB 5 : Galaxy S24 Ultra 모바일 미리보기
+════════════════════════════════════ -->
+<div id="tab-mobile" class="tab-panel">
+
+  <!-- 액션 바 -->
+  <div class="preview-action-bar">
+    <span class="bar-lbl">📱 Samsung Galaxy S24 Ultra 출력 :</span>
+    <button class="btn-export btn-jpg-dl" id="btn-mobile-jpg" onclick="exportMobileJpg()">
+      <span id="btn-mobile-jpg-txt">🖼️ JPG 저장</span>
+    </button>
+    <button class="btn-export btn-share-dl" id="btn-mobile-share" onclick="shareMobileJpg()"
+      style="display:none;animation:share-appear .35s ease;">
+      📤 공유하기
+    </button>
+    <span id="mobile-action-hint" style="font-size:10px;color:#94a3b8;margin-left:6px;">
+      ※ 단일 덕트 산정 탭에서 풍량을 입력 후 JPG 저장하세요
+    </span>
+  </div>
+
+  <!-- 기기 중앙 배치 -->
+  <div style="display:flex;justify-content:center;align-items:flex-start;padding:10px 0 40px;">
+    <div style="flex-shrink:0;">
+
+      <!-- 기기명 레이블 -->
+      <div style="font-size:10px;font-weight:700;color:#475569;text-align:center;margin-bottom:12px;letter-spacing:.04em;">
+        Samsung Galaxy S24 Ultra &nbsp;·&nbsp; 384 × 832 px &nbsp;·&nbsp; 6.8" QHD+
+      </div>
+
+      <!-- ★ Galaxy S24 Ultra 프레임 ★ -->
+      <div id="s24-frame" style="
+        width:264px; height:572px;
+        background:#0a0a0a;
+        border-radius:38px;
+        border:2px solid #2a2a2a;
+        box-shadow:
+          0 0 0 1px #111,
+          inset 0 0 0 1px #3d3d3d,
+          0 20px 60px rgba(0,0,0,.55),
+          0 40px 100px rgba(0,0,0,.35),
+          4px 0 0 0 #1c1c1c,
+          -4px 0 0 0 #1c1c1c;
+        position:relative;
+        overflow:hidden;">
+
+        <!-- 볼륨 버튼 (좌측 위) -->
+        <div style="position:absolute;left:-4px;top:104px;width:3px;height:26px;background:#2a2a2a;border-radius:2px 0 0 2px;"></div>
+        <div style="position:absolute;left:-4px;top:140px;width:3px;height:26px;background:#2a2a2a;border-radius:2px 0 0 2px;"></div>
+        <!-- 전원 버튼 (우측) -->
+        <div style="position:absolute;right:-4px;top:115px;width:3px;height:52px;background:#2a2a2a;border-radius:0 2px 2px 0;"></div>
+        <!-- S펜 슬롯 (하단 좌) -->
+        <div style="position:absolute;bottom:14px;left:18px;width:3px;height:16px;background:#1c1c1c;border-radius:2px;"></div>
+
+        <!-- 화면 영역 -->
+        <div style="position:absolute;inset:4px;background:#f0fdfa;border-radius:35px;overflow:hidden;">
+
+          <!-- 상태바 (노치 없는 펀치홀) -->
+          <div style="position:absolute;top:0;left:0;right:0;height:22px;background:rgba(15,118,110,.04);z-index:10;
+            display:flex;align-items:center;justify-content:space-between;padding:0 14px;">
+            <span style="font-size:8px;font-weight:700;color:#475569;">9:41</span>
+            <div style="display:flex;align-items:center;gap:4px;">
+              <span style="font-size:8px;color:#475569;">●●●●</span>
+              <span style="font-size:8px;color:#475569;">WiFi</span>
+              <span style="font-size:8px;color:#475569;">🔋</span>
+            </div>
+          </div>
+
+          <!-- 펀치홀 카메라 (상단 중앙) -->
+          <div style="position:absolute;top:5px;left:50%;transform:translateX(-50%);
+            width:10px;height:10px;background:#0a0a0a;border-radius:50%;z-index:20;
+            box-shadow:0 0 0 1.5px #1a1a1a;"></div>
+
+          <!-- 결과 렌더링 영역 -->
+          <div id="phone-result-render" style="
+            width:100%;height:100%;
+            overflow-y:auto;overflow-x:hidden;
+            background:#f0fdfa;
+            padding:24px 8px 14px;
+            box-sizing:border-box;
+            scrollbar-width:none;
+            -webkit-overflow-scrolling:touch;">
+            <div style="text-align:center;padding:32px 0 20px;color:#94a3b8;">
+              <div style="font-size:30px;margin-bottom:10px;">📱</div>
+              <div style="font-size:11px;font-weight:700;line-height:1.8;">
+                단일 덕트 산정 탭에서<br/>풍량을 입력하면<br/>여기에 표시됩니다
+              </div>
+            </div>
+          </div>
+
+          <!-- 홈 인디케이터 바 -->
+          <div style="position:absolute;bottom:6px;left:50%;transform:translateX(-50%);
+            width:80px;height:3px;background:#3d3d3d;border-radius:2px;z-index:10;"></div>
+        </div>
+      </div>
+
+      <!-- 기기 하단 스펙 정보 -->
+      <div style="margin-top:12px;text-align:center;font-size:9.5px;color:#94a3b8;line-height:1.8;letter-spacing:.02em;">
+        Snapdragon 8 Gen 3 &nbsp;·&nbsp; 12GB RAM<br/>
+        Dynamic AMOLED 2X &nbsp;·&nbsp; 120Hz &nbsp;·&nbsp; S Pen
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     TAB 4 : A4 미리보기
+════════════════════════════════════ -->
+<div id="tab-print" class="tab-panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:13px;flex-wrap:wrap;" class="no-print">
+    <div style="display:flex;align-items:center;gap:7px;">
+      <span style="font-size:10px;font-weight:800;color:#0f766e;background:#f0fdfa;border:1.5px solid #99f6e4;padding:4px 9px;border-radius:7px;letter-spacing:.04em;">📄 ISO A4 · 210 × 297 mm</span>
+      <span style="font-size:10px;color:#64748b;font-weight:600;">실제 인쇄 비율 미리보기</span>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-g" onclick="window.print()">🖨️ 인쇄</button>
+      <button class="btn-b" onclick="exportA4Jpg()">📸 JPG 저장</button>
+    </div>
+  </div>
+  <!-- ISO A4 중앙 배치 래퍼 -->
+  <div class="a4-preview-wrap">
+  <div class="a4-page" id="a4Page">
+    <div class="a4-header">
+      <div>
+        <div class="a4-title">공조 덕트 규격 산정서</div>
+        <div class="a4-subtitle">HVAC DUCT SIZING CALCULATION SHEET</div>
+      </div>
+      <div class="a4-company" style="text-align:right;">
+        <div style="font-size:11px;font-weight:800;">MANMIN Engineering</div>
+        <div>기계설비 기술기준 국토교통부 고시 제2021-851호</div>
+        <div>별표 9 덕트설비의 설계 및 시공 기준</div>
+      </div>
+    </div>
+
+    <!-- 공사정보 -->
+    <table class="a4-meta-table">
+      <tr>
+        <td class="k">공사(현장)명</td><td id="a4-projName" colspan="3">—</td>
+      </tr>
+      <tr>
+        <td class="k">산정일자</td><td id="a4-projDate">—</td>
+        <td class="k">작성자</td><td id="a4-projAuthor">—</td>
+      </tr>
+    </table>
+
+    <!-- 산정결과 -->
+    <div class="a4-section-tit">■ 덕트 규격 산정 결과</div>
+    <div id="a4-result">
+      <div style="color:#94a3b8;font-size:11px;padding:10px;">단일 덕트 산정 탭에서 먼저 산정을 완료하세요.</div>
+    </div>
+
+    <!-- 다중 산정 결과 -->
+    <div id="a4-multi-section" style="display:none;">
+      <div class="a4-section-tit" style="margin-top:14px;">■ 다중 덕트 구간 산정</div>
+      <div id="a4-multi-result"></div>
+    </div>
+
+    <!-- 기준 -->
+    <div class="a4-section-tit" style="margin-top:14px;">■ 적용 기준</div>
+    <table class="a4-meta-table">
+      <tr><td class="k">근거 기준</td><td>기계설비 기술기준 (국토교통부 고시 제2021-851호) 별표 9</td></tr>
+      <tr><td class="k">설계 방법</td><td>등마찰손실법 (Constant Friction Method)</td></tr>
+      <tr><td class="k">공기 밀도</td><td>1.2 kg/m³ (20°C, 1atm 기준)</td></tr>
+      <tr><td class="k">마찰계수</td><td>아연도금강판 λ=0.02 / 알루미늄 λ=0.018 / 스테인리스 λ=0.015 / 플렉시블 λ=0.05</td></tr>
+    </table>
+
+    <div style="font-size:9px;color:#94a3b8;text-align:center;margin-top:18px;padding-top:10px;border-top:1px solid #d1faf5;">
+      본 산정서는 MANMIN 덕트 규격 산정 시스템(Ver2.0)에 의해 자동 생성되었습니다. | 설계자의 책임 하에 최종 확인 바랍니다.
+    </div>
+  </div><!-- /a4-page -->
+  </div><!-- /a4-preview-wrap -->
+</div>
+
+</div><!-- /main-wrap -->
+
+<!-- ════════════════════════════════════════════
+     FAB 버튼
+════════════════════════════════════════════ -->
+
+<!-- ════════════════════════════════════
+     JPG 공유 모달 (냉온수 배관 웹 동일 구조)
+════════════════════════════════════ -->
+<div id="share-modal"
+  style="display:none;position:fixed;inset:0;background:rgba(12,26,46,.62);
+    z-index:9000;align-items:center;justify-content:center;padding:16px;"
+  onclick="if(event.target===this)closeDuctShareModal()">
+  <div style="background:#fff;border-radius:18px;max-width:420px;width:100%;
+    box-shadow:0 20px 60px rgba(15,118,110,.25);overflow:hidden;
+    animation:modal-share-in .28s cubic-bezier(.16,1,.3,1);">
+
+    <!-- 헤더 -->
+    <div style="padding:14px 18px 12px;border-bottom:1px solid #d1faf5;
+      display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:9px;">
+        <div style="width:30px;height:30px;background:#0f766e;border-radius:8px;
+          display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">📤</div>
+        <div>
+          <div style="font-size:13px;font-weight:900;color:#0c1a2e;">JPG 공유하기</div>
+          <div style="font-size:9px;color:#0d9488;font-weight:700;margin-top:1px;">덕트 규격 산정 결과 공유</div>
+        </div>
+      </div>
+      <button onclick="closeDuctShareModal()"
+        style="background:#f0fdfa;border:none;border-radius:7px;width:29px;height:29px;
+          cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+
+    <!-- 바디 -->
+    <div style="padding:16px 18px;">
+      <!-- 이미지 미리보기 -->
+      <div id="share-preview-wrap"
+        style="text-align:center;margin-bottom:14px;min-height:90px;background:#f8fafc;
+          border-radius:10px;border:1px solid #d1faf5;padding:12px;
+          display:flex;align-items:center;justify-content:center;">
+        <img id="share-preview-img"
+          style="max-width:100%;max-height:220px;border-radius:8px;display:none;
+            box-shadow:0 4px 16px rgba(0,0,0,.15);" alt="덕트규격 산정결과"/>
+        <div id="share-loading"
+          style="color:#94a3b8;font-size:12px;font-weight:700;text-align:center;">
+          <div style="font-size:26px;margin-bottom:8px;">🖼️</div>
+          이미지 생성 중...
+        </div>
+      </div>
+
+      <!-- 4개 공유 버튼 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:11px;">
+        <button onclick="ductShareDownload()"
+          style="padding:13px 8px;background:#0f766e;color:#fff;border:none;border-radius:11px;
+            font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;
+            display:flex;align-items:center;justify-content:center;gap:5px;
+            transition:background .15s;">
+          💾 저장
+        </button>
+        <button onclick="ductShareNative()" id="btn-duct-native-share"
+          style="padding:13px 8px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);
+            color:#fff;border:none;border-radius:11px;font-size:12px;font-weight:800;
+            cursor:pointer;font-family:inherit;
+            display:flex;align-items:center;justify-content:center;gap:5px;">
+          📤 앱으로 공유
+        </button>
+        <button onclick="ductShareCopyLink()"
+          style="padding:13px 8px;background:#f0fdfa;color:#0f766e;
+            border:1.5px solid #99f6e4;border-radius:11px;font-size:12px;font-weight:800;
+            cursor:pointer;font-family:inherit;
+            display:flex;align-items:center;justify-content:center;gap:5px;">
+          🔗 링크 복사
+        </button>
+        <button onclick="ductShareKakao()"
+          style="padding:13px 8px;background:#fee500;color:#3c1e1e;border:none;
+            border-radius:11px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;
+            display:flex;align-items:center;justify-content:center;gap:5px;">
+          💬 카카오 공유
+        </button>
+      </div>
+
+      <div id="share-hint"
+        style="font-size:10px;color:#94a3b8;text-align:center;line-height:1.65;">
+        이미지를 저장한 후 원하는 앱으로 공유하세요<br/>
+        <span style="color:#99f6e4;">ESC 또는 배경 클릭으로 닫기</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="fab-calc" id="fabCalc" title="설계기준 종합 안내">📐</button>
+<div class="fab-tooltip" id="fabTooltip">설계기준 종합 안내</div>
+
+<!-- ════════════════════════════════════════════
+     통합 마스터 모달 — 이용방법 · 계산식 · 기준표
+     냉온수 배관 웹 동일 스타일 슬라이드업
+════════════════════════════════════════════ -->
+<div class="master-modal-ov" id="masterModal" onclick="if(event.target===this)closeMasterModal()">
+  <div class="master-modal-box">
+
+    <!-- 헤더 -->
+    <div class="master-modal-head">
+      <div style="display:flex;align-items:center;gap:9px;">
+        <div style="width:32px;height:32px;background:#0f766e;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">💨</div>
+        <div>
+          <div class="master-modal-tit">공조 덕트 규격 산정 — 설계기준 종합 안내</div>
+          <div class="master-modal-sub">기계설비 기술기준 국토교통부 고시 제2021-851호 [별표 9] · MANMIN-Ver2.0</div>
+        </div>
+      </div>
+      <button class="master-modal-cls" onclick="closeMasterModal()">✕</button>
+    </div>
+
+    <!-- 탭 헤더 -->
+    <div class="master-modal-tabs">
+      <button class="gm-tab active" id="mt-0" onclick="switchMasterTab(0)">📘 이용방법</button>
+      <button class="gm-tab" id="mt-1" onclick="switchMasterTab(1)">📐 계산식</button>
+      <button class="gm-tab" id="mt-2" onclick="switchMasterTab(2)">⚡ 풍속기준</button>
+      <button class="gm-tab" id="mt-3" onclick="switchMasterTab(3)">📉 마찰손실</button>
+      <button class="gm-tab" id="mt-4" onclick="switchMasterTab(4)">📋 규격·두께</button>
+    </div>
+
+    <!-- 모달 바디 -->
+    <div class="master-modal-body">
+
+      <!-- ══ 탭0: 이용방법 ══ -->
+      <div class="gm-panel active" id="mp-0" style="display:block;">
+
+        <!-- 시스템 소개 배너 (냉온수 배관 웹과 동일 스타일) -->
+        <div style="background:linear-gradient(135deg,#0c1a2e,#0f766e);border-radius:10px;padding:14px 16px;margin-bottom:12px;color:#fff;">
+          <div style="font-size:13px;font-weight:900;margin-bottom:4px;letter-spacing:.02em;">💨 공조 덕트 규격 산정 시스템 Ver2.0</div>
+          <div style="font-size:10px;opacity:.85;line-height:1.7;">
+            기계설비 기술기준 국토교통부 고시 제2021-851호 [별표 9]<br>
+            Darcy-Weisbach 등마찰손실법 · 사각·원형·편평 전 형상 지원
+          </div>
+          <div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap;">
+            <span style="background:rgba(255,255,255,.15);border-radius:20px;padding:3px 10px;font-size:9.5px;font-weight:700;">✅ 실시간 자동산정</span>
+            <span style="background:rgba(255,255,255,.15);border-radius:20px;padding:3px 10px;font-size:9.5px;font-weight:700;">✅ CMH·CMS·CFM 변환</span>
+            <span style="background:rgba(255,255,255,.15);border-radius:20px;padding:3px 10px;font-size:9.5px;font-weight:700;">✅ A4 산정서 자동생성</span>
+            <span style="background:rgba(255,255,255,.15);border-radius:20px;padding:3px 10px;font-size:9.5px;font-weight:700;">✅ Galaxy S24 Ultra 출력</span>
+          </div>
+        </div>
+
+        <!-- 화면 구조 3열 설명 -->
+        <div style="background:#f8fafc;border:1px solid #d1faf5;border-radius:10px;padding:11px 13px;margin-bottom:12px;">
+          <div style="font-size:10.5px;font-weight:800;color:#115e59;margin-bottom:8px;">🖥️ 화면 구조 — 3열 레이아웃 (데스크탑)</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:9.5px;">
+            <div style="background:#d1faf5;border-radius:7px;padding:8px;text-align:center;">
+              <div style="font-weight:800;color:#0f766e;margin-bottom:4px;">📌 좌열</div>
+              <div style="color:#115e59;line-height:1.7;">STEP 1 공사정보<br>STEP 2 덕트 조건<br>형상·재질·마찰손실<br>설치장소·종횡비</div>
+            </div>
+            <div style="background:#dcfce7;border-radius:7px;padding:8px;text-align:center;">
+              <div style="font-weight:800;color:#15803d;margin-bottom:4px;">📌 중열</div>
+              <div style="color:#166534;line-height:1.7;">STEP 3 풍량 입력<br>CMH·CMS·CFM 선택<br>빠른 선택 버튼<br>W/H 치수 고정</div>
+            </div>
+            <div style="background:#fef9c3;border-radius:7px;padding:8px;text-align:center;">
+              <div style="font-weight:800;color:#854d0e;margin-bottom:4px;">📌 우열 (Sticky)</div>
+              <div style="color:#713f12;line-height:1.7;">STEP 4 결과 패널<br>덕트규격·풍속게이지<br>단면적·수력직경<br>인접규격 비교표</div>
+            </div>
+          </div>
+          <div style="margin-top:7px;font-size:9.5px;color:#64748b;text-align:center;">※ 우열 결과 패널은 <b>sticky 고정</b> — 입력 중에도 항상 화면에 표시됩니다</div>
+        </div>
+
+        <!-- 단계별 가이드 -->
+        <div style="font-size:10.5px;font-weight:800;color:#0f766e;margin-bottom:8px;padding-left:3px;">📋 단계별 입력 가이드</div>
+        <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:12px;">
+
+          <div style="background:#fff;border:1.5px solid #ccfbf1;border-radius:10px;padding:10px 13px;display:flex;gap:10px;">
+            <div style="width:26px;height:26px;background:#f0fdfa;border:2px solid #0f766e;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#0f766e;flex-shrink:0;margin-top:1px;">1</div>
+            <div style="flex:1;">
+              <div style="font-size:11px;font-weight:800;color:#0c1a2e;margin-bottom:5px;">🏗️ STEP 1 — 공사 정보</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:9.5px;">
+                <div style="background:#f0fdfa;border-radius:6px;padding:5px 8px;"><b style="color:#0f766e;">공사명</b><br><span style="color:#475569;">기본값: 만민 건축사 신사옥 신축공사</span></div>
+                <div style="background:#f0fdfa;border-radius:6px;padding:5px 8px;"><b style="color:#0f766e;">작성자</b><br><span style="color:#475569;">기본값: 김만민</span></div>
+                <div style="background:#d1faf5;border-radius:6px;padding:5px 8px;grid-column:1/-1;"><b style="color:#0f766e;">→ 자동반영</b> <span style="color:#475569;">A4 산정서 · Galaxy S24 Ultra 출력</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1.5px solid #99f6e4;border-radius:10px;padding:10px 13px;display:flex;gap:10px;">
+            <div style="width:26px;height:26px;background:#0f766e;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;margin-top:1px;">2</div>
+            <div style="flex:1;">
+              <div style="font-size:11px;font-weight:800;color:#0c1a2e;margin-bottom:5px;">🔧 STEP 2 — 덕트 조건 설정 <span style="font-size:9px;color:#0f766e;">(좌열)</span></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:9.5px;">
+                <div style="background:#f8fafc;border-radius:6px;padding:5px 8px;"><b>덕트 형상</b><br><span style="color:#475569;">▭ 사각(W×H) · ⬤ 원형(Φ) · ▬ 편평(AR≥3)</span></div>
+                <div style="background:#f8fafc;border-radius:6px;padding:5px 8px;"><b>마찰손실 기준</b><br><span style="color:#475569;">0.8~2.0 Pa/m · 직접입력 가능</span></div>
+                <div style="background:#f8fafc;border-radius:6px;padding:5px 8px;"><b>덕트 재질</b><br><span style="color:#475569;">아연·알루미늄·STS·플렉시블 → λ 자동 적용</span></div>
+                <div style="background:#fff7ed;border-radius:6px;padding:5px 8px;"><b style="color:#c2410c;">자동 표시</b><br><span style="color:#78350f;">설치 장소 선택 시 권장 풍속 자동 안내</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1.5px solid #99f6e4;border-radius:10px;padding:10px 13px;display:flex;gap:10px;">
+            <div style="width:26px;height:26px;background:#0f766e;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;margin-top:1px;">3</div>
+            <div style="flex:1;">
+              <div style="font-size:11px;font-weight:800;color:#0c1a2e;margin-bottom:5px;">🌬️ STEP 3 — 풍량 입력 <span style="font-size:9px;color:#0f766e;">(중열)</span></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:9.5px;">
+                <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:6px 8px;"><b style="color:#15803d;">단위 선택</b><br><span style="color:#166534;">CMH · CMS · CFM 탭 → 실시간 자동 변환</span></div>
+                <div style="background:#f0fdfa;border-radius:6px;padding:6px 8px;"><b style="color:#0f766e;">빠른 선택</b><br><span style="color:#115e59;">500~20,000 CMH 버튼 클릭 즉시 입력</span></div>
+                <div style="background:#f8fafc;border-radius:6px;padding:6px 8px;"><b>치수 고정</b><br><span style="color:#475569;">W 또는 H 고정 → 반대 치수 자동 산정 (사각덕트)</span></div>
+                <div style="background:#fef9c3;border-radius:6px;padding:6px 8px;"><b style="color:#854d0e;">자동 산정</b><br><span style="color:#713f12;">입력 즉시 우열에 규격·풍속·ΔP 실시간 표시</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:10px 13px;display:flex;gap:10px;">
+            <div style="width:26px;height:26px;background:#15803d;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;margin-top:1px;">4</div>
+            <div style="flex:1;">
+              <div style="font-size:11px;font-weight:800;color:#14532d;margin-bottom:5px;">📊 STEP 4 — 결과 확인 <span style="font-size:9px;color:#15803d;">(우열 sticky · 실시간 자동갱신)</span></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:9.5px;">
+                <div style="background:#fff;border-radius:6px;padding:5px 8px;border:1px solid #bbf7d0;"><b style="color:#15803d;">채택 규격 히어로</b><br><span style="color:#166534;">W×H(mm) 또는 Φ(mm) · 실제풍속(m/s)</span></div>
+                <div style="background:#fff;border-radius:6px;padding:5px 8px;border:1px solid #bbf7d0;"><b style="color:#15803d;">풍속 게이지</b><br><span style="color:#166534;">✅ 적정 · ⚠️ 초과 · 🔵 여유 색상 판정</span></div>
+                <div style="background:#fff;border-radius:6px;padding:5px 8px;border:1px solid #bbf7d0;"><b style="color:#15803d;">인접 규격 비교표</b><br><span style="color:#166534;">상·하 치수 풍속·ΔP 동시 표시</span></div>
+                <div style="background:#fff;border-radius:6px;padding:5px 8px;border:1px solid #bbf7d0;"><b style="color:#15803d;">판두께 자동산정</b><br><span style="color:#166534;">재질·장변 길이 기반 KS 기준 자동 표시</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 출력 및 공유 -->
+        <div style="font-size:10.5px;font-weight:800;color:#0f766e;margin-bottom:8px;padding-left:3px;">📤 출력 및 공유</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;">
+          <div style="background:#fff;border:1.5px solid #d1faf5;border-radius:10px;padding:10px 12px;">
+            <div style="font-size:10.5px;font-weight:800;color:#0f766e;margin-bottom:6px;">📄 A4 미리보기 탭</div>
+            <div style="font-size:9.5px;color:#475569;line-height:1.8;">
+              • 공사명·작성자 자동 반영 산정서<br>
+              • 🖨️ 인쇄 / PDF 저장 가능<br>
+              • 📸 JPG 저장 (2x 고해상도)<br>
+              • 단일 + 다중 구간 일괄 출력
+            </div>
+          </div>
+          <div style="background:#fff;border:1.5px solid #d1faf5;border-radius:10px;padding:10px 12px;">
+            <div style="font-size:10.5px;font-weight:800;color:#7c3aed;margin-bottom:6px;">📱 모바일 미리보기 탭</div>
+            <div style="font-size:9.5px;color:#475569;line-height:1.8;">
+              • Samsung Galaxy S24 Ultra 실제 프레임<br>
+              • 384×832 px · 6.8" QHD+ 규격<br>
+              • 🖼️ JPG 저장 → 공유하기 버튼 활성화<br>
+              • S펜·측면버튼 실물 디테일 구현
+            </div>
+          </div>
+        </div>
+
+        <!-- 팁 -->
+        <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;padding:11px 13px;margin-bottom:10px;">
+          <div style="font-size:10.5px;font-weight:800;color:#c2410c;margin-bottom:7px;">💡 실무 활용 팁</div>
+          <div style="display:flex;flex-direction:column;gap:5px;font-size:9.5px;color:#78350f;line-height:1.7;">
+            <div>📋 <b>다중 산정:</b> 여러 구간(주덕트·분기·환기) 일괄 등록 후 전체 산정 → A4 일괄 출력</div>
+            <div>🔄 <b>단위 변환:</b> CMH·CMS·CFM 탭 전환 시 현재 값이 자동 변환되어 유지됩니다</div>
+            <div>📏 <b>치수 제약:</b> 천장 높이 제약 시 H 고정 → W 자동 산정으로 공간 최적화</div>
+            <div>📱 <b>모바일 공유:</b> 모바일 미리보기 탭 → JPG 저장 → 공유하기 버튼 활성화</div>
+            <div>📐 <b>FAB 버튼(우하단 📐):</b> 언제든 이 안내창 다시 호출 가능</div>
+          </div>
+        </div>
+
+        <!-- 적용 기술기준 -->
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 13px;">
+          <div style="font-size:10px;font-weight:800;color:#475569;margin-bottom:5px;">📌 적용 기술기준</div>
+          <div style="font-size:9.5px;color:#64748b;line-height:1.8;">
+            • 기계설비 기술기준 [별표 9] 덕트설비의 설계 및 시공 기준<br>
+            &nbsp;&nbsp;(국토교통부 고시 제2021-851호, 2021.06.07 시행)<br>
+            • Darcy-Weisbach : ΔP/L = λ × ρV² / (2·Dh)<br>
+            • 연속방정식 : Q = V × A<br>
+            • 수력직경 : Dh = 2WH/(W+H) [사각] · D [원형]<br>
+            • 원형 역산 : D = (8λρQ²/π²ΔP_L)^(1/5)
+          </div>
+        </div>
+      </div><!-- /mp-0 -->
+
+      <!-- ══ 탭1: 계산식 ══ -->
+      <div class="gm-panel" id="mp-1" style="display:none;">
+        <div class="formula-block">
+          <div class="formula-title">🔷 ① 등마찰손실법 — 설계 절차</div>
+          <div class="formula-steps">
+            <div class="fstep"><div class="fstep-num">1</div><div class="fstep-txt">설계 풍량 Q 결정 (m³/h → m³/s 변환)</div></div>
+            <div class="fstep"><div class="fstep-num">2</div><div class="fstep-txt">마찰손실 기준 ΔP/L 선정 (통상 0.8~1.5 Pa/m)</div></div>
+            <div class="fstep"><div class="fstep-num">3</div><div class="fstep-txt">Darcy-Weisbach로 수력직경 Dh 역산</div></div>
+            <div class="fstep"><div class="fstep-num">4</div><div class="fstep-txt">Dh에서 W×H 또는 Φ 표준 치수 채택 (KS B 6141)</div></div>
+            <div class="fstep"><div class="fstep-num">5</div><div class="fstep-txt">실제 풍속 V 검토 — 설치 장소별 권장 범위 확인</div></div>
+          </div>
+        </div>
+        <div class="formula-block">
+          <div class="formula-title">🔷 ② Darcy-Weisbach 마찰손실</div>
+          <div class="formula-main">ΔP/L = λ × (ρ × V²) / (2 × Dh)</div>
+          <div class="formula-box">
+            <div class="formula-row"><span class="formula-label">ΔP/L</span><span class="formula-eq">단위 길이당 마찰손실 [Pa/m]</span></div>
+            <div class="formula-row"><span class="formula-label">λ</span><span class="formula-eq">Darcy 마찰계수 (아연 0.020 · 알루미늄 0.018 · STS 0.015 · 플렉시블 0.050)</span></div>
+            <div class="formula-row"><span class="formula-label">ρ</span><span class="formula-eq">공기밀도 = 1.2 kg/m³ (20°C, 1atm)</span></div>
+            <div class="formula-row"><span class="formula-label">V</span><span class="formula-eq">덕트 내 풍속 [m/s]</span></div>
+            <div class="formula-row"><span class="formula-label">Dh</span><span class="formula-eq">수력직경 [m]</span></div>
+          </div>
+        </div>
+        <div class="formula-block">
+          <div class="formula-title">🔷 ③ 사각덕트 수력직경 Dh</div>
+          <div class="formula-main">Dh = 4A / P = 2WH / (W + H)</div>
+          <div class="formula-box">
+            <div class="formula-row"><span class="formula-label">A</span><span class="formula-eq">단면적 = W × H [m²]</span></div>
+            <div class="formula-row"><span class="formula-label">P</span><span class="formula-eq">둘레 = 2(W + H) [m]</span></div>
+            <div class="formula-row"><span class="formula-label">등가직경</span><span class="formula-eq">De = 1.3 × (WH)^0.625 / (W+H)^0.25 [ASHRAE]</span></div>
+          </div>
+        </div>
+        <div class="formula-block">
+          <div class="formula-title">🔷 ④ 원형덕트 직경 역산</div>
+          <div class="formula-main">D⁵ = (8 × λ × ρ × Q²) / (π² × ΔP/L)</div>
+          <div class="formula-box">
+            <div class="formula-row"><span class="formula-label">D</span><span class="formula-eq">원형덕트 직경 [m]</span></div>
+            <div class="formula-row"><span class="formula-label">Q</span><span class="formula-eq">풍량 [m³/s]</span></div>
+            <div class="formula-row"><span class="formula-label">풀이</span><span class="formula-eq">D = (8λρQ² / π²ΔP_L)^(1/5) → KS 표준 직경으로 올림</span></div>
+          </div>
+        </div>
+        <div class="formula-block">
+          <div class="formula-title">🔷 ⑤ 연속방정식 · 동압 · 단위환산</div>
+          <div class="formula-main">Q = V × A &nbsp;&nbsp; Pd = ρV² / 2</div>
+          <div class="formula-box">
+            <div class="formula-row"><span class="formula-label">CMH→CMS</span><span class="formula-eq">Q[m³/s] = Q[m³/h] ÷ 3600</span></div>
+            <div class="formula-row"><span class="formula-label">CMH→CFM</span><span class="formula-eq">Q[CFM] = Q[m³/h] × 0.58858</span></div>
+            <div class="formula-row"><span class="formula-label">1 Pa</span><span class="formula-eq">= 0.102 mmH₂O = 0.00401 inH₂O</span></div>
+          </div>
+        </div>
+      </div><!-- /mp-1 -->
+
+      <!-- ══ 탭2: 풍속 기준 ══ -->
+      <div class="gm-panel" id="mp-2" style="display:none;">
+        <div class="nb grn"><div class="nb-tit">✅ 권장 풍속 기준 (기계설비 기술기준 별표 9)</div><div class="nb-txt">덕트 내 과도한 풍속은 소음, 압력손실, 구조 불안정을 유발합니다.</div></div>
+        <div class="twrap" style="margin-top:10px;">
+          <table class="rtbl">
+            <thead><tr><th>구분</th><th>저속 (m/s)</th><th>권장 (m/s)</th><th>최대 (m/s)</th><th>소음 기준</th><th>비고</th></tr></thead>
+            <tbody>
+              <tr><td>급기 주덕트</td><td>4~5</td><td>5~8</td><td>10</td><td>NC-35</td><td>공조기 출구</td></tr>
+              <tr><td>급기 분기덕트</td><td>2~4</td><td>3~6</td><td>8</td><td>NC-30</td><td>각 실 공급</td></tr>
+              <tr><td>환기 주덕트</td><td>3~5</td><td>4~6</td><td>8</td><td>NC-35</td><td>팬 흡입측</td></tr>
+              <tr><td>환기 분기덕트</td><td>2~3</td><td>3~5</td><td>6</td><td>NC-30</td><td>각 실 흡입</td></tr>
+              <tr><td>배기 주덕트</td><td>3~5</td><td>5~7</td><td>10</td><td>NC-40</td><td>외기 배출</td></tr>
+              <tr><td>배기 분기덕트</td><td>2~3</td><td>3~5</td><td>7</td><td>NC-35</td><td>국소 배기</td></tr>
+              <tr><td>외기덕트</td><td>2~4</td><td>3~5</td><td>6</td><td>NC-30</td><td>외기 취입</td></tr>
+              <tr><td>플렉시블덕트</td><td>1~2</td><td>2~4</td><td>5</td><td>NC-25</td><td>최대 1.5m</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="nb org" style="margin-top:10px;"><div class="nb-tit">⚠️ 풍속 초과 시 발생 현상</div><div class="nb-txt">
+          • 풍속 &gt; 8 m/s → 덕트 소음 급증, 이음부 마모 가속<br>
+          • 풍속 &gt; 10 m/s → 구조 불안정, 플랜지 누기 발생<br>
+          • 플렉시블 &gt; 5 m/s → 연결부 이탈, 누기 위험<br>
+          • 풍속 &lt; 2 m/s → 분진 퇴적, 바이오 오염 위험
+        </div></div>
+      </div><!-- /mp-2 -->
+
+      <!-- ══ 탭3: 마찰손실 기준 ══ -->
+      <div class="gm-panel" id="mp-3" style="display:none;">
+        <div class="nb org"><div class="nb-tit">📉 등마찰손실법 설계 기준</div><div class="nb-txt">덕트 전 구간에서 단위 길이당 마찰손실(Pa/m)을 동일하게 유지하는 설계법입니다.</div></div>
+        <div class="twrap" style="margin-top:10px;">
+          <table class="rtbl">
+            <thead><tr><th>설계방법</th><th>마찰손실 (Pa/m)</th><th>적용 건물</th><th>특징</th></tr></thead>
+            <tbody>
+              <tr><td>저속 설계</td><td>0.5~0.8</td><td>주거·병원·호텔</td><td>저소음, 대구경</td></tr>
+              <tr class="highlight"><td style="font-weight:900;">표준 설계 ★</td><td class="mono" style="font-weight:900;">1.0</td><td>일반 공조 (기준)</td><td>표준 설계기준</td></tr>
+              <tr><td>중속 설계</td><td>1.0~1.5</td><td>사무소·상업시설</td><td>절충형</td></tr>
+              <tr><td>고속 설계</td><td>1.5~2.5</td><td>소규모·단거리</td><td>소구경, 경제적</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="ref-box" style="margin-top:12px;">
+          <div class="ref-tit">📌 재질별 Darcy 마찰계수 λ</div>
+          <div class="ref-item">아연도금강판 (기본) : λ = 0.020</div>
+          <div class="ref-item">알루미늄 덕트 : λ = 0.018 (약 10% 저감)</div>
+          <div class="ref-item">스테인리스 (위생·주방용) : λ = 0.015</div>
+          <div class="ref-item">플렉시블 덕트 : λ = 0.050 (마찰 2.5배 — 1.5m 이내 사용)</div>
+        </div>
+      </div><!-- /mp-3 -->
+
+      <!-- ══ 탭4: 규격·판두께 ══ -->
+      <div class="gm-panel" id="mp-4" style="display:none;">
+        <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;">
+          <button class="seg-btn active" id="rs-sq" onclick="switchRuleTab('sq',this)" style="flex:1;min-width:120px;">▭ 사각덕트 W×H</button>
+          <button class="seg-btn" id="rs-ci" onclick="switchRuleTab('ci',this)" style="flex:1;min-width:100px;">⭕ 원형덕트 Φ</button>
+          <button class="seg-btn" id="rs-th" onclick="switchRuleTab('th',this)" style="flex:1;min-width:100px;">🔩 판두께</button>
+        </div>
+        <div id="rule-sq">
+          <div class="nb blue"><div class="nb-tit">📐 KS B 6141 표준 사각덕트 규격 — 종횡비 4:1 이하 권장</div></div>
+          <div class="twrap" style="margin-top:8px;">
+            <table class="rtbl"><thead><tr><th>W×H (mm)</th><th>단면적 (m²)</th><th>Dh (mm)</th><th>AR</th></tr></thead>
+            <tbody id="modal-rect-tbody"></tbody></table>
+          </div>
+        </div>
+        <div id="rule-ci" style="display:none;">
+          <div class="nb sky"><div class="nb-tit">⭕ 원형덕트 표준 직경 규격</div></div>
+          <div class="twrap" style="margin-top:8px;">
+            <table class="rtbl"><thead><tr><th>직경 Φ (mm)</th><th>단면적 (cm²)</th><th>둘레 (mm)</th><th>용도</th></tr></thead>
+            <tbody id="modal-circ-tbody"></tbody></table>
+          </div>
+        </div>
+        <div id="rule-th" style="display:none;">
+          <div class="nb grn"><div class="nb-tit">🔩 덕트 재질별 판두께 기준 (기계설비 기술기준 별표 9)</div></div>
+          <div class="twrap" style="margin-top:8px;">
+            <table class="rtbl">
+              <thead><tr><th>장변 (mm)</th><th>아연도금강판</th><th>스테인리스</th><th>알루미늄</th></tr></thead>
+              <tbody>
+                <tr><td>450 이하</td><td>0.5 mm</td><td>0.5 mm</td><td>0.6 mm</td></tr>
+                <tr><td>451~750</td><td>0.6 mm</td><td>0.6 mm</td><td>0.8 mm</td></tr>
+                <tr><td>751~1,000</td><td>0.8 mm</td><td>0.8 mm</td><td>1.0 mm</td></tr>
+                <tr><td>1,001~1,500</td><td>1.0 mm</td><td>1.0 mm</td><td>1.2 mm</td></tr>
+                <tr><td>1,501~2,200</td><td>1.2 mm</td><td>1.2 mm</td><td>1.5 mm</td></tr>
+                <tr><td>2,200 초과</td><td>1.5 mm</td><td>1.5 mm</td><td>1.8 mm</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="ref-box" style="margin-top:10px;">
+            <div class="ref-tit">📌 보강 및 접합 기준</div>
+            <div class="ref-item">장변 750mm 초과 : 간격 2.4m 이내 보강재 설치</div>
+            <div class="ref-item">장변 1,500mm 초과 : 간격 1.8m 이내 보강재 설치</div>
+            <div class="ref-item">플랜지 접합 : 간격 1,200mm 이하</div>
+            <div class="ref-item">플렉시블 덕트 : 직선 1.5m 이내, 굴곡반경 D의 1.5배 이상</div>
+          </div>
+        </div>
+      </div><!-- /mp-4 -->
+
+    </div><!-- /master-modal-body -->
+  </div><!-- /master-modal-box -->
+</div><!-- /masterModal -->
+
+<script>
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+var state = {
+  dtype: 'rect',       // rect | circ | flat
+  flowUnit: 'cmh',     // cmh | cms | cfm
+  flowCmh: 0,          // m³/h
+  spaceType: 'supply_main',
+  frictionBase: 1.0,
+  arLimit: 4,
+  material: 'galv',
+  result: null,
+  multiItems: [],
+  multiResults: []
+};
+
+// 풍속 기준 (공간유형 → [min, max] m/s)
+var VEL_STD = {
+  supply_main:    {min:5, max:8,  label:'급기 주덕트: 5~8 m/s'},
+  supply_branch:  {min:3, max:6,  label:'급기 분기덕트: 3~6 m/s'},
+  return_main:    {min:4, max:6,  label:'환기 주덕트: 4~6 m/s'},
+  return_branch:  {min:3, max:5,  label:'환기 분기덕트: 3~5 m/s'},
+  exhaust_main:   {min:5, max:7,  label:'배기 주덕트: 5~7 m/s'},
+  exhaust_branch: {min:3, max:5,  label:'배기 분기덕트: 3~5 m/s'},
+  outdoor_air:    {min:3, max:5,  label:'외기덕트: 3~5 m/s'}
+};
+
+// 표준 사각덕트 치수 (mm) - KS B 6141
+var RECT_SIZES = [100,125,150,200,250,300,350,400,450,500,600,700,800,900,1000,1200,1500,1800,2000,2500];
+
+// 표준 원형덕트 직경 (mm)
+var CIRC_SIZES = [100,125,150,175,200,225,250,300,350,400,450,500,560,600,630,710,800,900,1000,1120,1250];
+
+// 마찰계수
+var LAMBDA = {galv:0.02, alum:0.018, ss:0.015, flex:0.05};
+
+// ══════════════════════════════════════════
+//  CONSTANTS
+// ══════════════════════════════════════════
+var CFM_FACTOR = 0.58858; // 1 m³/h = 0.58858 CFM (정확 계수)
+
+// ══════════════════════════════════════════
+//  UTILITY
+// ══════════════════════════════════════════
+function showToast(msg, dur){
+  var el = document.getElementById('toastEl');
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(function(){ el.classList.remove('show'); }, dur || 2200);
+}
+
+function fmt(n, d){
+  if(d === undefined) d = 0;
+  return Number(n).toFixed(d).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function fmtFlow(cmh){
+  return fmt(cmh,0) + ' m³/h';
+}
+
+// ══════════════════════════════════════════
+//  TAB
+// ══════════════════════════════════════════
+function switchTab(id, btn){
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tb').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  if(id === 'tab-print') updateA4();
+  if(id === 'tab-mobile'){
+    if(state.result) renderMobileResult(state.result);
+    // 산정 결과 없으면 안내 텍스트 유지 (이미 초기화됨)
+  }
+}
+
+function switchGmTab(id, btn){
+  // BUG-7 수정: #tab-guide 내부만 제어 (masterModal .gm-panel 건드리지 않음)
+  var guideTab = document.getElementById('tab-guide');
+  if(guideTab){
+    guideTab.querySelectorAll('.gm-panel').forEach(function(p){
+      p.classList.remove('active'); p.style.display='none';
+    });
+    guideTab.querySelectorAll('.gm-tab').forEach(function(b){ b.classList.remove('active'); });
+  }
+  var panel = document.getElementById(id);
+  if(panel){ panel.classList.add('active'); panel.style.display='block'; }
+  if(btn) btn.classList.add('active');
+}
+
+// ══════════════════════════════════════════
+//  STEP BAR
+// ══════════════════════════════════════════
+function updateStep(step){
+  var steps = [1,2,3,4];
+  steps.forEach(function(s){
+    var sc = document.getElementById('sc'+s);
+    var sl = document.getElementById('sl'+s);
+    var sd = document.getElementById('sd'+s);
+    if(!sc) return;
+    sc.classList.remove('done','active');
+    sl.classList.remove('done','active');
+    if(sd) sd.classList.remove('done');
+    if(s < step){ sc.classList.add('done'); sc.textContent='✓'; sl.classList.add('done'); if(sd) sd.classList.add('done'); }
+    else if(s === step){ sc.classList.add('active'); sc.textContent=s; sl.classList.add('active'); }
+    else{ sc.textContent=s; }
+  });
+}
+
+// ══════════════════════════════════════════
+//  DTYPE SELECT
+// ══════════════════════════════════════════
+function selectDtype(card){
+  document.querySelectorAll('.dtype-card').forEach(function(c){ c.classList.remove('sel'); });
+  card.classList.add('sel');
+  state.dtype = card.dataset.dtype;
+  var fixBox = document.getElementById('fixDimBox');
+  if(state.dtype === 'circ'){
+    fixBox.style.display = 'none';
+  } else {
+    fixBox.style.display = 'block';
+  }
+  calcDuct();
+}
+
+// ══════════════════════════════════════════
+//  FLOW UNIT
+// ══════════════════════════════════════════
+function setSeg(unit, btn){
+  document.querySelectorAll('.seg-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  state.flowUnit = unit;
+  var labels = {cmh:'풍량 (CMH)', cms:'풍량 (CMS)', cfm:'풍량 (CFM)'};
+  var sfx = {cmh:'m³/h', cms:'m³/s', cfm:'CFM'};
+  document.getElementById('flowLabel').textContent = labels[unit];
+  document.getElementById('flowSfx').textContent = sfx[unit];
+  // 기존 값 변환
+  if(state.flowCmh > 0){
+    var fi = document.getElementById('flowInput');
+    if(unit === 'cmh') fi.value = fmt(state.flowCmh,0).replace(/,/g,'');
+    else if(unit === 'cms') fi.value = (state.flowCmh/3600).toFixed(4);
+    else if(unit === 'cfm') fi.value = (state.flowCmh * CFM_FACTOR).toFixed(1);
+  }
+  calcDuct();
+}
+
+function setFlow(val){
+  var fi = document.getElementById('flowInput');
+  // 현재 단위에 맞게
+  if(state.flowUnit === 'cmh') fi.value = val;
+  else if(state.flowUnit === 'cms') fi.value = (val/3600).toFixed(4);
+  else if(state.flowUnit === 'cfm') fi.value = (val * CFM_FACTOR).toFixed(1);
+  calcDuct();
+}
+
+function getFlowCmh(){
+  var raw = parseFloat(document.getElementById('flowInput').value);
+  if(isNaN(raw) || raw <= 0) return 0;
+  if(state.flowUnit === 'cmh') return raw;
+  if(state.flowUnit === 'cms') return raw * 3600;
+  if(state.flowUnit === 'cfm') return raw / CFM_FACTOR;
+  return 0;
+}
+
+// ══════════════════════════════════════════
+//  DUCT CALCULATION ENGINE
+// ══════════════════════════════════════════
+function calcDuct(){
+  updateStep(3);
+
+  // friction
+  var fb = document.getElementById('frictionBase').value;
+  var fr_row = document.getElementById('manualFrictionRow');
+  if(fb === 'manual'){
+    fr_row.style.display = '';
+    state.frictionBase = parseFloat(document.getElementById('manualFriction').value) || 1.0;
+  } else {
+    fr_row.style.display = 'none';
+    state.frictionBase = parseFloat(fb);
+  }
+  state.spaceType = document.getElementById('spaceType').value;
+  state.arLimit   = parseInt(document.getElementById('arLimit').value);
+  state.material  = document.getElementById('ductMaterial').value;
+
+  // 풍속 기준 표시
+  var vs = VEL_STD[state.spaceType];
+  document.getElementById('velStdText').textContent = vs.label;
+
+  var cmh = getFlowCmh();
+  state.flowCmh = cmh;
+
+  if(cmh <= 0){ renderResultPlaceholder(); return; }
+
+  // 단위변환 표시
+  document.getElementById('convBox').style.display = '';
+  document.getElementById('cv_cmh').textContent = fmt(cmh,1) + ' m³/h';
+  document.getElementById('cv_cms').textContent = (cmh/3600).toFixed(4) + ' m³/s';
+  document.getElementById('cv_cfm').textContent = fmt(cmh * CFM_FACTOR,1) + ' CFM';
+
+  var cms = cmh / 3600; // m³/s
+  var lambda = LAMBDA[state.material];
+
+  var res;
+  if(state.dtype === 'rect' || state.dtype === 'flat'){
+    res = calcRectDuct(cms, lambda, state.frictionBase, state.arLimit, state.dtype);
+  } else {
+    res = calcCircDuct(cms, lambda, state.frictionBase);
+  }
+
+  res.cmh = cmh;
+  res.cms = cms;
+  res.spaceType = state.spaceType;
+  res.dtype = state.dtype;
+  res.velStd = vs;
+  state.result = res;
+
+  renderResult(res);
+  renderMobileResult(res);
+  updateStep(4);
+}
+
+// ── 사각덕트 산정 ──
+function calcRectDuct(cms, lambda, friction_pa_m, arLimit, dtype){
+  var rho = 1.2;   // kg/m³
+  var targetFr = friction_pa_m; // Pa/m
+
+  // 등마찰손실법: ΔP/L = λ/Dh × ρV²/2
+  // 목표: ΔP/L = targetFr → V = sqrt(2 × targetFr × Dh / (λ × ρ))
+  // 단면적 A = cms / V → A = cms / sqrt(2 × targetFr × Dh / (λ × ρ))
+  // Dh = 2WH/(W+H), A = WH → 연립 풀기: 수치 탐색
+
+  var fixW = parseFloat(document.getElementById('fixW').value) || 0;
+  var fixH = parseFloat(document.getElementById('fixH').value) || 0;
+
+  var bestResult = null;
+  var bestDiff = Infinity;
+
+  // 표준 치수 조합 탐색
+  for(var wi = 0; wi < RECT_SIZES.length; wi++){
+    for(var hi = 0; hi < RECT_SIZES.length; hi++){
+      var W = RECT_SIZES[wi];
+      var H = RECT_SIZES[hi];
+      if(W < H) continue; // W ≥ H (W가 장변)
+      var ar = W / H;
+      if(ar > arLimit) continue;
+      if(dtype === 'flat' && ar < 3) continue; // 편평덕트: AR≥3
+
+      // 고정치수 체크
+      if(fixW > 0 && W !== getBestStdSize(fixW)) continue;
+      if(fixH > 0 && H !== getBestStdSize(fixH)) continue;
+
+      var Wm = W / 1000, Hm = H / 1000; // m
+      var A = Wm * Hm;
+      var Dh = 4 * A / (2 * (Wm + Hm)); // 수력직경
+      var V = cms / A;
+      var Fr = lambda * rho * V * V / (2 * Dh);
+
+      var diff = Math.abs(Fr - targetFr);
+      if(diff < bestDiff){
+        bestDiff = diff;
+        bestResult = {W:W, H:H, A:A, Dh:Dh*1000, V:V, Fr:Fr, ar:ar};
+      }
+    }
+  }
+
+  // 표준치수에 없으면 자유 계산 (임계: 목표 마찰손실의 50% 이상 오차 시)
+  if(!bestResult || bestDiff > targetFr * 0.5){
+    // 황금비 근사: 편평덕트(flat)는 AR_TARGET 최소 3 적용
+    var AR_TARGET = (dtype === 'flat')
+      ? Math.min(Math.max(3, Math.sqrt(2)), arLimit)
+      : Math.min(Math.sqrt(2), arLimit);
+    // ΔP/L = λ × V² × ρ / (2 × Dh)
+    // V = cms / A, Dh = 2WH/(W+H) = 2H × AR_TARGET / (1 + AR_TARGET)
+    // A = W×H = AR_TARGET × H²
+    // 연립 → H 계산
+    var Dh_over_H = 2 * AR_TARGET / (1 + AR_TARGET);
+    // Fr = λ × ρ × (cms/(AR_TARGET×H²))² / (2 × Dh_over_H × H)
+    //     = λ × ρ × cms² / (AR_TARGET² × H^4 × 2 × Dh_over_H × H)
+    //     = λ × ρ × cms² / (2 × AR_TARGET² × Dh_over_H × H^5)
+    // H^5 = λ × ρ × cms² / (2 × AR_TARGET² × Dh_over_H × Fr)
+    var H5 = lambda * rho * cms * cms / (2 * AR_TARGET * AR_TARGET * Dh_over_H * targetFr);
+    var fHm = Math.pow(H5, 0.2);          // WARN-FIX: 루프 변수와 구분 (fHm, fWm...)
+    var fWm = AR_TARGET * fHm;
+    var fA  = fWm * fHm;
+    var fDh = 2 * fWm * fHm / (fWm + fHm);
+    var fV  = cms / fA;
+    var fFr = lambda * rho * fV * fV / (2 * fDh);
+    // BUG-11 수정: 올림 후 실제 치수로 A/Dh/V/Fr 재계산
+    var Wfinal = Math.ceil(fWm*1000/50)*50;
+    var Hfinal = Math.ceil(fHm*1000/50)*50;
+    var Wfm = Wfinal/1000, Hfm = Hfinal/1000;
+    var Af  = Wfm * Hfm;
+    var Dhf = 2 * Wfm * Hfm / (Wfm + Hfm);
+    var Vf  = cms / Af;
+    var Frf = lambda * rho * Vf * Vf / (2 * Dhf);
+    bestResult = {
+      W: Wfinal,
+      H: Hfinal,
+      A: Af, Dh: Dhf*1000, V: Vf, Fr: Frf,
+      ar: Wfinal/Hfinal,
+      freeCalc: true
+    };
+  }
+
+  // 판두께
+  var maxSide = Math.max(bestResult.W, bestResult.H);
+  bestResult.thickness = getThickness(maxSide, state.material);
+
+  return bestResult;
+}
+
+// ── 원형덕트 산정 ──
+function calcCircDuct(cms, lambda, friction_pa_m){
+  var rho = 1.2;
+  var targetFr = friction_pa_m;
+  // ΔP/L = λ × ρ × V² / (2 × D) = λ × ρ / (2D) × (cms × 4/(π×D²))²
+  //       = λ × ρ × 16 × cms² / (2 × π² × D^5)
+  // D^5 = 8 × λ × ρ × cms² / (π² × targetFr)
+  var D5 = 8 * lambda * rho * cms * cms / (Math.PI * Math.PI * targetFr);
+  var Dm = Math.pow(D5, 0.2);
+  var D_mm = Dm * 1000;
+
+  // 가장 가까운 표준 직경
+  var bestD = CIRC_SIZES[0];
+  var bestDiff = Infinity;
+  for(var i = 0; i < CIRC_SIZES.length; i++){
+    var diff = Math.abs(CIRC_SIZES[i] - D_mm);
+    if(diff < bestDiff){ bestDiff = diff; bestD = CIRC_SIZES[i]; }
+  }
+
+  var Dm2 = bestD / 1000;
+  var A = Math.PI * Dm2 * Dm2 / 4;
+  var V = cms / A;
+  var Fr = lambda * rho * V * V / (2 * Dm2);
+
+  return {
+    D: bestD,
+    D_calc: D_mm,
+    A: A,
+    Dh: bestD,
+    V: V,
+    Fr: Fr,
+    thickness: getCircThickness(bestD, state.material)
+  };
+}
+
+// ── 표준 치수 찾기 ──
+function getBestStdSize(val){
+  var best = RECT_SIZES[0];
+  var bestDiff = Infinity;
+  for(var i = 0; i < RECT_SIZES.length; i++){
+    var diff = Math.abs(RECT_SIZES[i] - val);
+    if(diff < bestDiff){ bestDiff = diff; best = RECT_SIZES[i]; }
+  }
+  return best;
+}
+
+// ── 판두께 ──
+function getThickness(maxSide, mat){
+  var base;
+  if(maxSide <= 450) base = 0.5;
+  else if(maxSide <= 750) base = 0.6;
+  else if(maxSide <= 1000) base = 0.8;
+  else if(maxSide <= 1500) base = 1.0;
+  else if(maxSide <= 2200) base = 1.2;
+  else base = 1.5;
+  if(mat === 'alum') return (base + 0.1).toFixed(1);
+  return base.toFixed(1);
+}
+function getCircThickness(d, mat){
+  var base;
+  if(d <= 450) base = 0.5;
+  else if(d <= 750) base = 0.6;
+  else if(d <= 1000) base = 0.8;
+  else base = 1.0;
+  // BUG-FIX: 알루미늄 +0.1 보정 (사각덕트와 동일 기준)
+  if(mat === 'alum') return parseFloat((base + 0.1).toFixed(1));
+  return base;
+}
+
+// ══════════════════════════════════════════
+//  RENDER RESULT
+// ══════════════════════════════════════════
+function renderResultPlaceholder(){
+  var rb = document.getElementById('resultBody');
+  if(rb){
+    rb.innerHTML =
+      '<div class="result-placeholder" id="resultPlaceholder">' +
+        '<div class="rph-ico">💨</div>' +
+        '<div class="rph-tit">풍량을 입력하고 산정하세요</div>' +
+        '<div class="rph-sub">STEP 2 덕트 조건 설정 후<br/>STEP 3에서 풍량을 입력하세요</div>' +
+      '</div>';
+  }
+  var badge = document.getElementById('resultBadge');
+  if(badge){ badge.textContent = 'RESULT'; badge.className = 'cbadge pur'; }
+}
+
+function renderResult(r){
+  var vs = r.velStd;
+  var velOk = r.V >= vs.min && r.V <= vs.max;
+  var velHi = r.V > vs.max;
+  var velPct = (vs.max > 0) ? Math.min((r.V / (vs.max * 2)) * 100, 100) : 0;
+  var velBarClass = velOk ? 'ok' : (velHi ? 'hi' : 'lo');
+  var velIcon = velOk ? '✅' : (velHi ? '⚠️' : '🔵');
+  var velMsg  = velOk ? '권장 범위' : (velHi ? '풍속 초과 — 덕트 치수 확대 검토' : '풍속 미달 — 덕트 치수 축소 가능');
+
+  var badge = velOk ? 'cbadge grn' : (velHi ? 'cbadge red' : 'cbadge sky');
+  var badgeTxt = velOk ? '✅ 적정' : (velHi ? '⚠️ 초과' : '🔵 여유');
+  document.getElementById('resultBadge').className = badge;
+  document.getElementById('resultBadge').textContent = badgeTxt;
+
+  var html = '';
+
+  if(r.dtype === 'circ'){
+    // ── 원형덕트 결과 ──
+    html += `
+    <div class="duct-result-hero">
+      <div class="drh-box circ">
+        <div class="drh-lbl">원형덕트 직경 Φ</div>
+        <div class="drh-val">${r.D}</div>
+        <div class="drh-unit">mm</div>
+        <div class="drh-sub">계산치: ${r.D_calc.toFixed(1)} mm</div>
+      </div>
+      <div class="drh-box vel">
+        <div class="drh-lbl">실제 풍속</div>
+        <div class="drh-val">${r.V.toFixed(2)}</div>
+        <div class="drh-unit">m/s</div>
+        <div class="drh-sub">권장: ${vs.min}~${vs.max} m/s</div>
+      </div>
+    </div>`;
+  } else {
+    // ── 사각덕트 결과 ──
+    html += `
+    <div class="duct-result-hero">
+      <div class="drh-box rect">
+        <div class="drh-lbl">${r.dtype==='flat'?'편평':'사각'}덕트 규격</div>
+        <div class="drh-val" style="font-size:24px;">${r.W}×${r.H}</div>
+        <div class="drh-unit">mm × mm</div>
+        <div class="drh-sub">종횡비 ${r.ar.toFixed(1)}:1</div>
+      </div>
+      <div class="drh-box vel">
+        <div class="drh-lbl">실제 풍속</div>
+        <div class="drh-val">${r.V.toFixed(2)}</div>
+        <div class="drh-unit">m/s</div>
+        <div class="drh-sub">권장: ${vs.min}~${vs.max} m/s</div>
+      </div>
+    </div>`;
+  }
+
+  // 풍속 게이지
+  html += `
+  <div style="margin-bottom:12px;">
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:#64748b;font-weight:700;margin-bottom:3px;">
+      <span>${velIcon} ${velMsg}</span>
+      <span>${r.V.toFixed(2)} m/s</span>
+    </div>
+    <div class="vel-gauge"><div class="vel-bar ${velBarClass}" style="width:${velPct.toFixed(1)}%"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:9px;color:#94a3b8;margin-top:2px;">
+      <span>0</span><span>권장 ${vs.min}~${vs.max}</span><span>최대</span>
+    </div>
+  </div>`;
+
+  // stat grid
+  html += `<div class="stat-grid">
+    <div class="sbox"><div class="sico">🌬️</div><div class="sval mono">${fmtFlow(r.cmh)}</div><div class="slbl">풍량</div></div>
+    <div class="sbox"><div class="sico">📐</div><div class="sval mono">${(r.A*10000).toFixed(1)}</div><div class="slbl">단면적 cm²</div></div>
+    <div class="sbox"><div class="sico">🔵</div><div class="sval mono">${r.Dh.toFixed(0)}</div><div class="slbl">수력직경 mm</div></div>
+  </div>`;
+
+  // 계산 과정
+  html += `<div class="cbox">
+    <div class="cbox-tit">📐 산정 상세</div>`;
+  if(r.dtype === 'circ'){
+    html += `
+    <div class="crow"><span class="ck">직경 Φ (계산치)</span><span class="cv">${r.D_calc.toFixed(1)} mm</span></div>
+    <div class="crow"><span class="ck">직경 Φ (표준 채택)</span><span class="cv">${r.D} mm</span></div>
+    <div class="crow"><span class="ck">단면적</span><span class="cv">${(r.A*10000).toFixed(2)} cm²</span></div>`;
+  } else {
+    html += `
+    <div class="crow"><span class="ck">폭 W</span><span class="cv">${r.W} mm</span></div>
+    <div class="crow"><span class="ck">높이 H</span><span class="cv">${r.H} mm</span></div>
+    <div class="crow"><span class="ck">종횡비 W/H</span><span class="cv">${r.ar.toFixed(1)} : 1</span></div>`;
+  }
+  html += `
+    <div class="crow"><span class="ck">풍량 Q</span><span class="cv">${(r.cms).toFixed(4)} m³/s</span></div>
+    <div class="crow"><span class="ck">실제 풍속 V</span><span class="cv">${r.V.toFixed(3)} m/s</span></div>
+    <div class="crow"><span class="ck">수력직경 Dh</span><span class="cv">${r.Dh.toFixed(1)} mm</span></div>
+    <div class="crow"><span class="ck">마찰손실 ΔP/L</span><span class="cv">${r.Fr.toFixed(3)} Pa/m</span></div>
+    <div class="crow"><span class="ck">판두께 (${state.material})</span><span class="cv">${r.thickness} mm</span></div>
+  </div>`;
+
+  // 인접 규격 비교표
+  if(r.dtype !== 'circ'){
+    html += renderNearbyRectTable(r);
+  } else {
+    html += renderNearbyCircTable(r);
+  }
+
+  // 경고
+  if(velHi){
+    html += `<div class="nb red" style="margin-top:10px;"><div class="nb-tit">⚠️ 풍속 초과</div><div class="nb-txt">실제 풍속(${r.V.toFixed(2)} m/s)이 권장 최대값(${vs.max} m/s)을 초과합니다.<br/>덕트 치수를 확대하거나 분기 구간을 검토하세요.</div></div>`;
+  } else if(velOk){
+    html += `<div class="nb grn" style="margin-top:10px;"><div class="nb-tit">✅ 적정 풍속</div><div class="nb-txt">산정된 덕트 규격이 권장 범위 내에 있습니다.</div></div>`;
+  }
+
+  document.getElementById('resultBody').innerHTML = html;
+}
+
+function renderNearbyRectTable(r){
+  var targets = [];
+  var idx  = RECT_SIZES.indexOf(r.W);
+  var idxH = RECT_SIZES.indexOf(r.H);
+
+  // BUG-12 수정: indexOf=-1 (freeCalc 등) 시 가장 가까운 표준 인덱스로 폴백
+  if(idx < 0){
+    var minDiffW = Infinity;
+    for(var k=0;k<RECT_SIZES.length;k++){
+      var d=Math.abs(RECT_SIZES[k]-r.W);
+      if(d<minDiffW){minDiffW=d;idx=k;}
+    }
+  }
+  if(idxH < 0){
+    var minDiffH = Infinity;
+    for(var k=0;k<RECT_SIZES.length;k++){
+      var d=Math.abs(RECT_SIZES[k]-r.H);
+      if(d<minDiffH){minDiffH=d;idxH=k;}
+    }
+  }
+
+  for(var i = Math.max(0,idx-1); i <= Math.min(RECT_SIZES.length-1, idx+1); i++){
+    for(var j = Math.max(0,idxH-1); j <= Math.min(RECT_SIZES.length-1, idxH+1); j++){
+      var W = RECT_SIZES[i], H = RECT_SIZES[j];
+      if(W < H) continue;
+      targets.push({W:W,H:H});
+    }
+  }
+  if(!targets.length) return '';
+
+  var lambda = LAMBDA[state.material], rho = 1.2, cms = r.cms;
+  var html = '<div class="twrap" style="margin-top:10px;"><table class="rtbl">';
+  html += '<thead><tr><th>W×H (mm)</th><th>풍속 (m/s)</th><th>ΔP/L (Pa/m)</th><th>판정</th></tr></thead><tbody>';
+
+  targets.forEach(function(t){
+    var Wm = t.W/1000, Hm = t.H/1000;
+    var A = Wm*Hm, Dh = 4*A/(2*(Wm+Hm));
+    var V = cms/A;
+    var Fr = lambda*rho*V*V/(2*Dh);
+    var vs = r.velStd;
+    var ok = V >= vs.min && V <= vs.max;
+    var isSelected = (t.W === r.W && t.H === r.H);
+    var cls = isSelected ? 'tbl-recommend-row' : '';
+    html += `<tr class="${cls}">
+      <td>${t.W}×${t.H}</td>
+      <td>${V.toFixed(2)}</td>
+      <td>${Fr.toFixed(3)}</td>
+      <td>${isSelected?'★ 채택':ok?'✓ 적정':'—'}</td>
+    </tr>`;
+  });
+  html += '</tbody></table></div>';
+  return html;
+}
+
+function renderNearbyCircTable(r){
+  var targets = [];
+  var idx = CIRC_SIZES.indexOf(r.D);
+  // BUG-FIX: indexOf=-1 시 최근접 인덱스로 폴백
+  if(idx < 0){
+    var minDiff = Infinity;
+    for(var k = 0; k < CIRC_SIZES.length; k++){
+      var d = Math.abs(CIRC_SIZES[k] - r.D);
+      if(d < minDiff){ minDiff = d; idx = k; }
+    }
+  }
+  for(var i = Math.max(0,idx-2); i <= Math.min(CIRC_SIZES.length-1,idx+2); i++){
+    targets.push(CIRC_SIZES[i]);
+  }
+  var lambda = LAMBDA[state.material], rho = 1.2, cms = r.cms;
+  var html = '<div class="twrap" style="margin-top:10px;"><table class="rtbl">';
+  html += '<thead><tr><th>Φ (mm)</th><th>단면적 (cm²)</th><th>풍속 (m/s)</th><th>ΔP/L (Pa/m)</th><th>판정</th></tr></thead><tbody>';
+  targets.forEach(function(d){
+    var Dm = d/1000, A = Math.PI*Dm*Dm/4;
+    var V = cms/A;
+    var Fr = lambda*rho*V*V/(2*Dm);
+    var vs = r.velStd;
+    var ok = V >= vs.min && V <= vs.max;
+    var isSelected = (d === r.D);
+    var cls = isSelected ? 'tbl-recommend-row' : '';
+    html += `<tr class="${cls}">
+      <td>Φ${d}</td>
+      <td>${(A*10000).toFixed(1)}</td>
+      <td>${V.toFixed(2)}</td>
+      <td>${Fr.toFixed(3)}</td>
+      <td>${isSelected?'★ 채택':ok?'✓ 적정':'—'}</td>
+    </tr>`;
+  });
+  html += '</tbody></table></div>';
+  return html;
+}
+
+// ══════════════════════════════════════════
+//  MULTI CALC
+// ══════════════════════════════════════════
+var multiCount = 0;
+
+function addMultiItem(){
+  multiCount++;
+  var id = 'mi_' + multiCount;
+  var spaceOpts = [
+    {v:'supply_main',l:'급기 주덕트'},
+    {v:'supply_branch',l:'급기 분기덕트'},
+    {v:'return_main',l:'환기 주덕트'},
+    {v:'return_branch',l:'환기 분기덕트'},
+    {v:'exhaust_main',l:'배기 주덕트'},
+    {v:'exhaust_branch',l:'배기 분기덕트'},
+    {v:'outdoor_air',l:'외기덕트'}
+  ].map(function(o){ return `<option value="${o.v}">${o.l}</option>`; }).join('');
+
+  var dtypeOpts = [
+    {v:'rect',l:'사각'},
+    {v:'circ',l:'원형'},
+    {v:'flat',l:'편평'}
+  ].map(function(o){ return `<option value="${o.v}">${o.l}</option>`; }).join('');
+
+  var html = `<div class="multi-item" id="${id}">
+    <div class="multi-item-head">
+      <div class="multi-item-title">🔹 구간 ${multiCount}</div>
+      <button class="multi-del" onclick="removeMultiItem('${id}')">✕</button>
+    </div>
+    <div class="frow3">
+      <div class="fgrp">
+        <label class="flbl">구간명</label>
+        <input class="finput" id="${id}_name" type="text" placeholder="구간 ${multiCount}" value="구간 ${multiCount}"/>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">덕트 형상</label>
+        <select class="fselect" id="${id}_dtype">${dtypeOpts}</select>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">설치 장소</label>
+        <select class="fselect" id="${id}_space">${spaceOpts}</select>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fgrp">
+        <label class="flbl">풍량 (m³/h)</label>
+        <div class="input-sfx">
+          <input class="finput" id="${id}_flow" type="number" placeholder="풍량" min="1"/>
+          <span class="sfx">m³/h</span>
+        </div>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">마찰손실 (Pa/m)</label>
+        <div class="input-sfx">
+          <input class="finput" id="${id}_fr" type="number" value="1.0" min="0.1" max="5" step="0.1"/>
+          <span class="sfx">Pa/m</span>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  document.getElementById('multiItems').insertAdjacentHTML('beforeend', html);
+}
+
+function removeMultiItem(id){
+  var el = document.getElementById(id);
+  if(el) el.remove();
+}
+
+function calcMulti(){
+  var items = document.querySelectorAll('.multi-item');
+  if(!items.length){ showToast('❌ 구간을 먼저 추가하세요'); return; }
+
+  var results = [];
+  items.forEach(function(item){
+    var id = item.id;
+    var name  = document.getElementById(id+'_name').value || id;
+    var dtype = document.getElementById(id+'_dtype').value;
+    var space = document.getElementById(id+'_space').value;
+    var flow  = parseFloat(document.getElementById(id+'_flow').value) || 0;
+    var fr    = parseFloat(document.getElementById(id+'_fr').value) || 1.0;
+
+    if(flow <= 0){ results.push({name:name, error:'풍량 미입력'}); return; }
+
+    var cms = flow / 3600;
+    var lambda = LAMBDA[state.material] || LAMBDA['galv']; // BUG-FIX: 단일 산정 재질 연동
+    var res;
+    if(dtype === 'circ'){
+      res = calcCircDuct(cms, lambda, fr);
+      res.dtype = 'circ';
+    } else {
+      res = calcRectDuct_multi(cms, lambda, fr, 4, dtype);
+      res.dtype = dtype;
+    }
+    res.name = name;
+    res.cmh  = flow;
+    res.cms  = cms;
+    res.spaceType = space;
+    res.velStd = VEL_STD[space];
+    results.push(res);
+  });
+
+  state.multiResults = results;
+  renderMultiResult(results);
+  showToast('✅ ' + results.length + '개 구간 산정 완료');
+}
+
+function calcRectDuct_multi(cms, lambda, friction_pa_m, arLimit, dtype){
+  var rho = 1.2;
+  var bestResult = null, bestDiff = Infinity;
+  for(var wi=0;wi<RECT_SIZES.length;wi++){
+    for(var hi=0;hi<RECT_SIZES.length;hi++){
+      var W=RECT_SIZES[wi],H=RECT_SIZES[hi];
+      if(W<H)continue;
+      var ar=W/H;
+      if(ar>arLimit)continue;
+      if(dtype==='flat'&&ar<3)continue;
+      var Wm=W/1000,Hm=H/1000,A=Wm*Hm;
+      var Dh=4*A/(2*(Wm+Hm));
+      var V=cms/A;
+      var Fr=lambda*rho*V*V/(2*Dh);
+      var diff=Math.abs(Fr-friction_pa_m);
+      if(diff<bestDiff){bestDiff=diff;bestResult={W:W,H:H,A:A,Dh:Dh*1000,V:V,Fr:Fr,ar:ar,thickness:getThickness(Math.max(W,H),state.material||'galv')};} // BUG-FIX: 재질 반영
+    }
+  }
+  if(!bestResult){
+    // 폴백: 400×300 기본값, 실제 계산값으로 채움
+    var fbW=0.4, fbH=0.3, fbA=fbW*fbH;
+    var fbDh=2*fbW*fbH/(fbW+fbH);
+    var fbV=cms/fbA;
+    var fbFr=lambda*rho*fbV*fbV/(2*fbDh);
+    bestResult={W:400,H:300,A:fbA,Dh:fbDh*1000,V:fbV,Fr:fbFr,ar:400/300,thickness:'0.8'};
+  }
+  return bestResult;
+}
+
+function renderMultiResult(results){
+  var container = document.getElementById('multiResult');
+  if(!container) return;
+  if(!results.length){ container.innerHTML = '<div class="result-placeholder"><div class="rph-ico">📋</div><div class="rph-tit">결과 없음</div></div>'; return; }
+
+  var html = '<div class="twrap"><table class="rtbl"><thead><tr><th>구간명</th><th>풍량 m³/h</th><th>규격 (mm)</th><th>풍속 m/s</th><th>ΔP/L Pa/m</th><th>판정</th></tr></thead><tbody>';
+
+  results.forEach(function(r){
+    if(r.error){
+      html += `<tr><td>${r.name}</td><td colspan="5" style="color:#dc2626;">${r.error}</td></tr>`;
+      return;
+    }
+    var vs = r.velStd;
+    var ok = r.V >= vs.min && r.V <= vs.max;
+    var size = r.dtype === 'circ' ? ('Φ'+r.D) : (r.W+'×'+r.H);
+    html += `<tr class="${ok?'':''}">
+      <td>${r.name}</td>
+      <td class="mono">${fmt(r.cmh,0)}</td>
+      <td class="mono" style="font-weight:900;color:${ok?'#0f766e':'#dc2626'};">${size}</td>
+      <td class="mono">${r.V.toFixed(2)}</td>
+      <td class="mono">${r.Fr.toFixed(3)}</td>
+      <td>${ok?'<span class="duct-tag ok">✓ 적정</span>':'<span class="duct-tag warn">⚠ 검토</span>'}</td>
+    </tr>`;
+  });
+  html += '</tbody></table></div>';
+  if(container) container.innerHTML = html;
+  updateA4();
+}
+
+// ══════════════════════════════════════════
+//  GUIDE TABLE INIT
+// ══════════════════════════════════════════
+function initGuideTables(){
+  // 사각덕트 규격표 (일부)
+  var rectHtml = '';
+  var sample = [[400,300],[400,400],[500,300],[500,400],[600,400],[600,500],[800,400],[800,600],[1000,500],[1000,800],[1200,600],[1200,800],[1500,800],[1500,1000],[2000,1000]];
+  sample.forEach(function(s){
+    var W=s[0],H=s[1];
+    var Wm=W/1000,Hm=H/1000,A=Wm*Hm;
+    var Dh=2*Wm*Hm/(Wm+Hm)*1000;
+    rectHtml+=`<tr><td>${W}</td><td>${H}</td><td>${A.toFixed(4)}</td><td>${Dh.toFixed(0)}</td><td>${(W/H).toFixed(1)}:1</td></tr>`;
+  });
+  document.getElementById('rectTableBody').innerHTML = rectHtml;
+
+  // 원형덕트 규격표
+  var circHtml = '';
+  CIRC_SIZES.forEach(function(d){
+    var A=Math.PI*(d/1000)*(d/1000)/4*10000;
+    var P=Math.PI*d;
+    var use=d<=200?'분기':d<=500?'간선':d<=800?'주덕트':'대형주덕트';
+    circHtml+=`<tr><td>Φ${d}</td><td>${A.toFixed(1)}</td><td>${P.toFixed(0)}</td><td>${use}</td></tr>`;
+  });
+  document.getElementById('circTableBody').innerHTML = circHtml;
+}
+
+// ══════════════════════════════════════════
+//  A4 UPDATE
+// ══════════════════════════════════════════
+function updateA4(){
+  document.getElementById('a4-projName').textContent  = document.getElementById('projName').value  || '—';
+  document.getElementById('a4-projDate').textContent  = document.getElementById('projDate').value  || '—';
+  document.getElementById('a4-projAuthor').textContent = document.getElementById('projAuthor').value || '—';
+
+  if(state.result){
+    var r = state.result;
+    var vs = r.velStd;
+    var velOk = r.V >= vs.min && r.V <= vs.max;
+    var size = r.dtype === 'circ' ? ('Φ' + r.D + ' mm') : (r.W + ' × ' + r.H + ' mm');
+    var html = `
+    <table class="a4-meta-table">
+      <tr><td class="k">덕트 형상</td><td>${r.dtype==='circ'?'원형':r.dtype==='flat'?'편평':'사각'}</td><td class="k">설치 장소</td><td>${document.getElementById('spaceType').options[document.getElementById('spaceType').selectedIndex].text}</td></tr>
+      <tr><td class="k">설계 풍량</td><td>${fmt(r.cmh,0)} m³/h (${r.cms.toFixed(4)} m³/s)</td><td class="k">마찰손실 기준</td><td>${state.frictionBase} Pa/m</td></tr>
+      <tr><td class="k">산정 규격</td><td style="font-weight:900;font-size:13px;">${size}</td><td class="k">풍속 판정</td><td style="color:${velOk?'#16a34a':'#dc2626'};font-weight:800;">${r.V.toFixed(2)} m/s (${velOk?'적정':'검토'})</td></tr>
+      <tr><td class="k">수력직경 Dh</td><td>${r.Dh.toFixed(1)} mm</td><td class="k">실제 ΔP/L</td><td>${r.Fr.toFixed(3)} Pa/m</td></tr>
+      <tr><td class="k">단면적</td><td>${(r.A*10000).toFixed(2)} cm²</td><td class="k">판두께</td><td>${r.thickness} mm</td></tr>
+    </table>`;
+    document.getElementById('a4-result').innerHTML = html;
+  }
+
+  if(state.multiResults && state.multiResults.length){
+    document.getElementById('a4-multi-section').style.display = '';
+    var html2 = '<table class="a4-meta-table"><tr><th style="background:#f0fdfa;font-size:10px;padding:5px 8px;">구간명</th><th style="background:#f0fdfa;font-size:10px;padding:5px 8px;">풍량</th><th style="background:#f0fdfa;font-size:10px;padding:5px 8px;">규격</th><th style="background:#f0fdfa;font-size:10px;padding:5px 8px;">풍속</th><th style="background:#f0fdfa;font-size:10px;padding:5px 8px;">판정</th></tr>';
+    state.multiResults.forEach(function(r){
+      if(r.error){ html2+=`<tr><td>${r.name}</td><td colspan="4" style="color:#dc2626;">${r.error}</td></tr>`; return; }
+      var vs=r.velStd, ok=r.V>=vs.min&&r.V<=vs.max;
+      var size=r.dtype==='circ'?('Φ'+r.D):(r.W+'×'+r.H);
+      html2+=`<tr><td>${r.name}</td><td>${fmt(r.cmh,0)} m³/h</td><td style="font-weight:800;">${size} mm</td><td>${r.V.toFixed(2)} m/s</td><td style="color:${ok?'#16a34a':'#dc2626'};font-weight:800;">${ok?'적정':'검토'}</td></tr>`;
+    });
+    html2+='</table>';
+    document.getElementById('a4-multi-result').innerHTML = html2;
+  }
+}
+
+// ══════════════════════════════════════════
+//  GUIDE MODAL → 통합 마스터 모달로 이관
+//  (아래 alias 함수들은 JS 하단에 별도 정의)
+// ══════════════════════════════════════════
+
+// ══════════════════════════════════════════
+//  RESET
+// ══════════════════════════════════════════
+function resetAll(){
+  document.getElementById('flowInput').value = '';
+  document.getElementById('fixW').value = '';
+  document.getElementById('fixH').value = '';
+  document.getElementById('projName').value   = '만민 건축사 신사옥 신축공사';
+  document.getElementById('projDate').value   = new Date().toISOString().split('T')[0];
+  document.getElementById('projAuthor').value = '김만민';
+  state.result = null;
+  state.flowCmh = 0;
+  state.multiResults = [];
+  document.getElementById('convBox').style.display = 'none';
+
+  // BUG-FIX: 다중 산정 구간 DOM + 카운터 초기화
+  var mi = document.getElementById('multiItems');
+  if(mi) mi.innerHTML = '';
+  multiCount = 0;
+  addMultiItem();
+  addMultiItem();
+
+  // BUG-3,4: 공유 캔버스 초기화 + 공유버튼 숨김
+  _ductShareCanvas = null;
+  var shareBtn = document.getElementById('btn-mobile-share');
+  if(shareBtn) shareBtn.style.display = 'none';
+  var jpgTxt = document.getElementById('btn-mobile-jpg-txt');
+  if(jpgTxt) jpgTxt.textContent = '🖼️ JPG 저장';
+
+  // BUG-5: 모바일 화면 초기화
+  var phoneRender = document.getElementById('phone-result-render');
+  if(phoneRender) phoneRender.innerHTML =
+    '<div style="text-align:center;padding:32px 0 20px;color:#94a3b8;">' +
+      '<div style="font-size:30px;margin-bottom:10px;">📱</div>' +
+      '<div style="font-size:11px;font-weight:700;line-height:1.8;">' +
+        '단일 덕트 산정 탭에서<br/>풍량을 입력하면<br/>여기에 표시됩니다' +
+      '</div>' +
+    '</div>';
+  var hint = document.getElementById('mobile-action-hint');
+  if(hint) hint.textContent = '※ 단일 덕트 산정 탭에서 풍량을 입력 후 JPG 저장하세요';
+
+  renderResultPlaceholder();
+  updateStep(1);
+  showToast('🔄 초기화 완료');
+}
+
+// ══════════════════════════════════════════
+//  JPG EXPORT
+// ══════════════════════════════════════════
+function exportJpg(){
+  if(!state.result){ showToast('먼저 덕트 규격을 산정하세요'); return; }
+  var card = document.getElementById('resultCard');
+  if(!card){ showToast('결과 카드를 찾을 수 없습니다'); return; }
+  showToast('📸 JPG 생성 중...');
+  html2canvas(card, {scale:2, useCORS:true, backgroundColor:'#ffffff'}).then(function(canvas){
+    var a = document.createElement('a');
+    var now = new Date();
+    var ts = now.getFullYear()
+      + String(now.getMonth()+1).padStart(2,'0')
+      + String(now.getDate()).padStart(2,'0');
+    a.download = '덕트규격_' + ts + '.jpg';
+    a.href = canvas.toDataURL('image/jpeg', 0.95);
+    a.click();
+    showToast('✅ JPG 저장 완료');
+  }).catch(function(e){ showToast('❌ JPG 저장 실패: ' + e.message); });
+}
+
+function exportA4Jpg(){
+  if(!state.result){ showToast('⚠️ 먼저 덕트 규격을 산정하세요'); return; }
+  showToast('📸 JPG 생성 중...');
+  html2canvas(document.getElementById('a4Page'),{scale:3,useCORS:true,backgroundColor:'#ffffff'}).then(function(canvas){
+    var a = document.createElement('a');
+    a.download = '덕트규격산정서.jpg';
+    a.href = canvas.toDataURL('image/jpeg',0.95);
+    a.click();
+    showToast('✅ A4 JPG 저장 완료');
+  }).catch(function(e){
+    showToast('❌ A4 JPG 저장 실패: ' + e.message);
+  });
+}
+
+// frictionBase listener → DOMContentLoaded로 이동됨
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function(){
+  var today = new Date().toISOString().split('T')[0];
+  document.getElementById('projDate').value   = today;
+  document.getElementById('projName').value   = '만민 건축사 신사옥 신축공사';
+  document.getElementById('projAuthor').value = '김만민';
+
+  // ─ frictionBase change 이벤트 (DOMContentLoaded 내부로 이동)
+  var fbEl = document.getElementById('frictionBase');
+  if(fbEl){
+    fbEl.addEventListener('change', function(){
+      var manRow = document.getElementById('manualFrictionRow');
+      if(this.value === 'manual'){
+        if(manRow) manRow.style.display = '';
+      } else {
+        if(manRow) manRow.style.display = 'none';
+      }
+      calcDuct();
+    });
+  }
+
+  initGuideTables();
+  initModalTables();
+  addMultiItem();
+  addMultiItem();
+  updateStep(1);
+  initFab();
+});
+
+// ══════════════════════════════════════════
+//  통합 마스터 모달 (FAB)
+// ══════════════════════════════════════════
+function openMasterModal(tabIdx){
+  var modal = document.getElementById('masterModal');
+  modal.classList.add('open');
+  if(tabIdx !== undefined) switchMasterTab(tabIdx);
+  // 모달 바디 스크롤 초기화
+  var body = modal.querySelector('.master-modal-body');
+  if(body) body.scrollTop = 0;
+}
+function closeMasterModal(){
+  document.getElementById('masterModal').classList.remove('open');
+}
+function switchMasterTab(idx){
+  for(var i=0;i<5;i++){
+    var mt=document.getElementById('mt-'+i);
+    var mp=document.getElementById('mp-'+i);
+    if(mt) mt.classList.toggle('active', i===idx);
+    if(mp){
+      mp.style.display = (i===idx) ? 'block' : 'none';
+      if(i===idx) mp.classList.add('active');
+      else mp.classList.remove('active');
+    }
+  }
+  if(idx===4) initModalTables();
+  // 탭 전환 시 스크롤 초기화
+  var body = document.querySelector('.master-modal-body');
+  if(body) body.scrollTop = 0;
+}
+function switchRuleTab(type,btn){
+  document.querySelectorAll('#mp-4 .seg-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  document.getElementById('rule-sq').style.display = type==='sq'?'':'none';
+  document.getElementById('rule-ci').style.display = type==='ci'?'':'none';
+  document.getElementById('rule-th').style.display = type==='th'?'':'none';
+}
+// 하위 호환 alias
+function openGuide()  { openMasterModal(0); }
+function closeGuide() { closeMasterModal(); }
+function openFormula(){ openMasterModal(1); }
+function closeFormula(){ closeMasterModal(); }
+function openHowto()  { openMasterModal(0); }
+function closeHowto() { closeMasterModal(); }
+
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){
+    closeMasterModal();
+    closeDuctShareModal();
+  }
+});
+
+// ══════════════════════════════════════════
+//  FAB 초기화 (드래그 이동 포함 — 냉온수배관 웹 동일)
+// ══════════════════════════════════════════
+function initFab(){
+  var btn=document.getElementById('fabCalc');
+  var tip=document.getElementById('fabTooltip');
+  if(!btn) return;
+  var isDragging=false,hasMoved=false,startX,startY,startR,startB;
+  function getXY(e){var t=e.touches?e.touches[0]:e;return{x:t.clientX,y:t.clientY};}
+  function onDown(e){
+    var p=getXY(e);startX=p.x;startY=p.y;hasMoved=false;isDragging=false;
+    var rect=btn.getBoundingClientRect();
+    startR=window.innerWidth-rect.right;startB=window.innerHeight-rect.bottom;
+    document.addEventListener('mousemove',onMove);document.addEventListener('mouseup',onUp);
+    document.addEventListener('touchmove',onMove,{passive:false});document.addEventListener('touchend',onUp);
+    e.preventDefault();
+  }
+  function onMove(e){
+    var p=getXY(e);var dx=p.x-startX,dy=p.y-startY;
+    if(!hasMoved&&(Math.abs(dx)>5||Math.abs(dy)>5)){hasMoved=true;isDragging=true;tip.classList.remove('show');}
+    if(!isDragging)return;
+    var nr=Math.max(4,Math.min(startR-dx,window.innerWidth-btn.offsetWidth-4));
+    var nb=Math.max(4,Math.min(startB-dy,window.innerHeight-btn.offsetHeight-4));
+    btn.style.right=nr+'px';btn.style.bottom=nb+'px';
+    e.preventDefault();
+  }
+  function onUp(){
+    document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);
+    document.removeEventListener('touchmove',onMove);document.removeEventListener('touchend',onUp);
+    if(!hasMoved) openMasterModal(0);
+    isDragging=false;
+  }
+  btn.addEventListener('mousedown',onDown);
+  btn.addEventListener('touchstart',onDown,{passive:false});
+  btn.addEventListener('mouseenter',function(){
+    if(!isDragging){
+      var r=btn.getBoundingClientRect();
+      tip.style.right=Math.max(8,window.innerWidth-r.right)+'px';
+      tip.style.bottom=(window.innerHeight-r.top+8)+'px';
+      tip.style.left='auto';
+      tip.classList.add('show');
+    }
+  });
+  btn.addEventListener('mouseleave',function(){tip.classList.remove('show');});
+}
+
+// ══════════════════════════════════════════
+//  모달 내 규격표 데이터 초기화
+// ══════════════════════════════════════════
+function initModalTables(){
+  var RECT_S=[100,125,150,200,250,300,350,400,450,500,600,700,800,900,1000,1200,1500,1800,2000];
+  var sample=[];
+  for(var wi=3;wi<RECT_S.length;wi++){
+    for(var hi=2;hi<wi&&hi<RECT_S.length;hi++){
+      var W=RECT_S[wi],H=RECT_S[hi];
+      if(W/H>4.1) continue;
+      sample.push([W,H]);
+      if(sample.length>=16) break;
+    }
+    if(sample.length>=16) break;
+  }
+  var rhtml='';
+  sample.forEach(function(s){
+    var W=s[0],H=s[1];
+    var A=(W/1000)*(H/1000);
+    var Dh=2*(W/1000)*(H/1000)/((W/1000)+(H/1000))*1000; // WARN-FIX: m→mm 변환 방식으로 통일
+    rhtml+='<tr><td>'+W+'×'+H+'</td><td>'+A.toFixed(4)+'</td><td>'+Dh.toFixed(0)+'</td><td>'+(W/H).toFixed(1)+':1</td></tr>';
+  });
+  var rt=document.getElementById('modal-rect-tbody');
+  if(rt) rt.innerHTML=rhtml;
+
+  var CIRC=[100,125,150,175,200,225,250,300,350,400,450,500,560,600,630,710,800,900,1000,1120,1250];
+  var chtml='';
+  CIRC.forEach(function(d){
+    var A=Math.PI*(d/1000)*(d/1000)/4*10000;
+    var P=Math.PI*d;
+    var use=d<=200?'분기':d<=500?'간선':d<=800?'주덕트':'대형';
+    chtml+='<tr><td>Φ'+d+'</td><td>'+A.toFixed(1)+'</td><td>'+P.toFixed(0)+'</td><td>'+use+'</td></tr>';
+  });
+  var ct=document.getElementById('modal-circ-tbody');
+  if(ct) ct.innerHTML=chtml;
+}
+
+// ══════════════════════════════════════════
+//  Galaxy S24 Ultra 모바일 미리보기 렌더
+// ══════════════════════════════════════════
+function renderMobileResult(r){
+  var el = document.getElementById('phone-result-render');
+  if(!el || !r) return;
+
+  // 새 산정마다 공유 canvas 초기화 → 공유 버튼 숨김
+  _ductShareCanvas = null;
+  var shareBtn = document.getElementById('btn-mobile-share');
+  if(shareBtn) shareBtn.style.display = 'none';
+  var hint = document.getElementById('mobile-action-hint');
+  if(hint) hint.textContent = '✅ 결과 생성됨 — JPG 저장 후 공유하세요';
+  var jpgTxt = document.getElementById('btn-mobile-jpg-txt');
+  if(jpgTxt) jpgTxt.textContent = '🖼️ JPG 저장';
+
+  var vs        = r.velStd;
+  var velOk     = r.V >= vs.min && r.V <= vs.max;
+  var velHi     = r.V > vs.max;
+  var size      = r.dtype === 'circ' ? ('Φ' + r.D + ' mm') : (r.W + '×' + r.H + ' mm');
+  var monoFont  = '"JetBrains Mono", monospace';  // ← 따옴표 충돌 방지
+  var bgGrad    = r.dtype === 'circ'
+    ? 'linear-gradient(135deg,#134e4a,#0f766e)'
+    : (r.dtype === 'flat'
+      ? 'linear-gradient(135deg,#2d1b69,#5b21b6)'
+      : 'linear-gradient(135deg,#0c1a2e,#0f766e)');
+  var statusColor = velOk ? '#15803d' : (velHi ? '#dc2626' : '#0f766e');
+  var statusBg    = velOk ? '#f0fdf4' : (velHi ? '#fef2f2' : '#f0fdfa');
+  var statusBd    = velOk ? '#bbf7d0' : (velHi ? '#fecaca' : '#5eead4');
+  var statusIcon  = velOk ? '✅' : (velHi ? '⚠️' : '🔵');
+  var statusTxt   = velOk ? '권장 범위' : (velHi ? '풍속 초과 — 치수 확대 검토' : '풍속 미달 — 치수 축소 가능');
+
+  var projNameEl = document.getElementById('projName');
+  var projName   = projNameEl ? projNameEl.value : '';
+  var spaceEl    = document.getElementById('spaceType');
+  var spaceTxt   = spaceEl ? spaceEl.options[spaceEl.selectedIndex].text : '';
+
+  var detailHtml = r.dtype !== 'circ'
+    ? '<div style="color:#0c1a2e;">W:<b>' + r.W + '</b>  H:<b>' + r.H + '</b> mm · AR:' + r.ar.toFixed(1) + ':1</div>'
+    : '<div style="color:#0c1a2e;">직경 Φ:<b>' + r.D + '</b> mm</div>';
+
+  el.innerHTML = [
+    '<div style="background:' + bgGrad + ';padding:14px 10px 10px;color:#fff;">',
+      '<div style="font-size:8px;font-weight:700;opacity:.65;margin-bottom:1px;">MANMIN 덕트규격산정 · Ver2.0</div>',
+      '<div style="font-size:10.5px;font-weight:800;opacity:.9;margin-bottom:6px;line-height:1.3;">' + (projName || '공조 덕트 규격 산정') + '</div>',
+      '<div style="font-size:8px;opacity:.6;margin-bottom:9px;">' + spaceTxt + '</div>',
+      '<div style="background:rgba(255,255,255,.1);border-radius:9px;padding:10px;text-align:center;">',
+        '<div style="font-size:8.5px;opacity:.7;margin-bottom:3px;">채택 덕트 규격</div>',
+        '<div style="font-size:22px;font-weight:900;font-family:' + monoFont + ';color:#fde047;line-height:1;">' + size + '</div>',
+        '<div style="font-size:8.5px;opacity:.7;margin-top:3px;">풍속 ' + r.V.toFixed(2) + ' m/s · ΔP/L ' + r.Fr.toFixed(3) + ' Pa/m</div>',
+      '</div>',
+    '</div>',
+    '<div style="padding:10px 9px 8px;">',
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:8px;">',
+        '<div style="background:#f0fdfa;border:1px solid #99f6e4;border-radius:7px;padding:6px;text-align:center;">',
+          '<div style="font-size:13px;font-weight:900;color:#0f766e;font-family:' + monoFont + ';">' + fmt(r.cmh, 0) + '</div>',
+          '<div style="font-size:8px;color:#3d6b64;font-weight:700;margin-top:1px;">m³/h</div>',
+        '</div>',
+        '<div style="background:#f0fdfa;border:1px solid #99f6e4;border-radius:7px;padding:6px;text-align:center;">',
+          '<div style="font-size:13px;font-weight:900;color:#0f766e;font-family:' + monoFont + ';">' + r.V.toFixed(2) + '</div>',
+          '<div style="font-size:8px;color:#3d6b64;font-weight:700;margin-top:1px;">m/s</div>',
+        '</div>',
+        '<div style="background:#f0fdfa;border:1px solid #99f6e4;border-radius:7px;padding:6px;text-align:center;">',
+          '<div style="font-size:13px;font-weight:900;color:#0f766e;font-family:' + monoFont + ';">' + r.Fr.toFixed(2) + '</div>',
+          '<div style="font-size:8px;color:#3d6b64;font-weight:700;margin-top:1px;">Pa/m</div>',
+        '</div>',
+      '</div>',
+      '<div style="background:' + statusBg + ';border:1.5px solid ' + statusBd + ';border-radius:7px;padding:8px 9px;margin-bottom:8px;">',
+        '<div style="font-size:9.5px;font-weight:800;color:' + statusColor + ';">' + statusIcon + ' 풍속 판정: ' + statusTxt + '</div>',
+        '<div style="font-size:9px;color:' + statusColor + ';margin-top:2px;">' + r.V.toFixed(2) + ' m/s · 권장 ' + vs.min + '~' + vs.max + ' m/s</div>',
+      '</div>',
+      '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:7px 9px;font-size:8.5px;">',
+        '<div style="font-weight:800;color:#475569;margin-bottom:3px;">산정 상세</div>',
+        detailHtml,
+        '<div style="color:#475569;margin-top:2px;">수력직경 Dh: ' + r.Dh.toFixed(0) + ' mm · 단면적: ' + (r.A * 10000).toFixed(1) + ' cm²</div>',
+        '<div style="color:#475569;">마찰손실: ' + r.Fr.toFixed(3) + ' Pa/m · 판두께: ' + r.thickness + ' mm</div>',
+      '</div>',
+      '<div style="font-size:7.5px;color:#94a3b8;text-align:center;margin-top:8px;line-height:1.7;">',
+        'MANMIN 공조덕트 규격산정 Ver2.0<br>기계설비기술기준 고시 제2021-851호',
+      '</div>',
+    '</div>'
+  ].join('');
+
+  // 공유 버튼 활성화
+  var shareBtn = document.getElementById('btn-mobile-share');
+  if(shareBtn) shareBtn.style.display = 'flex';
+  var hint = document.getElementById('mobile-action-hint');
+  if(hint) hint.textContent = '※ JPG 저장 후 공유하기 버튼을 눌러 공유하세요';
+}
+// ══════════════════════════════════════════
+//  모바일 JPG 저장 + 공유 시스템
+//  (냉온수 배관 웹 동일 패턴)
+// ══════════════════════════════════════════
+var _ductShareCanvas = null;  // 저장된 캔버스 (공유 재사용)
+
+function exportMobileJpg(){
+  if(!state.result){
+    showToast('⚠️ 먼저 단일 덕트 산정 탭에서 풍량을 입력하세요');
+    return;
+  }
+
+  // WARN-FIX: frame null 체크
+  var frame = document.getElementById('s24-frame');
+  if(!frame){ showToast('❌ 미리보기 프레임을 찾을 수 없습니다'); return; }
+
+  var hint  = document.getElementById('mobile-action-hint');
+  var jpgBtn = document.getElementById('btn-mobile-jpg-txt');
+
+  // 버튼 로딩 상태
+  if(jpgBtn) jpgBtn.textContent = '⏳ 생성 중...';
+  if(hint)   hint.textContent   = '⏳ JPG 이미지 생성 중...';
+  showToast('📸 Galaxy S24 Ultra JPG 생성 중...');
+
+  html2canvas(frame, {
+    scale: 3,
+    useCORS: true,
+    backgroundColor: '#0a0a0a',
+    logging: false
+  }).then(function(canvas){
+    _ductShareCanvas = canvas;  // 공유를 위해 저장
+
+    // 파일 다운로드
+    var a   = document.createElement('a');
+    var now = new Date();
+    var ts  = now.getFullYear()
+      + String(now.getMonth()+1).padStart(2,'0')
+      + String(now.getDate()).padStart(2,'0')
+      + '_' + String(now.getHours()).padStart(2,'0')
+      + String(now.getMinutes()).padStart(2,'0');
+    a.download = '덕트규격_S24Ultra_' + ts + '.jpg';
+    a.href = canvas.toDataURL('image/jpeg', 0.95);
+    a.click();
+
+    showToast('✅ JPG 저장 완료! 공유 버튼이 활성화됐습니다');
+
+    // 공유 버튼 활성화 (애니메이션)
+    var shareBtn = document.getElementById('btn-mobile-share');
+    if(shareBtn){
+      shareBtn.style.display = 'flex';
+      shareBtn.style.animation = 'share-appear .35s ease';
+    }
+    if(jpgBtn) jpgBtn.textContent = '🖼️ JPG 저장';
+    if(hint)   hint.textContent   = '✅ 저장 완료 — 공유하기 버튼으로 전송하세요';
+
+  }).catch(function(e){
+    showToast('❌ JPG 저장 실패: ' + e.message);
+    if(jpgBtn) jpgBtn.textContent = '🖼️ JPG 저장';
+    if(hint)   hint.textContent   = '❌ 생성 실패, 다시 시도하세요';
+  });
+}
+
+/* ── 공유 모달 열기 ── */
+function shareMobileJpg(){
+  if(!state.result){
+    showToast('⚠️ 먼저 덕트 규격을 산정하세요');
+    return;
+  }
+
+  var modal   = document.getElementById('share-modal');
+  var img     = document.getElementById('share-preview-img');
+  var loading = document.getElementById('share-loading');
+  if(!modal) return;
+
+  modal.style.display = 'flex';
+
+  // 이미 canvas가 있으면 즉시 미리보기 표시
+  if(_ductShareCanvas){
+    img.src = _ductShareCanvas.toDataURL('image/jpeg', 0.95);
+    img.style.display = 'block';
+    if(loading) loading.style.display = 'none';
+    return;
+  }
+
+  // canvas 없으면 새로 생성
+  img.style.display = 'none';
+  if(loading){
+    loading.style.display = 'block';
+    loading.innerHTML = '<div style="font-size:22px;margin-bottom:8px;">🖼️</div>이미지 생성 중...';
+  }
+  var frame = document.getElementById('s24-frame');
+  if(!frame){ if(loading) loading.textContent = '오류: 프레임을 찾을 수 없습니다'; return; }
+
+  html2canvas(frame, {scale:3, useCORS:true, backgroundColor:'#0a0a0a', logging:false})
+  .then(function(canvas){
+    _ductShareCanvas = canvas;
+    img.src = canvas.toDataURL('image/jpeg', 0.95);
+    img.style.display = 'block';
+    if(loading) loading.style.display = 'none';
+  })
+  .catch(function(){
+    if(loading) loading.textContent = '이미지 생성 실패. 다시 시도하세요.';
+  });
+}
+
+/* ── 공유 모달 닫기 ── */
+function closeDuctShareModal(){
+  var m = document.getElementById('share-modal');
+  if(m) m.style.display = 'none';
+}
+
+/* ── 💾 저장 ── */
+function ductShareDownload(){
+  if(!_ductShareCanvas){ showToast('이미지를 먼저 생성하세요'); return; }
+  var a   = document.createElement('a');
+  var now = new Date();
+  var ts  = now.getFullYear()
+    + String(now.getMonth()+1).padStart(2,'0')
+    + String(now.getDate()).padStart(2,'0');
+  a.download = '덕트규격_' + ts + '.jpg';
+  a.href = _ductShareCanvas.toDataURL('image/jpeg', 0.95);
+  a.click();
+  showToast('✅ 저장 완료');
+}
+
+/* ── 📤 앱으로 공유 (Web Share API) ── */
+function ductShareNative(){
+  if(!_ductShareCanvas){
+    showToast('⚠️ 이미지를 먼저 생성하세요');
+    return;
+  }
+  if(!navigator.share && !navigator.canShare){
+    showToast('이 브라우저에서는 앱 공유를 지원하지 않습니다');
+    return;
+  }
+  _ductShareCanvas.toBlob(function(blob){
+    var file = new File([blob], '덕트규격산정결과.jpg', {type:'image/jpeg'});
+    var shareData = {
+      title: '공조 덕트 규격 산정 결과',
+      text:  'MANMIN Ver2.0 덕트 규격 산정 결과 — ' + (document.getElementById('projName') ? document.getElementById('projName').value : ''),
+      files: [file]
+    };
+    // 파일 공유 지원 여부 체크
+    var canShareFiles = navigator.canShare && navigator.canShare({files:[file]});
+    if(!canShareFiles){
+      // 파일 공유 불가 → URL만 공유
+      navigator.share({
+        title: shareData.title,
+        text:  shareData.text,
+        url:   window.location.href
+      })
+      .then(function(){ showToast('✅ 공유 완료'); })
+      .catch(function(){});
+      return;
+    }
+    navigator.share(shareData)
+      .then(function(){ showToast('✅ 공유 완료'); })
+      .catch(function(){});
+  }, 'image/jpeg', 0.95);
+}
+
+/* ── 🔗 링크 복사 ── */
+function ductShareCopyLink(){
+  var url = window.location.href;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(url)
+      .then(function(){ showToast('🔗 링크 복사 완료'); })
+      .catch(function(){ _ductFallbackCopy(url); });
+  } else {
+    _ductFallbackCopy(url);
+  }
+}
+function _ductFallbackCopy(text){
+  var t = document.createElement('textarea');
+  t.value = text;
+  t.style.position = 'fixed';
+  t.style.opacity  = '0';
+  document.body.appendChild(t);
+  t.focus(); t.select();
+  try{ document.execCommand('copy'); showToast('🔗 링크 복사 완료'); }
+  catch(e){ showToast('복사 실패, 직접 주소창을 복사해주세요'); }
+  document.body.removeChild(t);
+}
+
+/* ── 💬 카카오 공유 ── */
+function ductShareKakao(){
+  var hint = document.getElementById('share-hint');
+  if(hint) hint.innerHTML =
+    '💬 카카오톡 → JPG를 저장한 후<br/>채팅방에서 첨부하여 공유하세요';
+  showToast('📥 JPG 저장 후 카카오톡으로 공유하세요');
+  ductShareDownload();  // 저장 먼저
+}
+</script>
+
+<!-- ══════════════════════════════════════════
+     PWA — 설치 배너 + 업데이트 배너 + 토스트
+══════════════════════════════════════════ -->
+
+<!-- 하단 설치 배너 -->
+<div class="pwa-banner" id="pwaBanner">
+  <div class="pwa-banner-icon">
+    <img src="icons/icon-192x192.png" alt="앱 아이콘"/>
+  </div>
+  <div class="pwa-banner-text">
+    <div class="pwa-banner-title">📲 홈 화면에 설치하기</div>
+    <div class="pwa-banner-sub">오프라인 지원 · 빠른 실행 · 홈 화면 바로가기</div>
+  </div>
+  <button class="pwa-banner-install" id="btnBannerInstall">지금 설치</button>
+  <button class="pwa-banner-close" onclick="pwaDismissBanner()" title="닫기">✕</button>
+</div>
+
+<!-- 업데이트 알림 배너 -->
+<div class="pwa-update-bar" id="pwaUpdateBar">
+  🔄 새 버전이 있습니다
+  <button onclick="pwaApplyUpdate()">업데이트 적용</button>
+  <button onclick="document.getElementById('pwaUpdateBar').classList.remove('show')"
+          style="background:rgba(255,255,255,.2);color:#fff;margin-left:4px;">✕</button>
+</div>
+
+<!-- 네트워크 상태 토스트 -->
+<div class="net-toast" id="netToast"></div>
+
+<!-- 설치 완료 토스트 -->
+<div class="pwa-done-toast" id="pwaDoneToast">✅ 앱이 홈 화면에 설치되었습니다!</div>
+
+<script>
+/* ════════════════════════════════════════════════════
+   PWA — Service Worker · 설치 프롬프트 · 업데이트
+════════════════════════════════════════════════════ */
+(function(){
+  var _prompt   = null;   // beforeinstallprompt 이벤트 보관
+  var _swReg    = null;   // SW 등록 객체
+  var _dismissed = false; // 배너 닫기 세션 플래그
+
+  /* ── Service Worker 등록 ── */
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('./sw.js', {scope:'./'})
+        .then(function(reg){
+          _swReg = reg;
+
+          // SW 업데이트 감지
+          reg.addEventListener('updatefound', function(){
+            var nw = reg.installing;
+            if(!nw) return;
+            nw.addEventListener('statechange', function(){
+              if(nw.state === 'installed' && navigator.serviceWorker.controller){
+                document.getElementById('pwaUpdateBar').classList.add('show');
+              }
+            });
+          });
+        })
+        .catch(function(e){ console.info('[SW]', e.message); });
+
+      // 새 SW 활성화 시 자동 리로드
+      navigator.serviceWorker.addEventListener('controllerchange', function(){
+        if(!window._pwaReloading){ window._pwaReloading = true; location.reload(); }
+      });
+    });
+  }
+
+  /* ── beforeinstallprompt 캡처 ── */
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    _prompt = e;
+
+    // 헤더 설치 버튼 표시
+    var btn = document.getElementById('btnPwaInstall');
+    if(btn) btn.classList.add('show');
+
+    // 하단 배너 — 세션당 1회, 2초 딜레이
+    if(!_dismissed && !sessionStorage.getItem('pwa-dismissed')){
+      setTimeout(function(){
+        document.getElementById('pwaBanner').classList.add('show');
+      }, 2000);
+    }
+  });
+
+  /* ── 배너 내 "지금 설치" 버튼 ── */
+  document.addEventListener('DOMContentLoaded', function(){
+    var bannerBtn = document.getElementById('btnBannerInstall');
+    if(bannerBtn){
+      bannerBtn.addEventListener('click', function(){
+        document.getElementById('pwaBanner').classList.remove('show');
+        _execInstall();
+      });
+    }
+  });
+
+  /* ── 헤더 버튼 / 외부 호출용 전역 함수 ── */
+  window.pwaTriggerInstall = function(){
+    document.getElementById('pwaBanner').classList.remove('show');
+    _execInstall();
+  };
+
+  function _execInstall(){
+    if(!_prompt){
+      // iOS Safari 안내
+      showToast('📱 Safari → 공유(□↑) → "홈 화면에 추가"를 선택하세요');
+      return;
+    }
+    _prompt.prompt();
+    _prompt.userChoice.then(function(result){
+      _prompt = null;
+      if(result.outcome === 'accepted'){
+        _hideInstallUi();
+        _showDoneToast();
+      }
+    });
+  }
+
+  /* ── 배너 닫기 ── */
+  window.pwaDismissBanner = function(){
+    _dismissed = true;
+    sessionStorage.setItem('pwa-dismissed', '1');
+    var bar = document.getElementById('pwaBanner');
+    bar.style.transition = 'transform .3s ease, opacity .25s ease';
+    bar.style.transform  = 'translateY(100%)';
+    bar.style.opacity    = '0';
+    setTimeout(function(){ bar.classList.remove('show'); bar.style = ''; }, 320);
+  };
+
+  /* ── 업데이트 적용 ── */
+  window.pwaApplyUpdate = function(){
+    document.getElementById('pwaUpdateBar').classList.remove('show');
+    if(_swReg && _swReg.waiting){
+      _swReg.waiting.postMessage({type:'SKIP_WAITING'});
+    }
+  };
+
+  /* ── 설치 완료 이벤트 (appinstalled) ── */
+  window.addEventListener('appinstalled', function(){
+    _prompt = null;
+    _hideInstallUi();
+    _showDoneToast();
+  });
+
+  /* ── standalone 모드이면 설치 UI 숨김 ── */
+  if(window.matchMedia('(display-mode:standalone)').matches || navigator.standalone){
+    _hideInstallUi();
+  }
+
+  function _hideInstallUi(){
+    var btn = document.getElementById('btnPwaInstall');
+    var bar = document.getElementById('pwaBanner');
+    if(btn) btn.classList.remove('show');
+    if(bar) bar.classList.remove('show');
+  }
+
+  function _showDoneToast(){
+    var t = document.getElementById('pwaDoneToast');
+    if(!t) return;
+    t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 3500);
+  }
+
+  /* ── 오프라인 / 온라인 감지 ── */
+  function _netToast(msg, type){
+    var t = document.getElementById('netToast');
+    if(!t) return;
+    t.textContent = msg;
+    t.className   = 'net-toast show' + (type ? ' ' + type : '');
+    setTimeout(function(){ t.classList.remove('show'); }, 3000);
+  }
+  window.addEventListener('offline', function(){ _netToast('📡 오프라인 — 캐시 데이터로 동작합니다', ''); });
+  window.addEventListener('online',  function(){ _netToast('✅ 온라인 연결됨', 'online'); });
+  if(!navigator.onLine){
+    setTimeout(function(){ _netToast('📡 오프라인 — 캐시 데이터로 동작합니다', ''); }, 1200);
+  }
+
+})();
+</script>
+</body>
+</html>
