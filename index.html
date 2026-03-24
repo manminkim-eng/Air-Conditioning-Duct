@@ -273,18 +273,20 @@ input[type="number"]{-moz-appearance:textfield;}
   .card{box-shadow:none!important;border:1px solid #ccc!important;}
   body{background:#fff!important;}
   .a4-preview-wrap{background:transparent!important;padding:0!important;}
-  .a4-page{box-shadow:none!important;margin:0!important;}
+  .a4-page{box-shadow:none!important;margin:0!important;
+    transform:none!important;width:210mm!important;}
 }
 
-/* ── A4 미리보기 래퍼 (중앙 배치) ── */
+/* ── A4 미리보기 래퍼 ── */
 .a4-preview-wrap{
-  background:#64748b;
-  padding:28px 16px 40px;
+  background:#4b5563;
+  padding:24px 16px 40px;
   display:flex;
-  justify-content:center;
+  justify-content:flex-start;   /* JS scale 후 left 기준 정렬 */
   align-items:flex-start;
   min-height:calc(100vh - 130px);
   border-radius:10px;
+  overflow:hidden;              /* scale 후 삐져나온 부분 숨김 */
 }
 
 /* ── ISO A4 규격 페이지 (210mm × 297mm) ── */
@@ -293,37 +295,13 @@ input[type="number"]{-moz-appearance:textfield;}
   width:210mm;
   min-height:297mm;
   padding:18mm 16mm 20mm;
-  box-shadow:0 4px 32px rgba(0,0,0,.35), 0 1px 6px rgba(0,0,0,.2);
+  box-shadow:0 4px 32px rgba(0,0,0,.4), 0 1px 6px rgba(0,0,0,.2);
   border-radius:2px;
   box-sizing:border-box;
   flex-shrink:0;
   position:relative;
-}
-
-/* 태블릿·모바일에서 A4 스케일 조정 */
-@media(max-width:900px){
-  .a4-preview-wrap{padding:20px 10px 32px;}
-  .a4-page{
-    width:100%;
-    max-width:210mm;
-    min-height:auto;
-    padding:14mm 12mm 16mm;
-    transform-origin:top center;
-  }
-}
-@media(max-width:600px){
-  .a4-preview-wrap{padding:14px 6px 24px;background:#475569;}
-  .a4-page{
-    transform:scale(0.72);
-    transform-origin:top center;
-    margin-bottom:calc(-297mm * 0.28 + 20px);
-  }
-}
-@media(max-width:400px){
-  .a4-page{
-    transform:scale(0.58);
-    margin-bottom:calc(-297mm * 0.42 + 16px);
-  }
+  /* transform은 JS(scaleA4Page)가 동적으로 주입 */
+  transform-origin:top left;   /* JS 계산 기준점 */
 }
 .a4-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2.5px solid #0f766e;padding-bottom:10px;margin-bottom:14px;}
 .a4-company{font-size:9px;color:#64748b;}
@@ -1138,7 +1116,7 @@ input[type="number"]{-moz-appearance:textfield;}
       <span style="font-size:10px;color:#64748b;font-weight:600;">실제 인쇄 비율 미리보기</span>
     </div>
     <div style="display:flex;gap:8px;">
-      <button class="btn-g" onclick="window.print()">🖨️ 인쇄</button>
+      <button class="btn-g" onclick="printA4()">🖨️ 인쇄</button>
       <button class="btn-b" onclick="exportA4Jpg()">📸 JPG 저장</button>
     </div>
   </div>
@@ -1684,7 +1662,7 @@ function switchTab(id, btn){
   document.querySelectorAll('.tb').forEach(function(b){ b.classList.remove('active'); });
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
-  if(id === 'tab-print') updateA4();
+  if(id === 'tab-print') { updateA4(); scaleA4Page(); }
   if(id === 'tab-mobile'){
     if(state.result) renderMobileResult(state.result);
     // 산정 결과 없으면 안내 텍스트 유지 (이미 초기화됨)
@@ -2515,17 +2493,104 @@ function exportJpg(){
   }).catch(function(e){ showToast('❌ JPG 저장 실패: ' + e.message); });
 }
 
+// ══════════════════════════════════════════
+//  A4 인쇄 (scale 제거 후 인쇄, 복구)
+// ══════════════════════════════════════════
+function printA4(){
+  var page = document.getElementById('a4Page');
+  if(!page){ window.print(); return; }
+  var prev = page.style.transform;
+  var prevMb = page.style.marginBottom;
+  page.style.transform    = 'none';
+  page.style.marginBottom = '0';
+  setTimeout(function(){
+    window.print();
+    setTimeout(function(){
+      page.style.transform    = prev;
+      page.style.marginBottom = prevMb;
+    }, 600);
+  }, 80);
+}
+
+// ══════════════════════════════════════════
+//  A4 동적 스케일 (모바일 뷰포트 정확 맞춤)
+// ══════════════════════════════════════════
+function scaleA4Page(){
+  var page = document.getElementById('a4Page');
+  var wrap = page && page.closest('.a4-preview-wrap');
+  if(!page || !wrap) return;
+
+  // 인쇄 중이면 transform 제거
+  if(window.matchMedia('print').matches){
+    page.style.transform = '';
+    page.style.marginBottom = '';
+    wrap.style.minHeight = '';
+    return;
+  }
+
+  // 래퍼 수평 패딩(좌우 각 16px 기본)
+  var wrapStyle   = getComputedStyle(wrap);
+  var wrapPadLR   = parseFloat(wrapStyle.paddingLeft) + parseFloat(wrapStyle.paddingRight);
+  var availWidth  = wrap.clientWidth - wrapPadLR;
+
+  // 페이지 자연 너비(210mm = ~794px @96dpi) — offsetWidth로 읽기
+  var pageNatW = page.offsetWidth;   // transform 적용 전 실제 픽셀 폭
+  if(pageNatW <= 0) pageNatW = 794;  // 폴백
+
+  var scale = availWidth / pageNatW;
+
+  if(scale >= 1){
+    // 충분한 공간 → 스케일 불필요
+    page.style.transform   = '';
+    page.style.marginBottom = '';
+    // 래퍼를 중앙 정렬로 복귀
+    wrap.style.justifyContent = 'center';
+    wrap.style.paddingLeft    = '';
+  } else {
+    // 스케일 필요 — transform-origin:top left 기준
+    page.style.transform      = 'scale(' + scale.toFixed(4) + ')';
+    // 스케일 후 실제 차지 높이 = 자연 높이 × scale
+    var pageNatH    = page.scrollHeight;
+    var scaledH     = pageNatH * scale;
+    // 레이아웃 공간 보정: 스케일로 줄어든 만큼 음수 마진 적용
+    var excess      = pageNatH - scaledH;
+    page.style.marginBottom = '-' + excess.toFixed(0) + 'px';
+    // 래퍼 좌측 정렬 유지 (transform-origin:top left 와 일치)
+    wrap.style.justifyContent = 'flex-start';
+    // 래퍼 최소 높이를 스케일된 높이 + 상하 패딩으로 재설정
+    var wrapPadTB = parseFloat(wrapStyle.paddingTop) + parseFloat(wrapStyle.paddingBottom);
+    wrap.style.minHeight = (scaledH + wrapPadTB + 20) + 'px';
+  }
+}
+
 function exportA4Jpg(){
   if(!state.result){ showToast('⚠️ 먼저 덕트 규격을 산정하세요'); return; }
   showToast('📸 JPG 생성 중...');
-  html2canvas(document.getElementById('a4Page'),{scale:3,useCORS:true,backgroundColor:'#ffffff'}).then(function(canvas){
-    var a = document.createElement('a');
-    a.download = '덕트규격산정서.jpg';
-    a.href = canvas.toDataURL('image/jpeg',0.95);
-    a.click();
-    showToast('✅ A4 JPG 저장 완료');
-  }).catch(function(e){
-    showToast('❌ A4 JPG 저장 실패: ' + e.message);
+
+  var page = document.getElementById('a4Page');
+  // 캡처 전 scale 임시 제거 (원본 사이즈로 캡처)
+  var prevTransform    = page.style.transform;
+  var prevMarginBottom = page.style.marginBottom;
+  page.style.transform    = 'none';
+  page.style.marginBottom = '0';
+
+  // 한 프레임 대기 후 캡처
+  requestAnimationFrame(function(){
+    html2canvas(page,{scale:3,useCORS:true,backgroundColor:'#ffffff'}).then(function(canvas){
+      // scale 복구
+      page.style.transform    = prevTransform;
+      page.style.marginBottom = prevMarginBottom;
+
+      var a = document.createElement('a');
+      a.download = '덕트규격산정서.jpg';
+      a.href = canvas.toDataURL('image/jpeg',0.95);
+      a.click();
+      showToast('✅ A4 JPG 저장 완료');
+    }).catch(function(e){
+      page.style.transform    = prevTransform;
+      page.style.marginBottom = prevMarginBottom;
+      showToast('❌ A4 JPG 저장 실패: ' + e.message);
+    });
   });
 }
 
@@ -2560,6 +2625,10 @@ document.addEventListener('DOMContentLoaded', function(){
   addMultiItem();
   updateStep(1);
   initFab();
+
+  // A4 미리보기 동적 스케일 — 리사이즈 시 재계산
+  window.addEventListener('resize', function(){ scaleA4Page(); });
+  scaleA4Page();
 });
 
 // ══════════════════════════════════════════
