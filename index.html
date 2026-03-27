@@ -512,6 +512,89 @@ input[type="number"]{-moz-appearance:textfield;}
   to{opacity:1;transform:scale(1);}
 }
 @media(max-width:600px){.btn-pwa .btn-txt{display:none;}.btn-pwa{padding:6px 8px;}}
+/* ══ PWA 설치 버튼 강화 (공조덕트 Edition) ══ */
+.btn-pwa{
+  background:linear-gradient(135deg,#0f766e,#f97316) !important;
+  color:#fff !important;border:none;padding:7px 13px;border-radius:8px;
+  font-size:11px;font-weight:800;cursor:pointer;
+  display:none;align-items:center;gap:5px;
+  font-family:inherit;transition:all .2s;white-space:nowrap;flex-shrink:0;
+  box-shadow:0 2px 12px rgba(15,118,110,.45);
+  animation:duct-pwa-glow 2.5s ease-in-out infinite;
+}
+.btn-pwa.show{display:flex;}
+.btn-pwa:hover{
+  transform:translateY(-1px) !important;
+  box-shadow:0 4px 18px rgba(15,118,110,.65) !important;
+  animation:none !important;
+}
+@keyframes duct-pwa-glow{
+  0%,100%{box-shadow:0 2px 12px rgba(15,118,110,.45);}
+  50%{box-shadow:0 2px 20px rgba(15,118,110,.75),0 0 10px rgba(249,115,22,.25);}
+}
+
+/* ══ 배너 강화 ══ */
+.pwa-banner{
+  background:linear-gradient(135deg,#0c1a2e 0%,#0f766e 70%,#115e59 100%) !important;
+  border-top:2px solid rgba(153,246,228,.4) !important;
+  border-radius:20px 20px 0 0 !important;
+  box-shadow:0 -6px 32px rgba(15,118,110,.55) !important;
+  gap:12px !important;
+}
+.pwa-banner-icon{
+  width:50px !important;height:50px !important;
+  border-radius:12px !important;
+  box-shadow:0 2px 12px rgba(15,118,110,.4) !important;
+}
+.pwa-banner-install{
+  background:linear-gradient(135deg,#f0fdfa,#ccfbf1) !important;
+  color:#0f766e !important;
+  padding:9px 16px !important;font-size:12px !important;font-weight:800 !important;
+  border-radius:10px !important;
+  box-shadow:0 2px 10px rgba(15,118,110,.3) !important;
+  transition:all .2s !important;
+}
+.pwa-banner-install:hover{
+  background:#fff !important;
+  transform:translateY(-1px) !important;
+  box-shadow:0 4px 16px rgba(15,118,110,.45) !important;
+}
+
+/* ══ iOS 안내 모달 ══ */
+#iosGuideModal{
+  position:fixed;bottom:0;left:0;right:0;z-index:9000;
+  background:linear-gradient(135deg,#0c1a2e,#0f766e);
+  border-top:2px solid rgba(153,246,228,.5);
+  border-radius:20px 20px 0 0;
+  padding:22px 20px calc(18px + env(safe-area-inset-bottom,0px));
+  display:none;
+  box-shadow:0 -8px 40px rgba(15,118,110,.55);
+  animation:ductSlideUp .35s cubic-bezier(.22,.61,.36,1);
+}
+#iosGuideModal.show{display:block;}
+@keyframes ductSlideUp{from{transform:translateY(110%);opacity:0}to{transform:translateY(0);opacity:1}}
+.ios-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.ios-hdr-title{font-size:15px;font-weight:800;color:#fff;}
+.ios-hdr-cls{background:rgba(255,255,255,.12);border:none;color:#fff;
+  width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;}
+.ios-step-row{display:flex;align-items:flex-start;gap:12px;
+  background:rgba(255,255,255,.07);border-radius:10px;
+  padding:12px;margin-bottom:8px;}
+.ios-step-num{min-width:26px;height:26px;border-radius:50%;
+  background:rgba(15,118,110,.4);border:1px solid rgba(153,246,228,.5);
+  color:#99f6e4;font-size:11px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ios-step-text{font-size:13px;color:#ccfbf1;line-height:1.5;}
+.ios-step-text strong{color:#fff;}
+.ios-footer-note{text-align:center;font-size:11px;color:#5eead4;margin-top:12px;}
+
+@media(max-width:480px){
+  .btn-pwa .btn-txt{display:none;}
+  .btn-pwa{padding:7px 10px;}
+  .pwa-banner-icon{width:42px !important;height:42px !important;}
+}
+
 
 /* ══ 업데이트 배너 ══ */
 .pwa-update-bar{
@@ -581,7 +664,7 @@ input[type="number"]{-moz-appearance:textfield;}
 <header class="app-header">
   <div class="header-inner">
     <div class="brand-logo">
-      <div class="brand-icon">💨</div>
+      <div class="brand-icon" style="background:none;padding:0;overflow:hidden;width:38px;height:38px;border-radius:9px;flex-shrink:0;box-shadow:0 2px 10px rgba(15,118,110,.4);"><img src="icons/brand-icon.jpg" alt="공조덕트 MANMIN" style="width:38px;height:38px;object-fit:cover;border-radius:9px;display:block;"/></div>
       <div class="brand-texts">
         <div class="brand-title">공조 덕트 규격 산정 시스템 [MANMIN-Ver2.0]</div>
         <div class="brand-sub">기계설비 기술기준 국토교통부 고시 제2021-851호 · 별표 9</div>
@@ -3114,14 +3197,36 @@ function ductShareKakao(){
 <!-- 하단 설치 배너 -->
 <div class="pwa-banner" id="pwaBanner">
   <div class="pwa-banner-icon">
-    <img src="icons/icon-192x192.png" alt="앱 아이콘"/>
+    <img src="icons/brand-icon.jpg" alt="공조덕트 MANMIN"/>
   </div>
   <div class="pwa-banner-text">
-    <div class="pwa-banner-title">📲 홈 화면에 설치하기</div>
-    <div class="pwa-banner-sub">오프라인 지원 · 빠른 실행 · 홈 화면 바로가기</div>
+    <div class="pwa-banner-title">📲 공조덕트 앱으로 설치!</div>
+    <div class="pwa-banner-sub">홈화면 추가 → 오프라인 덕트 산정 가능 · 빠른 실행</div>
   </div>
-  <button class="pwa-banner-install" id="btnBannerInstall">지금 설치</button>
-  <button class="pwa-banner-close" onclick="pwaDismissBanner()" title="닫기">✕</button>
+  <button class="pwa-banner-install" id="btnBannerInstall">설치하기</button>
+  <button class="pwa-banner-close" onclick="pwaDismissBanner()" title="닫기" style="white-space:nowrap;">나중에</button>
+</div>
+
+
+<!-- ══ iOS 홈화면 추가 안내 모달 ══ -->
+<div id="iosGuideModal">
+  <div class="ios-hdr">
+    <div class="ios-hdr-title">📱 홈 화면에 추가하기 (iOS)</div>
+    <button class="ios-hdr-cls" onclick="document.getElementById('iosGuideModal').classList.remove('show')">✕</button>
+  </div>
+  <div class="ios-step-row">
+    <div class="ios-step-num">1</div>
+    <div class="ios-step-text">Safari 하단 <strong>공유 버튼</strong> (□↑) 을 탭하세요</div>
+  </div>
+  <div class="ios-step-row">
+    <div class="ios-step-num">2</div>
+    <div class="ios-step-text">스크롤해서 <strong>홈 화면에 추가</strong>를 탭하세요</div>
+  </div>
+  <div class="ios-step-row">
+    <div class="ios-step-num">3</div>
+    <div class="ios-step-text">오른쪽 상단 <strong>추가</strong>를 탭하면 완료!</div>
+  </div>
+  <div class="ios-footer-note">공조덕트를 홈 화면에서 오프라인으로도 사용 가능합니다 ✓</div>
 </div>
 
 <!-- 업데이트 알림 배너 -->
@@ -3208,10 +3313,34 @@ function ductShareKakao(){
     _execInstall();
   };
 
+  /* iOS 감지 */
+  var _isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var _isSA  = window.matchMedia('(display-mode:standalone)').matches || !!navigator.standalone;
+
+  /* iOS: 헤더 버튼 자동 표시 + 2초 후 모달 */
+  document.addEventListener('DOMContentLoaded', function(){
+    if(_isIOS && !_isSA){
+      var hBtn = document.getElementById('btnPwaInstall');
+      if(hBtn) hBtn.classList.add('show');
+      if(!sessionStorage.getItem('pwa-dismissed')){
+        setTimeout(function(){
+          var m = document.getElementById('iosGuideModal');
+          if(m) m.classList.add('show');
+        }, 2000);
+      }
+    }
+    if(_isSA) _hideInstallUi();
+  });
+
   function _execInstall(){
+    /* iOS → 안내 모달 표시 */
+    if(_isIOS && !_isSA){
+      var m = document.getElementById('iosGuideModal');
+      if(m) m.classList.add('show');
+      return;
+    }
     if(!_prompt){
-      // iOS Safari 안내
-      showToast('📱 Safari → 공유(□↑) → "홈 화면에 추가"를 선택하세요');
+      showToast('📱 브라우저 메뉴 → 앱 설치 / 홈 화면에 추가');
       return;
     }
     _prompt.prompt();

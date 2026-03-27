@@ -1,51 +1,27 @@
 {
-  "name": "공조 덕트 규격 산정 시스템",
-  "short_name": "덕트산정",
-  "description": "공조 풍량에 따른 덕트 규격 자동 산정 — 기계설비 기술기준 국토교통부 고시 제2021-851호",
+  "name": "공조 덕트 규격 산정 시스템 [MANMIN-Ver2.0]",
+  "short_name": "공조덕트",
+  "description": "공조 풍량에 따른 덕트 규격 자동 산정 — 기계설비 기술기준 국토교통부 고시 제2021-851호 | ENGINEER KIM MANMIN",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "orientation": "any",
   "background_color": "#f0fdfa",
   "theme_color": "#0f766e",
+  "orientation": "portrait-primary",
   "lang": "ko",
-  "categories": ["engineering", "productivity", "utilities"],
+  "categories": ["utilities", "productivity"],
   "icons": [
-    { "src": "icons/icon-72x72.png",            "sizes": "72x72",   "type": "image/png" },
-    { "src": "icons/icon-96x96.png",            "sizes": "96x96",   "type": "image/png" },
-    { "src": "icons/icon-128x128.png",          "sizes": "128x128", "type": "image/png" },
-    { "src": "icons/icon-144x144.png",          "sizes": "144x144", "type": "image/png" },
-    { "src": "icons/icon-152x152.png",          "sizes": "152x152", "type": "image/png" },
-    { "src": "icons/icon-192x192.png",          "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-256x256.png",          "sizes": "256x256", "type": "image/png" },
-    { "src": "icons/icon-384x384.png",          "sizes": "384x384", "type": "image/png" },
-    { "src": "icons/icon-512x512.png",          "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-192x192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "icons/icon-512x512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
-  ],
-  "shortcuts": [
-    {
-      "name": "단일 덕트 산정",
-      "short_name": "단일산정",
-      "description": "단일 구간 덕트 규격 바로 산정",
-      "url": "./index.html#tab-single",
-      "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "다중 덕트 산정",
-      "short_name": "다중산정",
-      "description": "여러 구간 일괄 산정",
-      "url": "./index.html#tab-multi",
-      "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
-    }
+    { "src": "./icons/icon-72x72.png",   "sizes": "72x72",   "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-96x96.png",   "sizes": "96x96",   "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-128x128.png", "sizes": "128x128", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-144x144.png", "sizes": "144x144", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-152x152.png", "sizes": "152x152", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable any" },
+    { "src": "./icons/icon-256x256.png", "sizes": "256x256", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-384x384.png", "sizes": "384x384", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable any" }
   ],
   "screenshots": [
-    {
-      "src": "icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "공조 덕트 규격 산정 메인 화면"
-    }
+    { "src": "./icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "form_factor": "narrow" }
   ]
 }
