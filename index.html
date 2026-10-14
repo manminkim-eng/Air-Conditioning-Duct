@@ -95,6 +95,7 @@ input[type="number"]{-moz-appearance:textfield;}
   white-space:nowrap;flex-shrink:0;-webkit-tap-highlight-color:transparent;}
 .tb:hover{color:#fff;background:rgba(255,255,255,.09);}
 .tb.active{color:#fff;background:#0e7490;border-bottom-color:#7dd3fc;}
+.tb.tb-manual{margin-left:auto;text-decoration:none;white-space:nowrap;}   /* v5.1.1 — 사용자 매뉴얼(탭 막대 오른쪽 끝) · 좁은 화면은 한 줄 · 좌우 밀기 */
 /* v5.0-HDR — 요약 스트립 (헤더 3층) */
 .sum-bar-wrap{background:#0f172a;padding:10px 0;}
 .sum-bar{max-width:1300px;margin:0 auto;padding:0 24px;display:flex;flex-wrap:wrap;gap:14px;}
@@ -724,6 +725,7 @@ input[type="number"]{-moz-appearance:textfield;}
     <button class="tb" onclick="switchTab('tab-sp',this)">📉 정압 계산</button>
     <button class="tb" onclick="switchTab('tab-guide',this)">📐 설계 기준표</button>
     <button class="tb" onclick="switchTab('tab-print',this)">📄 A4 미리보기</button>
+    <a class="tb tb-manual" href="./manual/" target="_blank" rel="noopener" title="사용자 매뉴얼 (새 창)" onclick="if(navigator.onLine===false){event.preventDefault();showToast('매뉴얼은 인터넷 연결 시 열립니다');}">📘 매뉴얼</a>
   </div>
 </nav>
 </div><!-- /.hdr-shell -->
@@ -1289,12 +1291,14 @@ input[type="number"]{-moz-appearance:textfield;}
       <tr><td class="k">설계 방법</td><td>등마찰손실법 (Constant Friction Method) · 마찰손실 Darcy-Weisbach ΔP = λ(L/Dh)(ρV²/2) · 국부저항 ΔP = ζ(ρV²/2)</td></tr>
       <tr><td class="k">공기 밀도</td><td>1.2 kg/m³ (20°C, 1atm 기준)</td></tr>
       <tr><td class="k">마찰계수</td><td id="a4-lam-std">아연도금강판 λ=0.02 / 알루미늄 λ=0.018 / 스테인리스 λ=0.015 / 플렉시블 λ=0.05</td></tr>
+      <tr><td class="k">판두께 · 풍속 상한</td><td>별표 9 표 2(사각) · 표 4(스파이럴) — 아연도금강판 기준 · 표 1 저압 15 m/s · 고압 20 m/s 이하 · 장단비 4:1 이내(초과 시 보강조치)</td></tr>
+      <tr><td class="k">설계·시공기준</td><td>KDS 31 25 30 덕트설비 · KDS 31 25 20 환기설비 · KCS 31 25 20 (별표 9 1.3)</td></tr>
       <tr><td class="k">국부저항계수</td><td>ASHRAE Duct Fitting Database · ADC 플렉시블 덕트 성능기준 대표값(참고) — 제조사 시험값 제출 시 대체</td></tr>
     </table>
     </div>
 
     <div class="a4-footer">
-      <span>공조 덕트 규격 산정 시스템 [MANMIN-Ver5.1]</span>
+      <span>공조 덕트 규격 산정 시스템 [MANMIN-Ver5.1.1]</span>
       <span>기계설비 기술기준 [별표 9] · Darcy-Weisbach 등마찰손실법</span>
       <span>작성일: <span id="a4-foot-date">—</span></span>
     </div>
@@ -1745,7 +1749,7 @@ function fmtFlow(cmh){
 // ══════════════════════════════════════════
 function switchTab(id, btn){
   document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
-  document.querySelectorAll('.tb').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.tb:not(.tb-manual)').forEach(function(b){ b.classList.remove('active'); });
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
   if(id === 'tab-sp'){
@@ -3376,7 +3380,7 @@ window.exportA4Jpg = function(){
     var now = new Date();
     var ts = now.getFullYear()+''+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')
       +'_'+String(now.getHours()).padStart(2,'0')+String(now.getMinutes()).padStart(2,'0');
-    var base = '공조덕트_규격산정_MANMIN-Ver5.1_'+ts;
+    var base = '공조덕트_규격산정_MANMIN-Ver5.1.1_'+ts;
     if(!segs || !segs.length){
       mmDownload(canvas.toDataURL('image/jpeg',0.95), base+'.jpg');
       showToast('✅ JPG 저장 완료!'); return;
