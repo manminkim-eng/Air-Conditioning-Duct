@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
-<title>공조 덕트 규격 산정 시스템 · MANMIN Ver-5.1</title>
+<title>공조 덕트 규격 산정 시스템 · MANMIN Ver-5.1.1</title>
 <meta name="description" content="공조 풍량에 따른 덕트 규격 자동 산정 — 기계설비 기술기준 (국토교통부 고시 제2021-851호)"/>
 <meta name="theme-color" content="#0f766e"/>
 
@@ -704,13 +704,13 @@ input[type="number"]{-moz-appearance:textfield;}
         <h1 class="hdr-h1">공조 덕트 규격 산정 시스템</h1>
         <div class="hdr-sub">
           Darcy-Weisbach 등마찰손실법 · 사각 · 원형 · 편평 덕트 규격 · 풍속 · 판두께 자동 산정
-          <span class="hdr-manmin">MANMIN · Ver-5.1</span>
+          <span class="hdr-manmin">MANMIN · Ver-5.1.1</span>
         </div>
       </div>
     </div>
     <div class="hdr-right-wrap">
       <!-- v5.0-HDR — 마스터 4줄(13/11/11/10) · LawMCP 2026-09-03 확인(공포 2026-07-08) -->
-      <div class="hdr-right"><strong>기계설비 기술기준</strong><br/>국토교통부 고시 제2021-851호<br/>제2026-360호 일부개정<br/><em>[시행 2026. 7. 8.]</em></div>
+      <div class="hdr-right"><strong>기계설비 기술기준</strong><br/>국토교통부 고시 제2021-851호<br/>제2026-360호 타법개정<br/><em>[시행 2026. 7. 8.]</em></div>
       <!-- v5.0 : 헤더 버튼 없음. 설치는 PWA 배너가, 초기화는 우측 하단 FAB 이 담당한다(§3-1 · §18-1). -->
     </div>
   </div>
@@ -886,15 +886,22 @@ input[type="number"]{-moz-appearance:textfield;}
             <div class="fgrp">
               <label class="flbl">종횡비 제한 (사각)</label>
               <select class="fselect" id="arLimit" onchange="calcDuct()">
-                <option value="4">최대 4:1 (권장)</option>
-                <option value="6">최대 6:1</option>
-                <option value="8">최대 8:1 (한계)</option>
+                <option value="4">4:1 이내 (별표 9)</option>
+                <option value="6">6:1 (보강조치 전제)</option>
+                <option value="8">8:1 (보강조치 전제)</option>
+              </select>
+            </div>
+            <div class="fgrp">
+              <label class="flbl">덕트 압력 구분 (별표 9 표 1)</label>
+              <select class="fselect" id="pressClass" onchange="calcDuct()">
+                <option value="low" selected>저압 (15 m/s 이하)</option>
+                <option value="high">고압 (20 m/s 이하)</option>
               </select>
             </div>
           </div>
 
           <div class="nb org" style="margin-top:4px;">
-            <div class="nb-tit">⚡ 권장 풍속 기준 (기계설비 기술기준)</div>
+            <div class="nb-tit">⚡ 설계 권장 풍속 (실무 권장값 · 법정 상한은 별표 9 표 1)</div>
             <div class="nb-txt" id="velStdText">급기 주덕트: 5~8 m/s / 급기 분기: 3~6 m/s</div>
           </div>
         </div>
@@ -1126,7 +1133,7 @@ input[type="number"]{-moz-appearance:textfield;}
 
       <!-- 풍속 기준 -->
       <div id="g-vel" class="gm-panel active">
-        <div class="nb grn"><div class="nb-tit">✅ 권장 풍속 (기계설비 기술기준 기반)</div><div class="nb-txt">덕트 내 과도한 풍속은 소음과 압력손실을 증가시킵니다.</div></div>
+        <div class="nb grn"><div class="nb-tit">✅ 설계 권장 풍속 (실무 권장값 · 별표 9 미규정)</div><div class="nb-txt">덕트 내 과도한 풍속은 소음과 압력손실을 증가시킵니다.<br/>법정 상한 : 별표 9 표 1 — 저압덕트 15 m/s 이하 · 고압덕트 20 m/s 이하.<br/>루버 면풍속 : 외기 도입 2 m/s 이하 · 배기 2.5 m/s 이하 (별표 9 2.1(10)).</div></div>
         <div class="twrap">
           <table class="rtbl">
             <thead><tr>
@@ -1179,7 +1186,7 @@ input[type="number"]{-moz-appearance:textfield;}
 
       <!-- 사각덕트 규격 -->
       <div id="g-rect" class="gm-panel">
-        <div class="nb blue"><div class="nb-tit">📐 사각덕트 표준 규격 (KS B 6141)</div><div class="nb-txt">종횡비(AR)는 1:4 이하를 권장합니다. 1:8을 초과하면 안됩니다.</div></div>
+        <div class="nb blue"><div class="nb-tit">📐 사각덕트 표준 규격 (실무 표준치수)</div><div class="nb-txt">장단비(AR)는 4:1 이내로 하며, 초과하는 경우 보강조치를 합니다 (별표 9 2.1(1)).</div></div>
         <div class="twrap">
           <table class="rtbl">
             <thead><tr><th>폭 W (mm)</th><th>높이 H (mm)</th><th>단면적 (m²)</th><th>수력직경 Dh (mm)</th><th>종횡비</th></tr></thead>
@@ -1201,22 +1208,25 @@ input[type="number"]{-moz-appearance:textfield;}
 
       <!-- 재질·판두께 -->
       <div id="g-material" class="gm-panel">
-        <div class="nb grn"><div class="nb-tit">🔩 덕트 재질별 판두께 기준 (기계설비 기술기준 별표 9)</div></div>
+        <div class="nb grn"><div class="nb-tit">🔩 사각덕트 판두께 (기계설비 기술기준 별표 9 표 2 · 아연도금강판)</div></div>
         <div class="twrap">
           <table class="rtbl">
-            <thead><tr><th>장변 길이 (mm)</th><th>아연도금강판 (mm)</th><th>스테인리스 (mm)</th><th>알루미늄 (mm)</th></tr></thead>
+            <thead><tr><th>구분</th><th>장변 길이 (mm)</th><th>판두께 (mm)</th></tr></thead>
             <tbody>
-              <tr><td>450 이하</td><td>0.5</td><td>0.5</td><td>0.6</td></tr>
-              <tr><td>451~750</td><td>0.6</td><td>0.6</td><td>0.8</td></tr>
-              <tr><td>751~1000</td><td>0.8</td><td>0.8</td><td>1.0</td></tr>
-              <tr><td>1001~1500</td><td>1.0</td><td>1.0</td><td>1.2</td></tr>
-              <tr><td>1501~2200</td><td>1.2</td><td>1.2</td><td>1.5</td></tr>
-              <tr><td>2200 초과</td><td>1.5</td><td>1.5</td><td>1.8</td></tr>
+              <tr><td rowspan="5">저압덕트</td><td>450 이하</td><td>0.5</td></tr>
+              <tr><td>450 초과 ~ 750 이하</td><td>0.6</td></tr>
+              <tr><td>750 초과 ~ 1,500 이하</td><td>0.8</td></tr>
+              <tr><td>1,500 초과 ~ 2,250 이하</td><td>1.0</td></tr>
+              <tr><td>2,250 초과</td><td>1.2</td></tr>
+              <tr><td rowspan="3">고압덕트</td><td>450 이하</td><td>0.8</td></tr>
+              <tr><td>450 초과 ~ 1,200 이하</td><td>1.0</td></tr>
+              <tr><td>1,200 초과</td><td>1.2</td></tr>
             </tbody>
           </table>
         </div>
+        <div class="nb sky" style="margin-top:8px;"><div class="nb-tit">⭕ 스파이럴 덕트 (별표 9 표 4)</div><div class="nb-txt">저압 : 직경 450 이하 0.5 · 750 이하 0.6 · 1,000 이하 0.8 · 1,000 초과 1.0 mm<br/>고압 : 200 이하 0.5 · 600 이하 0.6 · 800 이하 0.8 · 1,000 이하 1.0 · 1,000 초과 1.2 mm<br/>※ 별표 9 표 2·4는 아연도금강판 기준입니다. 알루미늄·플렉시블은 별표 9에 규정이 없어 같은 값을 <b>참고</b>로 표시합니다.</div></div>
         <div class="ref-box" style="margin-top:12px;">
-          <div class="ref-tit">📌 보강 기준</div>
+          <div class="ref-tit">📌 보강 기준 (참고 · 실무)</div>
           <div class="ref-item">장변 750mm 초과: 2.4m 간격 이내 보강재 설치</div>
           <div class="ref-item">장변 1,500mm 초과: 1.8m 간격 이내 보강재 설치</div>
           <div class="ref-item">플랜지 접합: 1,200mm 이하 간격으로 설치</div>
@@ -1242,7 +1252,7 @@ input[type="number"]{-moz-appearance:textfield;}
     <div class="a4-tit">공조 덕트 규격 산정서</div>
     <div class="a4-head2">
       <div class="a4-proj">공사명 : <span id="a4-projName">—</span></div>
-      <div class="a4-meta">근거 : 기계설비 기술기준 (국토교통부 고시 제2021-851호) 별표 9<br/>작성일 : <span id="a4-projDate">—</span><br/>작성자 : <span id="a4-projAuthor">—</span></div>
+      <div class="a4-meta">근거 : 기계설비 기술기준 (국토교통부 고시 제2021-851호 · 제2026-360호 타법개정) 별표 9<br/>작성일 : <span id="a4-projDate">—</span><br/>작성자 : <span id="a4-projAuthor">—</span></div>
     </div>
 
     <!-- 산정결과 -->
@@ -1275,7 +1285,7 @@ input[type="number"]{-moz-appearance:textfield;}
     <div data-secwrap>
     <div class="a4-sub" data-sec="적용 기준">5. 적용 기준</div>
     <table class="a4-meta-table">
-      <tr><td class="k">근거 기준</td><td>기계설비 기술기준 (국토교통부 고시 제2021-851호 · 제2026-360호 일부개정, 2026. 7. 8. 시행) 별표 9</td></tr>
+      <tr><td class="k">근거 기준</td><td>기계설비 기술기준 (국토교통부 고시 제2021-851호 · 제2026-360호 타법개정, 2026. 7. 8. 시행) 별표 9</td></tr>
       <tr><td class="k">설계 방법</td><td>등마찰손실법 (Constant Friction Method) · 마찰손실 Darcy-Weisbach ΔP = λ(L/Dh)(ρV²/2) · 국부저항 ΔP = ζ(ρV²/2)</td></tr>
       <tr><td class="k">공기 밀도</td><td>1.2 kg/m³ (20°C, 1atm 기준)</td></tr>
       <tr><td class="k">마찰계수</td><td id="a4-lam-std">아연도금강판 λ=0.02 / 알루미늄 λ=0.018 / 스테인리스 λ=0.015 / 플렉시블 λ=0.05</td></tr>
@@ -1325,7 +1335,7 @@ input[type="number"]{-moz-appearance:textfield;}
       <div class="master-modal-head">
         <div>
           <div class="master-modal-tit">💨 공조 덕트 규격 산정 — 설계기준 종합 안내</div>
-          <div class="master-modal-sub">기계설비 기술기준 국토교통부 고시 제2021-851호 [별표 9] · MANMIN Ver-5.1</div>
+          <div class="master-modal-sub">기계설비 기술기준 국토교통부 고시 제2021-851호 · 제2026-360호 [별표 9] · MANMIN Ver-5.1.1</div>
         </div>
         <button class="master-modal-cls" onclick="closeMasterModal()">✕</button>
       </div>
@@ -1347,9 +1357,9 @@ input[type="number"]{-moz-appearance:textfield;}
 
         <!-- 시스템 소개 배너 (냉온수 배관 웹과 동일 스타일) -->
         <div style="background:linear-gradient(135deg,#0c1a2e,#0f766e);border-radius:10px;padding:14px 16px;margin-bottom:12px;color:#fff;">
-          <div style="font-size:13px;font-weight:900;margin-bottom:4px;letter-spacing:.02em;">💨 공조 덕트 규격 산정 시스템 Ver-5.1</div>
+          <div style="font-size:13px;font-weight:900;margin-bottom:4px;letter-spacing:.02em;">💨 공조 덕트 규격 산정 시스템 Ver-5.1.1</div>
           <div style="font-size:10px;opacity:.85;line-height:1.7;">
-            기계설비 기술기준 국토교통부 고시 제2021-851호 [별표 9]<br>
+            기계설비 기술기준 국토교통부 고시 제2021-851호 · 제2026-360호 [별표 9]<br>
             Darcy-Weisbach 등마찰손실법 · 사각·원형·편평 전 형상 지원
           </div>
           <div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap;">
@@ -1476,7 +1486,9 @@ input[type="number"]{-moz-appearance:textfield;}
           <div style="font-size:10px;font-weight:800;color:#475569;margin-bottom:5px;">📌 적용 기술기준</div>
           <div style="font-size:9.5px;color:#64748b;line-height:1.8;">
             • 기계설비 기술기준 [별표 9] 덕트설비의 설계 및 시공 기준<br>
-            &nbsp;&nbsp;(국토교통부 고시 제2021-851호 · 제2026-360호 일부개정, 2026. 7. 8. 시행)<br>
+            &nbsp;&nbsp;(국토교통부 고시 제2021-851호 · 제2026-360호 타법개정, 2026. 7. 8. 시행)<br>
+            • 설계·시공기준 (별표 9 1.3) : KDS 31 25 30 덕트설비 · KDS 31 25 20 환기설비 · KCS 31 25 20<br>
+            • 판두께 : 별표 9 표 2(사각)·표 4(스파이럴) · 풍속 상한 : 표 1 (저압 15 m/s · 고압 20 m/s 이하)<br>
             • Darcy-Weisbach : ΔP/L = λ × ρV² / (2·Dh)<br>
             • 연속방정식 : Q = V × A<br>
             • 수력직경 : Dh = 2WH/(W+H) [사각] · D [원형]<br>
@@ -1493,7 +1505,7 @@ input[type="number"]{-moz-appearance:textfield;}
             <div class="fstep"><div class="fstep-num">1</div><div class="fstep-txt">설계 풍량 Q 결정 (m³/h → m³/s 변환)</div></div>
             <div class="fstep"><div class="fstep-num">2</div><div class="fstep-txt">마찰손실 기준 ΔP/L 선정 (통상 0.8~1.5 Pa/m)</div></div>
             <div class="fstep"><div class="fstep-num">3</div><div class="fstep-txt">Darcy-Weisbach로 수력직경 Dh 역산</div></div>
-            <div class="fstep"><div class="fstep-num">4</div><div class="fstep-txt">Dh에서 W×H 또는 Φ 표준 치수 채택 (KS B 6141)</div></div>
+            <div class="fstep"><div class="fstep-num">4</div><div class="fstep-txt">Dh에서 W×H 또는 Φ 표준 치수 채택 (Fr ≤ 목표 중 최소 단면)</div></div>
             <div class="fstep"><div class="fstep-num">5</div><div class="fstep-txt">실제 풍속 V 검토 — 설치 장소별 권장 범위 확인</div></div>
           </div>
         </div>
@@ -1539,7 +1551,7 @@ input[type="number"]{-moz-appearance:textfield;}
 
       <!-- ══ 탭2: 풍속 기준 ══ -->
       <div class="gm-panel" id="mp-2" style="display:none;">
-        <div class="nb grn"><div class="nb-tit">✅ 권장 풍속 기준 (기계설비 기술기준 별표 9)</div><div class="nb-txt">덕트 내 과도한 풍속은 소음, 압력손실, 구조 불안정을 유발합니다.</div></div>
+        <div class="nb grn"><div class="nb-tit">✅ 설계 권장 풍속 (실무 권장값 · 별표 9 미규정)</div><div class="nb-txt">덕트 내 과도한 풍속은 소음, 압력손실, 구조 불안정을 유발합니다.<br/>법정 상한 : 별표 9 표 1 — 저압덕트 15 m/s 이하 · 고압덕트 20 m/s 이하.<br/>루버 면풍속 : 외기 도입 2 m/s 이하 · 배기 2.5 m/s 이하 (별표 9 2.1(10)).</div></div>
         <div class="twrap" style="margin-top:10px;">
           <table class="rtbl">
             <thead><tr><th>구분</th><th>저속 (m/s)</th><th>권장 (m/s)</th><th>최대 (m/s)</th><th>소음 기준</th><th>비고</th></tr></thead>
@@ -1594,7 +1606,7 @@ input[type="number"]{-moz-appearance:textfield;}
           <button class="seg-btn" id="rs-th" onclick="switchRuleTab('th',this)" style="flex:1;min-width:100px;">🔩 판두께</button>
         </div>
         <div id="rule-sq">
-          <div class="nb blue"><div class="nb-tit">📐 KS B 6141 표준 사각덕트 규격 — 종횡비 4:1 이하 권장</div></div>
+          <div class="nb blue"><div class="nb-tit">📐 표준 사각덕트 규격 — 장단비 4:1 이내 (별표 9 2.1(1))</div></div>
           <div class="twrap" style="margin-top:8px;">
             <table class="rtbl"><thead><tr><th>W×H (mm)</th><th>단면적 (m²)</th><th>Dh (mm)</th><th>AR</th></tr></thead>
             <tbody id="modal-rect-tbody"></tbody></table>
@@ -1608,22 +1620,25 @@ input[type="number"]{-moz-appearance:textfield;}
           </div>
         </div>
         <div id="rule-th" style="display:none;">
-          <div class="nb grn"><div class="nb-tit">🔩 덕트 재질별 판두께 기준 (기계설비 기술기준 별표 9)</div></div>
+          <div class="nb grn"><div class="nb-tit">🔩 사각덕트 판두께 (기계설비 기술기준 별표 9 표 2 · 아연도금강판)</div></div>
           <div class="twrap" style="margin-top:8px;">
             <table class="rtbl">
-              <thead><tr><th>장변 (mm)</th><th>아연도금강판</th><th>스테인리스</th><th>알루미늄</th></tr></thead>
-              <tbody>
-                <tr><td>450 이하</td><td>0.5 mm</td><td>0.5 mm</td><td>0.6 mm</td></tr>
-                <tr><td>451~750</td><td>0.6 mm</td><td>0.6 mm</td><td>0.8 mm</td></tr>
-                <tr><td>751~1,000</td><td>0.8 mm</td><td>0.8 mm</td><td>1.0 mm</td></tr>
-                <tr><td>1,001~1,500</td><td>1.0 mm</td><td>1.0 mm</td><td>1.2 mm</td></tr>
-                <tr><td>1,501~2,200</td><td>1.2 mm</td><td>1.2 mm</td><td>1.5 mm</td></tr>
-                <tr><td>2,200 초과</td><td>1.5 mm</td><td>1.5 mm</td><td>1.8 mm</td></tr>
-              </tbody>
+              <thead><tr><th>구분</th><th>장변 길이 (mm)</th><th>판두께 (mm)</th></tr></thead>
+            <tbody>
+              <tr><td rowspan="5">저압덕트</td><td>450 이하</td><td>0.5</td></tr>
+              <tr><td>450 초과 ~ 750 이하</td><td>0.6</td></tr>
+              <tr><td>750 초과 ~ 1,500 이하</td><td>0.8</td></tr>
+              <tr><td>1,500 초과 ~ 2,250 이하</td><td>1.0</td></tr>
+              <tr><td>2,250 초과</td><td>1.2</td></tr>
+              <tr><td rowspan="3">고압덕트</td><td>450 이하</td><td>0.8</td></tr>
+              <tr><td>450 초과 ~ 1,200 이하</td><td>1.0</td></tr>
+              <tr><td>1,200 초과</td><td>1.2</td></tr>
+            </tbody>
             </table>
           </div>
+          <div class="nb sky" style="margin-top:8px;"><div class="nb-tit">⭕ 스파이럴 덕트 (별표 9 표 4)</div><div class="nb-txt">저압 : 직경 450 이하 0.5 · 750 이하 0.6 · 1,000 이하 0.8 · 1,000 초과 1.0 mm<br/>고압 : 200 이하 0.5 · 600 이하 0.6 · 800 이하 0.8 · 1,000 이하 1.0 · 1,000 초과 1.2 mm<br/>※ 별표 9 표 2·4는 아연도금강판 기준입니다. 알루미늄·플렉시블은 별표 9에 규정이 없어 같은 값을 <b>참고</b>로 표시합니다.</div></div>
           <div class="ref-box" style="margin-top:10px;">
-            <div class="ref-tit">📌 보강 및 접합 기준</div>
+            <div class="ref-tit">📌 보강 및 접합 기준 (참고 · 실무)</div>
             <div class="ref-item">장변 750mm 초과 : 간격 2.4m 이내 보강재 설치</div>
             <div class="ref-item">장변 1,500mm 초과 : 간격 1.8m 이내 보강재 설치</div>
             <div class="ref-item">플랜지 접합 : 간격 1,200mm 이하</div>
@@ -1648,6 +1663,7 @@ var state = {
   lamMode: 'fixed',    // v5.1 §2 fixed | cole
   frictionBase: 1.0,
   arLimit: 4,
+  pressClass: 'low', // 별표 9 표 1
   material: 'galv',
   result: null,
   multiItems: [],
@@ -1665,7 +1681,7 @@ var VEL_STD = {
   outdoor_air:    {min:3, max:5,  label:'외기덕트: 3~5 m/s'}
 };
 
-// 표준 사각덕트 치수 (mm) - KS B 6141
+// 표준 사각덕트 치수 (mm) - 실무 표준치수
 var RECT_SIZES = [100,125,150,200,250,300,350,400,450,500,600,700,800,900,1000,1200,1500,1800,2000,2500];
 
 // 표준 원형덕트 직경 (mm)
@@ -1857,6 +1873,8 @@ function calcDuct(){
   }
   state.spaceType = document.getElementById('spaceType').value;
   state.arLimit   = parseInt(document.getElementById('arLimit').value);
+  var pcEl = document.getElementById('pressClass');
+  state.pressClass = pcEl ? pcEl.value : 'low';
   state.material  = document.getElementById('ductMaterial').value;
   var lmEl = document.getElementById('lamMode');
   state.lamMode   = lmEl ? lmEl.value : 'fixed';
@@ -1900,7 +1918,7 @@ function calcDuct(){
 }
 
 // ── 사각덕트 산정 ──
-function calcRectDuct(cms, lambda, friction_pa_m, arLimit, dtype){
+function calcRectDuct(cms, lambda, friction_pa_m, arLimit, dtype, noFix){
   var rho = 1.2;   // kg/m³
   var targetFr = friction_pa_m; // Pa/m
 
@@ -1909,11 +1927,12 @@ function calcRectDuct(cms, lambda, friction_pa_m, arLimit, dtype){
   // 단면적 A = cms / V → A = cms / sqrt(2 × targetFr × Dh / (λ × ρ))
   // Dh = 2WH/(W+H), A = WH → 연립 풀기: 수치 탐색
 
-  var fixW = parseFloat(document.getElementById('fixW').value) || 0;
-  var fixH = parseFloat(document.getElementById('fixH').value) || 0;
+  var fixW = noFix ? 0 : (parseFloat(document.getElementById('fixW').value) || 0);
+  var fixH = noFix ? 0 : (parseFloat(document.getElementById('fixH').value) || 0);
 
+  // v5.1.1 — Fr ≤ 목표 중 최소 단면(동일 단면은 장단비 작은 쪽) 채택
   var bestResult = null;
-  var bestDiff = Infinity;
+  var bestDiff = Infinity, nearResult = null;
 
   // 표준 치수 조합 탐색
   for(var wi = 0; wi < RECT_SIZES.length; wi++){
@@ -1936,16 +1955,19 @@ function calcRectDuct(cms, lambda, friction_pa_m, arLimit, dtype){
       var lamC = lambdaOf(state.material, V, Dh);           // v5.1 §2
       var Fr = lamC * rho * V * V / (2 * Dh) * (state.material==='flex' ? flexCF() : 1);
 
-      var diff = Math.abs(Fr - targetFr);
-      if(diff < bestDiff){
-        bestDiff = diff;
-        bestResult = {W:W, H:H, A:A, Dh:Dh*1000, V:V, Fr:Fr, ar:ar, lam:lamC, Re:reOf(V,Dh)};
+      var cand = {W:W, H:H, A:A, Dh:Dh*1000, V:V, Fr:Fr, ar:ar, lam:lamC, Re:reOf(V,Dh)};
+      if(Fr <= targetFr * 1.0001){
+        if(!bestResult || A < bestResult.A - 1e-9 || (Math.abs(A - bestResult.A) < 1e-9 && ar < bestResult.ar)) bestResult = cand;
       }
+      var diff = Math.abs(Fr - targetFr);
+      if(diff < bestDiff){ bestDiff = diff; nearResult = cand; }
     }
   }
 
-  // 표준치수에 없으면 자유 계산 (임계: 목표 마찰손실의 50% 이상 오차 시)
-  if(!bestResult || bestDiff > targetFr * 0.5){
+  // 치수 고정(검증) 시 조건 충족 규격이 없으면 고정 치수 중 최근접 채택
+  if(!bestResult && (fixW > 0 || fixH > 0) && nearResult){ bestResult = nearResult; bestResult.overFr = true; }
+  // 표준치수로 Fr ≤ 목표를 만족하지 못하면 자유 계산
+  if(!bestResult){
     // 황금비 근사: 편평덕트(flat)는 AR_TARGET 최소 3 적용
     var AR_TARGET = (dtype === 'flat')
       ? Math.min(Math.max(3, Math.sqrt(2)), arLimit)
@@ -1959,13 +1981,20 @@ function calcRectDuct(cms, lambda, friction_pa_m, arLimit, dtype){
     //     = λ × ρ × cms² / (AR_TARGET² × H^4 × 2 × Dh_over_H × H)
     //     = λ × ρ × cms² / (2 × AR_TARGET² × Dh_over_H × H^5)
     // H^5 = λ × ρ × cms² / (2 × AR_TARGET² × Dh_over_H × Fr)
-    var H5 = lambda * rho * cms * cms / (2 * AR_TARGET * AR_TARGET * Dh_over_H * targetFr);
-    var fHm = Math.pow(H5, 0.2);          // WARN-FIX: 루프 변수와 구분 (fHm, fWm...)
-    var fWm = AR_TARGET * fHm;
-    var fA  = fWm * fHm;
-    var fDh = 2 * fWm * fHm / (fWm + fHm);
-    var fV  = cms / fA;
-    var fFr = lambda * rho * fV * fV / (2 * fDh);
+    // v5.1.1 — λ를 본 산정과 같은 lambdaOf(고정/Swamee-Jain)로 반복 수렴 · 플렉시블 CF 반영
+    var cfF = (state.material==='flex') ? flexCF() : 1;
+    var lamI = lambda, fHm, fWm, fA, fDh, fV;
+    for(var itF = 0; itF < 6; itF++){
+      var H5 = lamI * cfF * rho * cms * cms / (2 * AR_TARGET * AR_TARGET * Dh_over_H * targetFr);
+      fHm = Math.pow(H5, 0.2);          // WARN-FIX: 루프 변수와 구분 (fHm, fWm...)
+      fWm = AR_TARGET * fHm;
+      fA  = fWm * fHm;
+      fDh = 2 * fWm * fHm / (fWm + fHm);
+      fV  = cms / fA;
+      var lamN2 = lambdaOf(state.material, fV, fDh);
+      if(Math.abs(lamN2 - lamI) < 1e-6){ lamI = lamN2; break; }
+      lamI = lamN2;
+    }
     // BUG-11 수정: 올림 후 실제 치수로 A/Dh/V/Fr 재계산
     var Wfinal = Math.ceil(fWm*1000/50)*50;
     var Hfinal = Math.ceil(fHm*1000/50)*50;
@@ -2018,12 +2047,10 @@ function calcCircDuct(cms, lambda, friction_pa_m, fixD){
   if(fixD && fixD > 0){
     bestD = fixD; fixed = true;
   } else {
-    // 가장 가까운 표준 직경
-    bestD = CIRC_SIZES[0];
-    var bestDiff = Infinity;
+    // v5.1.1 — 소요 구경 이상 최소 표준 직경 (Fr ≤ 목표). 표준 최대 초과 시 최대 구경
+    bestD = CIRC_SIZES[CIRC_SIZES.length - 1];
     for(var i = 0; i < CIRC_SIZES.length; i++){
-      var diff = Math.abs(CIRC_SIZES[i] - D_mm);
-      if(diff < bestDiff){ bestDiff = diff; bestD = CIRC_SIZES[i]; }
+      if(CIRC_SIZES[i] >= D_mm - 0.05){ bestD = CIRC_SIZES[i]; break; }
     }
   }
 
@@ -2058,27 +2085,32 @@ function getBestStdSize(val){
   return best;
 }
 
-// ── 판두께 ──
+// ── 판두께 ── 기계설비 기술기준 별표 9 표 2(사각·앵글플랜지) · 표 4(스파이럴)
+//   표는 아연도금강판 기준. 알루미늄·플렉시블은 별표 9 미규정 → 같은 값을 참고로 표시
+function vLegal(){ return (state.pressClass === 'high') ? 20 : 15; } // 별표 9 표 1
+function thkNote(mat){
+  var pc = (state.pressClass === 'high') ? '고압' : '저압';
+  return (mat === 'alum' || mat === 'flex') ? pc + ' · 참고(별표 9 미규정)' : pc + ' · 별표 9';
+}
 function getThickness(maxSide, mat){
-  var base;
-  if(maxSide <= 450) base = 0.5;
-  else if(maxSide <= 750) base = 0.6;
-  else if(maxSide <= 1000) base = 0.8;
-  else if(maxSide <= 1500) base = 1.0;
-  else if(maxSide <= 2200) base = 1.2;
-  else base = 1.5;
-  if(mat === 'alum') return (base + 0.1).toFixed(1);
-  return base.toFixed(1);
+  var t;
+  if(state.pressClass === 'high'){
+    if(maxSide <= 450) t = 0.8; else if(maxSide <= 1200) t = 1.0; else t = 1.2;
+  } else {
+    if(maxSide <= 450) t = 0.5; else if(maxSide <= 750) t = 0.6;
+    else if(maxSide <= 1500) t = 0.8; else if(maxSide <= 2250) t = 1.0; else t = 1.2;
+  }
+  return t.toFixed(1);
 }
 function getCircThickness(d, mat){
-  var base;
-  if(d <= 450) base = 0.5;
-  else if(d <= 750) base = 0.6;
-  else if(d <= 1000) base = 0.8;
-  else base = 1.0;
-  // BUG-FIX: 알루미늄 +0.1 보정 (사각덕트와 동일 기준)
-  if(mat === 'alum') return parseFloat((base + 0.1).toFixed(1));
-  return base;
+  var t;
+  if(state.pressClass === 'high'){
+    if(d <= 200) t = 0.5; else if(d <= 600) t = 0.6; else if(d <= 800) t = 0.8;
+    else if(d <= 1000) t = 1.0; else t = 1.2;
+  } else {
+    if(d <= 450) t = 0.5; else if(d <= 750) t = 0.6; else if(d <= 1000) t = 0.8; else t = 1.0;
+  }
+  return t.toFixed(1);
 }
 
 // ══════════════════════════════════════════
@@ -2192,7 +2224,8 @@ function renderResult(r){
     <div class="crow"><span class="ck">마찰계수 λ (${state.lamMode==='cole'?'Swamee-Jain, ε '+ROUGH_MM[state.material]+' mm':'고정'})</span><span class="cv">${(r.lam!==undefined?r.lam:LAMBDA[state.material]).toFixed(4)}</span></div>
     <div class="crow"><span class="ck">레이놀즈수 Re</span><span class="cv">${r.Re!==undefined?fmt(r.Re,0):'—'}</span></div>
     ${state.material==='flex'&&flexCF()!==1?`<div class="crow"><span class="ck">플렉시블 압축 보정 CF</span><span class="cv">×${flexCF().toFixed(1)}</span></div>`:''}
-    <div class="crow"><span class="ck">판두께 (${state.material})</span><span class="cv">${r.thickness} mm</span></div>
+    <div class="crow"><span class="ck">판두께 (${MAT_LABEL[state.material]} · ${thkNote(state.material)})</span><span class="cv">${r.thickness} mm</span></div>
+    <div class="crow"><span class="ck">법정 풍속 상한 (별표 9 표 1)</span><span class="cv">${vLegal()} m/s 이하 — ${r.V<=vLegal()?'적합':'초과'}</span></div>
   </div>`;
 
   // 인접 규격 비교표
@@ -2207,6 +2240,16 @@ function renderResult(r){
     html += `<div class="nb red" style="margin-top:10px;"><div class="nb-tit">⚠️ 풍속 초과</div><div class="nb-txt">실제 풍속(${r.V.toFixed(2)} m/s)이 권장 최대값(${vs.max} m/s)을 초과합니다.<br/>${r.fixed?'고정 구경 Φ'+r.D+'은 등마찰 '+state.frictionBase+' Pa/m 기준 소요 구경(Φ'+r.D_calc.toFixed(0)+')보다 작습니다 — 정압 계산 탭에서 계통 총 정압을 확인하세요.':'덕트 치수를 확대하거나 분기 구간을 검토하세요.'}</div></div>`;
   } else if(velOk){
     html += `<div class="nb grn" style="margin-top:10px;"><div class="nb-tit">✅ 적정 풍속</div><div class="nb-txt">산정된 덕트 규격이 권장 범위 내에 있습니다.</div></div>`;
+  }
+
+  if(r.V > vLegal()){
+    html += `<div class="nb red" style="margin-top:10px;"><div class="nb-tit">⛔ 법정 풍속 상한 초과</div><div class="nb-txt">실제 풍속 ${r.V.toFixed(2)} m/s &gt; ${state.pressClass==='high'?'고압':'저압'}덕트 상한 ${vLegal()} m/s (기계설비 기술기준 별표 9 표 1). 덕트 치수를 키우세요.</div></div>`;
+  }
+  if(r.dtype !== 'circ' && r.ar > 4.0001){
+    html += `<div class="nb org" style="margin-top:10px;"><div class="nb-tit">🔧 장단비 4:1 초과 — 보강조치</div><div class="nb-txt">장단비 ${r.ar.toFixed(2)} : 1 — 별표 9 2.1(1)에 따라 4:1을 초과하는 경우 보강조치를 해야 합니다.</div></div>`;
+  }
+  if(r.overFr){
+    html += `<div class="nb org" style="margin-top:10px;"><div class="nb-tit">📏 치수 고정(검증)</div><div class="nb-txt">고정 치수 조건에서 ΔP/L ≤ ${state.frictionBase} Pa/m를 만족하는 표준 규격이 없어 최근접 규격을 표시합니다.</div></div>`;
   }
 
   document.getElementById('resultBody').innerHTML = html;
@@ -2413,32 +2456,8 @@ function calcMulti(){
 }
 
 function calcRectDuct_multi(cms, lambda, friction_pa_m, arLimit, dtype){
-  var rho = 1.2;
-  var bestResult = null, bestDiff = Infinity;
-  for(var wi=0;wi<RECT_SIZES.length;wi++){
-    for(var hi=0;hi<RECT_SIZES.length;hi++){
-      var W=RECT_SIZES[wi],H=RECT_SIZES[hi];
-      if(W<H)continue;
-      var ar=W/H;
-      if(ar>arLimit)continue;
-      if(dtype==='flat'&&ar<3)continue;
-      var Wm=W/1000,Hm=H/1000,A=Wm*Hm;
-      var Dh=4*A/(2*(Wm+Hm));
-      var V=cms/A;
-      var Fr=lambda*rho*V*V/(2*Dh);
-      var diff=Math.abs(Fr-friction_pa_m);
-      if(diff<bestDiff){bestDiff=diff;bestResult={W:W,H:H,A:A,Dh:Dh*1000,V:V,Fr:Fr,ar:ar,thickness:getThickness(Math.max(W,H),state.material||'galv')};} // BUG-FIX: 재질 반영
-    }
-  }
-  if(!bestResult){
-    // 폴백: 400×300 기본값, 실제 계산값으로 채움
-    var fbW=0.4, fbH=0.3, fbA=fbW*fbH;
-    var fbDh=2*fbW*fbH/(fbW+fbH);
-    var fbV=cms/fbA;
-    var fbFr=lambda*rho*fbV*fbV/(2*fbDh);
-    bestResult={W:400,H:300,A:fbA,Dh:fbDh*1000,V:fbV,Fr:fbFr,ar:400/300,thickness:'0.8'};
-  }
-  return bestResult;
+  // v5.1.1 — 단일 산정과 같은 탐색(Fr ≤ 목표 · 최소 단면 · lambdaOf λ)을 사용 (치수 고정 무시)
+  return calcRectDuct(cms, lambda, friction_pa_m, arLimit, dtype, true);
 }
 
 function renderMultiResult(results){
@@ -2706,7 +2725,9 @@ function updateA4(){
       <tr><td class="k">설계 풍량</td><td>${fmt(r.cmh,0)} m³/h (${r.cms.toFixed(4)} m³/s)</td><td class="k">마찰손실 기준</td><td>${state.frictionBase} Pa/m</td></tr>
       <tr><td class="k">산정 규격</td><td style="font-weight:900;font-size:13px;">${size}</td><td class="k">풍속 판정</td><td style="color:${velOk?'#16a34a':'#dc2626'};font-weight:800;">${r.V.toFixed(2)} m/s (${velOk?'적정':(r.V>vs.max?'초과':'저속')})</td></tr>
       <tr><td class="k">수력직경 Dh</td><td>${r.Dh.toFixed(1)} mm</td><td class="k">실제 ΔP/L</td><td>${r.Fr.toFixed(3)} Pa/m</td></tr>
-      <tr><td class="k">단면적</td><td>${(r.A*10000).toFixed(2)} cm²</td><td class="k">판두께</td><td>${r.thickness} mm</td></tr>
+      <tr><td class="k">단면적</td><td>${(r.A*10000).toFixed(2)} cm²</td><td class="k">판두께</td><td>${r.thickness} mm (${thkNote(state.material)})</td></tr>
+      <tr><td class="k">압력 구분</td><td>${state.pressClass==='high'?'고압덕트':'저압덕트'} (별표 9 표 1)</td><td class="k">법정 풍속 상한</td><td style="color:${r.V<=vLegal()?'#16a34a':'#dc2626'};font-weight:800;">${vLegal()} m/s 이하 — ${r.V<=vLegal()?'적합':'초과'}</td></tr>
+      ${(r.dtype!=='circ'&&r.ar>4.0001)?`<tr><td class="k">장단비</td><td colspan="3" style="color:#c2410c;font-weight:800;">${r.ar.toFixed(2)} : 1 — 4:1 초과, 보강조치 필요 (별표 9 2.1(1))</td></tr>`:''}
       <tr><td class="k">마찰계수 λ</td><td>${(r.lam!==undefined?r.lam:LAMBDA[state.material]).toFixed(4)} (${state.lamMode==='cole'?'Swamee-Jain · ε '+ROUGH_MM[state.material]+' mm':'고정값'})</td><td class="k">레이놀즈수 Re</td><td>${r.Re!==undefined?fmt(r.Re,0):'—'}${(state.material==='flex'&&flexCF()!==1)?' · 플렉시블 CF ×'+flexCF().toFixed(1):''}</td></tr>
       ${r.fixed?`<tr><td class="k">산정 모드</td><td colspan="3">Φ 고정(검증) — 입력 구경 Φ${r.D} mm 기준 산정. 등마찰 ${state.frictionBase} Pa/m 소요 구경 Φ${r.D_calc.toFixed(1)} mm</td></tr>`:''}
     </table>`;
@@ -2765,6 +2786,7 @@ function resetAll(){
   document.getElementById('fixH').value = '';
   var _fd = document.getElementById('fixD'); if(_fd) _fd.value = '';
   var _lm = document.getElementById('lamMode'); if(_lm) _lm.value = 'fixed';
+  var _pc = document.getElementById('pressClass'); if(_pc) _pc.value = 'low'; state.pressClass = 'low';
   var _fc = document.getElementById('flexComp'); if(_fc) _fc.value = '1.0';
   if(typeof spReset === 'function') spReset();
   document.getElementById('projName').value   = '만민 건축사 신사옥 신축공사';
