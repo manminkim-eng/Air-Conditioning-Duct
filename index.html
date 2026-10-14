@@ -2259,6 +2259,13 @@ function renderResult(r){
   document.getElementById('resultBody').innerHTML = html;
 }
 
+// v5.1.2 — 인접 규격 판정: 법정 풍속 상한(별표 9 표 1) → 마찰손실 기준 초과 → 설계 권장 풍속 순
+function nbJudge(V, Fr, vs){
+  if(V > vLegal()) return '⛔ 법정 초과';
+  if(Fr > state.frictionBase * 1.0001) return '⚠ 마찰 초과';
+  if(V >= vs.min && V <= vs.max) return '✓ 적정';
+  return V > vs.max ? '⚠ 풍속 초과' : '🔵 저속';
+}
 function renderNearbyRectTable(r){
   var targets = [];
   var idx  = RECT_SIZES.indexOf(r.W);
@@ -2306,7 +2313,7 @@ function renderNearbyRectTable(r){
       <td>${t.W}×${t.H}</td>
       <td>${V.toFixed(2)}</td>
       <td>${Fr.toFixed(3)}</td>
-      <td>${isSelected?'★ 채택':ok?'✓ 적정':(V>vs.max?'⚠ 초과':'🔵 저속')}</td>
+      <td>${isSelected?'★ 채택':nbJudge(V,Fr,vs)}</td>
     </tr>`;
   });
   html += '</tbody></table></div>';
@@ -2345,7 +2352,7 @@ function renderNearbyCircTable(r){
       <td>${(A*10000).toFixed(1)}</td>
       <td>${V.toFixed(2)}</td>
       <td>${Fr.toFixed(3)}</td>
-      <td>${isSelected?(r.fixed?'★ 고정':'★ 채택'):ok?'✓ 적정':(V>vs.max?'⚠ 초과':'🔵 저속')}</td>
+      <td>${isSelected?(r.fixed?'★ 고정':'★ 채택'):nbJudge(V,Fr,vs)}</td>
     </tr>`;
   });
   html += '</tbody></table></div>';
@@ -2469,11 +2476,11 @@ function renderMultiResult(results){
   if(!container) return;
   if(!results.length){ container.innerHTML = '<div class="result-placeholder"><div class="rph-ico">📋</div><div class="rph-tit">결과 없음</div></div>'; return; }
 
-  var html = '<div class="twrap"><table class="rtbl"><thead><tr><th>구간명</th><th>풍량 m³/h</th><th>규격 (mm)</th><th>풍속 m/s</th><th>ΔP/L Pa/m</th><th>판정</th></tr></thead><tbody>';
+  var html = '<div class="twrap"><table class="rtbl"><thead><tr><th>구간명</th><th>풍량 m³/h</th><th>규격 (mm)</th><th>풍속 m/s</th><th>ΔP/L Pa/m</th><th>판두께 mm</th><th>판정</th></tr></thead><tbody>';
 
   results.forEach(function(r){
     if(r.error){
-      html += `<tr><td>${r.name}</td><td colspan="5" style="color:#dc2626;">${r.error}</td></tr>`;
+      html += `<tr><td>${r.name}</td><td colspan="6" style="color:#dc2626;">${r.error}</td></tr>`;
       return;
     }
     var vs = r.velStd;
@@ -2485,7 +2492,8 @@ function renderMultiResult(results){
       <td class="mono" style="font-weight:900;color:${ok?'#0f766e':'#dc2626'};">${size}</td>
       <td class="mono">${r.V.toFixed(2)}</td>
       <td class="mono">${r.Fr.toFixed(3)}</td>
-      <td>${ok?'<span class="duct-tag ok">✓ 적정</span>':'<span class="duct-tag warn">⚠ 검토</span>'}</td>
+      <td class="mono">${r.thickness}</td>
+      <td>${r.V>vLegal()?'<span class="duct-tag warn">⛔ 법정 초과</span>':ok?'<span class="duct-tag ok">✓ 적정</span>':'<span class="duct-tag warn">⚠ 검토</span>'}</td>
     </tr>`;
   });
   html += '</tbody></table></div>';
@@ -2745,12 +2753,12 @@ function updateA4(){
 
   if(state.multiResults && state.multiResults.length){
     document.getElementById('a4-multi-section').style.display = '';
-    var html2 = '<table class="a4-meta-table"><tr><th style="background:#f0fdfa;font-size:10px;padding:5px 8px;">구간명</th><th style="background:#f0fdfa;font-size:10px;padding:5px 8px;">풍량</th><th style="background:#f0fdfa;font-size:10px;padding:5px 8px;">규격</th><th style="background:#f0fdfa;font-size:10px;padding:5px 8px;">풍속</th><th style="background:#f0fdfa;font-size:10px;padding:5px 8px;">판정</th></tr>';
+    var html2 = '<table class="a4-meta-table"><tr><th style="background:#f0fdfa;font-size:10px;padding:5px 8px;">구간명</th><th style="background:#f0fdfa;font-size:10px;padding:5px 8px;">풍량</th><th style="background:#f0fdfa;font-size:10px;padding:5px 8px;">규격</th><th style="background:#f0fdfa;font-size:10px;padding:5px 8px;">풍속</th><th style="background:#f0fdfa;font-size:10px;padding:5px 8px;">판두께</th><th style="background:#f0fdfa;font-size:10px;padding:5px 8px;">판정</th></tr>';
     state.multiResults.forEach(function(r){
-      if(r.error){ html2+=`<tr><td>${r.name}</td><td colspan="4" style="color:#dc2626;">${r.error}</td></tr>`; return; }
+      if(r.error){ html2+=`<tr><td>${r.name}</td><td colspan="5" style="color:#dc2626;">${r.error}</td></tr>`; return; }
       var vs=r.velStd, ok=r.V>=vs.min&&r.V<=vs.max;
       var size=r.dtype==='circ'?('Φ'+r.D):(r.W+'×'+r.H);
-      html2+=`<tr><td>${r.name}</td><td>${fmt(r.cmh,0)} m³/h</td><td style="font-weight:800;">${size} mm</td><td>${r.V.toFixed(2)} m/s</td><td style="color:${ok?'#16a34a':'#dc2626'};font-weight:800;">${ok?'적정':'검토'}</td></tr>`;
+      html2+=`<tr><td>${r.name}</td><td>${fmt(r.cmh,0)} m³/h</td><td style="font-weight:800;">${size} mm</td><td>${r.V.toFixed(2)} m/s</td><td>${r.thickness} mm</td><td style="color:${(ok&&r.V<=vLegal())?'#16a34a':'#dc2626'};font-weight:800;">${r.V>vLegal()?'법정 초과':ok?'적정':'검토'}</td></tr>`;
     });
     html2+='</table>';
     document.getElementById('a4-multi-result').innerHTML = html2;
@@ -2792,6 +2800,16 @@ function resetAll(){
   var _lm = document.getElementById('lamMode'); if(_lm) _lm.value = 'fixed';
   var _pc = document.getElementById('pressClass'); if(_pc) _pc.value = 'low'; state.pressClass = 'low';
   var _fc = document.getElementById('flexComp'); if(_fc) _fc.value = '1.0';
+  // v5.1.2 — STEP 2·3 선택값도 기본값으로 (형상 사각 · 급기 주덕트 · 1.0 Pa/m · 아연도금강판 · 4:1 · CMH)
+  document.getElementById('spaceType').value    = 'supply_main';
+  document.getElementById('frictionBase').value = '1.0';
+  var _mf = document.getElementById('manualFriction'); if(_mf) _mf.value = '1.0';
+  document.getElementById('ductMaterial').value = 'galv';
+  document.getElementById('arLimit').value      = '4';
+  state.flowUnit = 'cmh';
+  var _sb = document.querySelectorAll('.seg-ctrl .seg-btn'); _sb.forEach(function(b,i){ b.classList.toggle('active', i===0); });
+  document.getElementById('flowLabel').textContent = '풍량 (CMH)';
+  document.getElementById('flowSfx').textContent   = 'm³/h';
   if(typeof spReset === 'function') spReset();
   document.getElementById('projName').value   = '만민 건축사 신사옥 신축공사';
   document.getElementById('projDate').value   = new Date().toISOString().split('T')[0];
@@ -2809,6 +2827,7 @@ function resetAll(){
   addMultiItem();
 
   // v5.0 — 모바일 미리보기·공유 모달 삭제에 따라 해당 초기화 호출부 제거 (§15-8)
+  var _rc = document.querySelector('.dtype-card[data-dtype="rect"]'); if(_rc) selectDtype(_rc);   // calcDuct 포함 — 풍량 비어 있으면 안내 화면
   renderResultPlaceholder();
   updateStep(1);
   showToast('🔄 초기화 완료');

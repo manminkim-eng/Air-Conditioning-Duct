@@ -36,7 +36,7 @@ const mmMatch = (req, opt) => caches.keys()
   .then((ks) => ks.reduce((p, k) => p.then((r) => r || caches.open(k).then((c) => c.match(req, opt))), Promise.resolve(undefined)))
   .then((r) => (r && r.type === 'opaque' && req && req.mode === 'cors') ? undefined : r);
 
-const CACHE  = 'duct-v5.1.1';   /* 2026-10-14 v5.1.1 별표 9 판두께·압력구분·장단비·Fr≤목표 탐색 */
+const CACHE  = 'duct-v5.1.2';   /* 2026-10-14 v5.1.2 초기화 범위 · 인접표 판정 · 다중표 판두께 */
 const ORPHAN = ['duct-v2.0'];
 const ASSETS = [
   './',
