@@ -16,7 +16,7 @@ VER = 'Ver-5.1.1'
 REL = 'v5.1.2'
 DATE = '2026-10-14'
 PDF = '공조덕트_사용자매뉴얼_Ver-5.1.1.pdf'
-APP_URL = 'https://manminkim-eng.github.io/air-conditioning-duct/'
+APP_URL = 'https://manminkim-eng.github.io/Air-Conditioning-Duct/'
 APP = '공조 덕트 규격 산정 시스템'
 GOSI = '기계설비 기술기준 국토교통부 고시 제2021-851호(제2026-360호로 타법개정, 2026. 7. 8. 시행)'
 
@@ -76,7 +76,7 @@ S.append(f"""{EXTRA_CSS}<section class="ch" id="ch0"><h2><span class="n">00</spa
 <p class="lead">{APP}은 공조 · 환기 덕트의 풍량과 마찰손실 기준으로 <b>사각 · 원형 · 편평 덕트 규격</b>을 정하고 <b>풍속 · 판두께 · 장단비</b>를 확인한 뒤, 계통 정압(마찰 + 국부저항)과 A4 산정서까지 만듭니다. 근거는 {GOSI} <b>별표 9 덕트설비</b>이며, 별표 9에 수치가 없는 값(설계 권장 풍속 · λ 고정값 · 피팅 ζ · 보강 간격 등)은 <b>실무 참고값</b>으로 구분해 표시합니다.</p>
 {K(T([
  ['대상 프로그램', f'{APP} <b>MANMIN {VER}</b>({REL}) — 탭 막대 「📘 매뉴얼」 버튼으로 이 문서가 열립니다'],
- ['접속 주소', f'<a href="{APP_URL}" target="_blank" rel="noopener">manminkim-eng.github.io/air-conditioning-duct</a>'],
+ ['접속 주소', f'<a href="{APP_URL}" target="_blank" rel="noopener">manminkim-eng.github.io/Air-Conditioning-Duct</a>'],
  ['매뉴얼 판', f'<b>{VER}</b> (화면 표기와 같은 판 번호, 초판) · {DATE} · 작성 김만민 건축사(㈜대성건축사사무소)'],
  ['내려받기', f'<a href="{PDF}" download>PDF(A4)</a> · <a href="../index.html">{APP} 열기</a>'],
  ['예제', f'본문 그림은 예제 A(업무시설 AHU-1 급기 주덕트 12,000 m³/h)로 캡처했습니다 — <b>{sz(A)} mm · {n(A["V"])} m/s · {n(A["Fr"],3)} Pa/m · 판두께 {A["th"]} mm</b>. 원형 분기(예제 B) · 높이 제약(예제 C) · 다중 · 정압 예제는 <a href="#a2">부록 A2</a>'],

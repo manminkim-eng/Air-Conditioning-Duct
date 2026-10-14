@@ -6,8 +6,8 @@
 ---
 
 ## 🌐 라이브 데모
-**https://manminkim-eng.github.io/air-conditioning-duct/**  
-📘 사용자 매뉴얼 : https://manminkim-eng.github.io/air-conditioning-duct/manual/
+**https://manminkim-eng.github.io/Air-Conditioning-Duct/**  
+📘 사용자 매뉴얼 : https://manminkim-eng.github.io/Air-Conditioning-Duct/manual/
 
 ---
 
