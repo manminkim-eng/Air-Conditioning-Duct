@@ -5,6 +5,11 @@
 
 ---
 
+## v6.1.0 (2026-11-12) — 기준 표기 · 판 6.1
+
+- 별표 9 「1.3 타 규정과의 관계」 목록에 **KCS 31 20 20 덕트설비공사 표준시방서** 추가(화면 · 계산서 2곳), A4 계산서 압력 구분 출처 「별표 9 표 1 · KCS 31 20 20 표 3.2-1」(정밀검토 B13 · 기계설비 기술기준 제2026-360호 원문 LawMCP 2026-11-12 확인)
+- 판 표기 Ver-6.1 · sw `duct-v6.1.0` · 계산 변경 없음 · 사용자 매뉴얼은 종전 판 그대로
+
 ## 🌐 라이브 데모
 **https://manminkim-eng.github.io/Air-Conditioning-Duct/**  
 📘 사용자 매뉴얼 : https://manminkim-eng.github.io/Air-Conditioning-Duct/manual/
