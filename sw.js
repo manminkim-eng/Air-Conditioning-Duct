@@ -1,4 +1,5 @@
 /* ═══════════════════════════════════════════════════
+   v6.1.1 (2026-11-12) — 건물개요 공통 원본 MM-PROJECT v1.2 새로 넣음(사업명 · 작성자 · 정밀검토 B6 · 작업지시서 §25-6-77) · 판 6.1 · 캐시명 v6.1.1 (종전 duct-v6.1.0)
    v6.1.0 2026-11-12 — 별표 9 1.3 타 규정에 KCS 31 20 20 덕트설비공사 추가 · 표 1 출처 표기(정밀검토 B13) · 판 6.1 · 캐시명 duct-v6.1.0
    S6 회차 2026-09-05 — R24①② 표 선 separate·mono 한글 폴백 소급 동반 캐시명 v5.0.5
    S5 회차 2026-09-04 — R23② JPG 엔진 행 나눔 소급 동반 캐시명 v5.0.4
@@ -37,7 +38,7 @@ const mmMatch = (req, opt) => caches.keys()
   .then((ks) => ks.reduce((p, k) => p.then((r) => r || caches.open(k).then((c) => c.match(req, opt))), Promise.resolve(undefined)))
   .then((r) => (r && r.type === 'opaque' && req && req.mode === 'cors') ? undefined : r);
 
-const CACHE  = 'duct-v6.1.0';   /* 2026-11-12 v6.1.0 B13 표기 (종전 duct-v5.1.9) */   /* 2026-10-14 v5.1.2 초기화 범위 · 인접표 판정 · 다중표 판두께 */
+const CACHE  = 'duct-v6.1.1';   /* 2026-11-12 v6.1.0 B13 표기 (종전 duct-v5.1.9) */   /* 2026-10-14 v5.1.2 초기화 범위 · 인접표 판정 · 다중표 판두께 */
 const ORPHAN = ['duct-v2.0'];
 const ASSETS = [
   './',
