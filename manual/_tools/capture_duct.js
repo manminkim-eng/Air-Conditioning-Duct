@@ -2,13 +2,14 @@
 // 규격: 1440×900 · DSF 1.25 · _marks.json(번호 배지 % 좌표) · _example.json(예제 검증값 — 앱에서 읽음)
 const {chromium}=require(process.env.MM_PW||'playwright');const fs=require('fs');const path=require('path');const {setup,server}=require('./serve');
 const repo=path.resolve(process.argv[2]),out=path.resolve(process.argv[3]);fs.mkdirSync(out,{recursive:true});
-const VW=1440,VH=900,DSF=1.25,PORT=8897;
+const VW=1440,VH=900,DSF=1.25,PORT=8884;
 /* 예제 A = 업무시설 AHU-1 급기 주덕트 — 사각 · 급기 주덕트 · 1.0 Pa/m · 아연도금강판 · 고정 λ · 저압 · 4:1 · 12,000 m³/h
    예제 B = 급기 분기 원형덕트 1,500 m³/h (그 외 A와 같음)
    예제 C = 천장 속 높이 제약 — 사각 H 300 고정 · 8:1(보강조치 전제) · 12,000 m³/h
    예제 D = 예제 A 조건 + 스테인리스(v6.1.5 별표 9 2.2.2 표 7 판두께 확인)
    다중 = 주덕트 12,000 · 분기 3,000(사각) · 분기 1,200(원형) / 정압 = AHU-1 급기 계통 12,000 m³/h · ESP 400 Pa
-   v6.1.5(2026-11-24) — 산정 대기(풍량 0) · A4 「산정 대기」 · 「⚠ 입력 확인」 줄 · 스테인리스 · 375 px 다중 탭 장면 추가 */
+   v6.1.5(2026-11-24) — 산정 대기(풍량 0) · A4 「산정 대기」 · 「⚠ 입력 확인」 줄 · 스테인리스 · 375 px 다중 탭 장면 추가
+   v6.1.6(2026-11-24) — 원형(스파이럴) 요약 스트립 · A4(예제 B + 다중 — 1절 형상 · 3절 종횡비 4:1 각주 · 적용 기준 판두께) 장면 추가 */
 const FREEZE=`(()=>{const T=new Date(2026,9,14,10,0,0).getTime();const D=Date;class F extends D{constructor(...a){if(a.length)super(...a);else super(T);}static now(){return T;}}window.Date=F;window.alert=()=>{};window.confirm=()=>true;try{localStorage.clear();['pwa-dismissed','pwa-banner-dismissed','pwa-welcome','duct-pwa-dismissed','mm-master-seen','duct-guide-seen'].forEach(k=>localStorage.setItem(k,'1'))}catch(e){}})()`;
 const HIDE='#pwaBanner,.pwa-banner,#iosModal,.ios-modal,#toastEl,.toast,#netToast,.net-toast,.pwa-update-bar,#toast{display:none!important}.calc-col-right{position:static!important;max-height:none!important;overflow:visible!important}';
 const HELP=`window.__vis=e=>e&&e.getClientRects().length>0;
@@ -61,16 +62,18 @@ const SHOTS=[
  {id:'s05_result',clip:'card:STEP 4',m:[['.duct-result-hero','채택 규격 · 실제 풍속'],['.vel-gauge','풍속 게이지'],['.stat-grid','풍량 · 단면적 · 수력직경'],['nth:#resultBody .cbox|0','산정 상세'],['nth:#resultBody .rtbl|0','인접 규격 비교']]},
  {id:'s06_result_b',pre:"__show('B')",clip:'card:STEP 4',m:[['.duct-result-hero','Φ 채택 · 풍속'],['nth:#resultBody .cbox|0','산정 상세']]},
  {id:'s07_result_c',pre:"__show('C')",clip:'card:STEP 4',m:[['.duct-result-hero','1800×300 · 풍속'],['nth:#resultBody .cbox|0','판두께 1.0 · 유속 범위'],['nth:#resultBody .rtbl|0','인접 규격'],['nth:#resultBody .nb.org|0','장단비 4:1 초과 — 보강조치'],['#resultBadge','🔧 보강 필요']]},
- {id:'s08_multi',pre:"__quiet(()=>{__show('A');__tab(1);__multi();scrollTo(0,0);})",wait:900,clip:'#tab-multi',m:[['#multiItems','구간 입력'],['.add-item-btn','구간 추가'],['nth:#tab-multi .btn-b|0','일괄 산정'],['card:일괄 산정 결과','일괄 산정 결과']]},
+ {id:'s08_multi',pre:"__quiet(()=>{__show('A');__tab(1);__multi();scrollTo(0,0);})",wait:900,clip:'#tab-multi',m:[['#multiItems','구간 입력'],['.add-item-btn','구간 추가'],['nth:#tab-multi .btn-b|0','일괄 산정'],['card:일괄 산정 결과','일괄 산정 결과'],['#tab-multi>.nb','종횡비 4:1 고정 안내']]},
  {id:'s09_sp',pre:"__quiet(()=>{__tab(2);__sp();scrollTo(0,0);})",wait:900,clip:'#tab-sp',crop:1150,m:[['card:계통 조건','계통 조건 · ESP'],['card:직관 구간','직관 구간'],['card:피팅','피팅 · ζ'],['card:정압 계산 결과','정압 계산 결과']]},
  {id:'s10_guide_vel',pre:"__tab(3);switchGmTab('g-vel',document.querySelectorAll('.gm-tab')[0]);scrollTo(0,0)",wait:700,clip:'card:덕트 설계 기준표',m:[['nth:.gm-tab|0','기준표 5종'],['nth:#g-vel .nb|0','유속 범위 · 루버'],['nth:#g-vel .rtbl|0','설계 권장 풍속']]},
  {id:'s11_guide_th',pre:"switchGmTab('g-material',document.querySelectorAll('.gm-tab')[4]);scrollTo(0,0)",wait:700,clip:'card:덕트 설계 기준표',m:[['nth:#g-material .rtbl|0','사각 판두께(표 2)'],['nth:#g-material .nb.sky|0','스파이럴(표 4)'],['nth:#g-material .nb.org|0','스테인리스(표 7 · 8)'],['nth:#g-material .ref-box|0','보강 기준(참고)']]},
  {id:'s12_modal',pre:"__tab(0);openMasterModal(1)",wait:900,fixed:true,post:"__closeM()",clip:'.master-modal-box',m:[]},
  {id:'s13_a4',pre:"__A();__tab(4);scrollTo(0,0)",wait:1500,clip:'viewport',m:[['.mm-btn-print','인쇄 / PDF'],['.mm-btn-jpg','JPG 저장'],['#a4Page','A4 산정서']]},
- {id:'s14_a4page',clip:'#a4Page',crop:2400,m:[['nth:.a4-meta-table|0','산정 결과표'],['nth:#a4Page .a4-meta-table|1','인접 규격']]},
+ {id:'s14_a4page',clip:'#a4Page',crop:2400,m:[['nth:.a4-meta-table|0','산정 결과표'],['nth:#a4Page .a4-meta-table|1','인접 규격'],['up:#a4-lam-std|table','적용 기준 — 판두께 행']]},
  {id:'s18_wait',pre:"__wait()",wait:900,clip:'card:STEP 3',union:'card:STEP 4',m:[['up:#flowInput|.input-sfx','풍량 0 — 빨간 테두리'],['.mm-warn-msg','⚠ 0 — 산정 안 함'],['#resultBadge','⚠ 입력 확인'],['#resultPlaceholder','산정 대기 — 결과 지움']]},
  {id:'s19_a4_wait',pre:"__tab(4);scrollTo(0,0)",wait:1200,clip:'#a4Page',crop:560,m:[['#a4-result','1절 「산정 대기」'],['.mm-warn-note','⚠ 입력 확인 줄']]},
  {id:'s20_ss',pre:"__show('D')",wait:800,clip:'card:STEP 4',crop:1150,m:[['.duct-result-hero','700×600 · 풍속'],['nth:#resultBody .cbox|0','판두께 0.5 · 별표 9 표 7(스테인리스)']]},
+ {id:'s23_sum_b',pre:"__show('B')",wait:800,clip:'.sum-bar',m:[['nth:.sum-bar .sum-item|0','형상: 원형(스파이럴)']]},
+ {id:'s22_a4_b',pre:"__quiet(()=>{__tab(1);__multi();__tab(4);scrollTo(0,0);})",wait:1500,clip:'#a4Page',crop:2700,m:[['nth:#a4Page .a4-meta-table|0','1절 덕트 형상 「원형(스파이럴)」'],['#a4-multi-section','3절 다중 구간 — 종횡비 4:1 고정 각주'],['up:#a4-lam-std|table','적용 기준 — 판두께 「원형은 스파이럴 덕트 전제」']]},
 ];
 (async()=>{
  const s=await server(repo,PORT);const b=await chromium.launch();
@@ -92,6 +95,8 @@ const SHOTS=[
   if(S.id==='s09_sp')ex.SP=await pg.evaluate('__exS()');
   if(S.id==='s14_a4page')ex.A_a4=await pg.evaluate(()=>document.getElementById('a4Page').innerText.replace(/\s+/g,' '));
   if(S.id==='s20_ss')ex.D=await pg.evaluate('__ex()');
+  if(S.id==='s23_sum_b')ex.Bsum=await pg.evaluate(()=>[...document.querySelectorAll('.sum-bar .sum-item')].map(e=>e.textContent.trim()));
+  if(S.id==='s22_a4_b')ex.B_a4=await pg.evaluate(()=>document.getElementById('a4Page').innerText.replace(/\s+/g,' '));
   const info=await pg.evaluate(({S,VW,VH})=>{
    const abs=e=>{const r=e.getBoundingClientRect();return {x:r.left+scrollX,y:r.top+scrollY,w:r.width,h:r.height};};
    let clip;
