@@ -10,7 +10,7 @@
 <meta property="og:site_name" content="MANMIN ENGINEERING">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:title" content="공조 덕트 규격 산정 시스템 · MANMIN Ver-6.1">
-<meta property="og:description" content="공조 풍량에 따른 덕트 규격 자동 산정 — 기계설비 기술기준 (국토교통부 고시 제2021-851호)">
+<meta property="og:description" content="공조 풍량에 따른 덕트 규격 자동 산정 — 기계설비 기술기준 (국토교통부 고시 제2021-851호 · 제2026-360호 타법개정)">
 <meta property="og:url" content="https://manminkim-eng.github.io/Air-Conditioning-Duct/">
 <meta property="og:image" content="https://manminkim-eng.github.io/Air-Conditioning-Duct/og-card.jpg">
 <meta property="og:image:secure_url" content="https://manminkim-eng.github.io/Air-Conditioning-Duct/og-card.jpg">
@@ -20,9 +20,9 @@
 <meta property="og:image:alt" content="공조 덕트 규격 산정 시스템 · MANMIN Ver-6.1">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="공조 덕트 규격 산정 시스템 · MANMIN Ver-6.1">
-<meta name="twitter:description" content="공조 풍량에 따른 덕트 규격 자동 산정 — 기계설비 기술기준 (국토교통부 고시 제2021-851호)">
+<meta name="twitter:description" content="공조 풍량에 따른 덕트 규격 자동 산정 — 기계설비 기술기준 (국토교통부 고시 제2021-851호 · 제2026-360호 타법개정)">
 <meta name="twitter:image" content="https://manminkim-eng.github.io/Air-Conditioning-Duct/og-card.jpg">
-<meta name="description" content="공조 풍량에 따른 덕트 규격 자동 산정 — 기계설비 기술기준 (국토교통부 고시 제2021-851호)"/>
+<meta name="description" content="공조 풍량에 따른 덕트 규격 자동 산정 — 기계설비 기술기준 (국토교통부 고시 제2021-851호 · 제2026-360호 타법개정)"/>
 <meta name="theme-color" content="#2d5186"/>
 
 <!-- ══ PWA 매니페스트 ══ -->
@@ -138,6 +138,7 @@ input[type="number"]{-moz-appearance:textfield;}
 .two-col{display:grid;grid-template-columns:440px 1fr;gap:13px;align-items:start;}
 @media(max-width:1024px){.two-col{grid-template-columns:1fr 1fr;}}
 @media(max-width:768px){.two-col{grid-template-columns:1fr;}}
+.two-col>*,.frow>*,.frow3>*{min-width:0;}   /* v6.1.5 — 다중 · 정압 결과 뒤 칸이 넓어지지 않게(교차검증 P7) */
 
 /* ── CARD ── */
 .card{background:#fff;border:1px solid #dbeafe;border-radius:12px;box-shadow:0 1px 4px rgba(45,81,134,.07);overflow:hidden;margin-bottom:12px;}
@@ -162,6 +163,7 @@ input[type="number"]{-moz-appearance:textfield;}
 @media(max-width:420px){.frow{grid-template-columns:1fr;}}
 .frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;align-items:end;}
 @media(max-width:480px){.frow3{grid-template-columns:1fr 1fr;}}
+@media(max-width:420px){.frow3{grid-template-columns:1fr;}}   /* v6.1.5 — 좁은 화면 1열(교차검증 P7) */
 .fgrp{display:flex;flex-direction:column;gap:3px;}
 .fgrp.full{grid-column:1/-1;}
 .input-sfx{display:flex;height:38px;}
@@ -862,7 +864,7 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
               <label class="flbl">마찰손실 기준</label>
               <select class="fselect" id="frictionBase" onchange="calcDuct()">
                 <option value="0.8">0.8 Pa/m (저속)</option>
-                <option value="1.0" selected>1.0 Pa/m (표준)</option>
+                <option value="1.0" selected>1.0 Pa/m (실무 기본값)</option>
                 <option value="1.5">1.5 Pa/m (중속)</option>
                 <option value="2.0">2.0 Pa/m (고속)</option>
                 <option value="manual">직접입력</option>
@@ -921,13 +923,13 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
               <label class="flbl">덕트 압력 구분 (별표 9 표 1)</label>
               <select class="fselect" id="pressClass" onchange="calcDuct()">
                 <option value="low" selected>저압 (15 m/s 이하)</option>
-                <option value="high">고압 (20 m/s 이하)</option>
+                <option value="high">고압 1 · 2 (20 m/s 이하)</option>
               </select>
             </div>
           </div>
 
           <div class="nb org" style="margin-top:4px;">
-            <div class="nb-tit">⚡ 설계 권장 풍속 (실무 권장값 · 법정 상한은 별표 9 표 1)</div>
+            <div class="nb-tit">⚡ 설계 권장 풍속 (실무 권장값 · 유속 범위는 별표 9 표 1)</div>
             <div class="nb-txt" id="velStdText">급기 주덕트: 5~8 m/s / 급기 분기: 3~6 m/s</div>
           </div>
         </div>
@@ -1159,7 +1161,7 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
 
       <!-- 풍속 기준 -->
       <div id="g-vel" class="gm-panel active">
-        <div class="nb grn"><div class="nb-tit">✅ 설계 권장 풍속 (실무 권장값 · 별표 9 미규정)</div><div class="nb-txt">덕트 내 과도한 풍속은 소음과 압력손실을 증가시킵니다.<br/>법정 상한 : 별표 9 표 1 — 저압덕트 15 m/s 이하 · 고압덕트 20 m/s 이하.<br/>루버 면풍속 : 외기 도입 2 m/s 이하 · 배기 2.5 m/s 이하 (별표 9 2.1(10)).</div></div>
+        <div class="nb grn"><div class="nb-tit">✅ 설계 권장 풍속 (실무 권장값 · 별표 9 미규정)</div><div class="nb-txt">덕트 내 과도한 풍속은 소음과 압력손실을 증가시킵니다.<br/>유속 범위 : 별표 9 표 1 — 저압덕트 15 m/s 이하 · 고압 1 · 2덕트 20 m/s 이하.<br/>루버 면풍속 : 외기 도입 2 m/s 이하 · 배기 2.5 m/s 이하 (별표 9 2.1(10)).</div></div>
         <div class="twrap">
           <table class="rtbl">
             <thead><tr>
@@ -1173,7 +1175,7 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
               <tr><td>배기 주덕트</td><td>3~5</td><td>5~7</td><td>10</td><td>외기 배출</td></tr>
               <tr><td>배기 분기덕트</td><td>2~3</td><td>3~5</td><td>7</td><td>국소 배기</td></tr>
               <tr><td>외기덕트</td><td>2~4</td><td>3~5</td><td>6</td><td>외기 취입</td></tr>
-              <tr><td>플렉시블덕트</td><td>1~2</td><td>2~4</td><td>5</td><td>최대 1.5m 이내</td></tr>
+              <tr><td>플렉시블덕트</td><td>1~2</td><td>2~4</td><td>5</td><td>길이 2.0 m 이하 (KDS 31 25 30 : 2026 4.8 · KCS 31 20 20 3.6.9)</td></tr>
             </tbody>
           </table>
         </div>
@@ -1189,13 +1191,13 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
 
       <!-- 마찰손실 기준 -->
       <div id="g-friction" class="gm-panel">
-        <div class="nb org"><div class="nb-tit">⚠️ 마찰손실 등분법 설계 기준</div><div class="nb-txt">일반적으로 0.8~1.5 Pa/m 범위에서 설계합니다.</div></div>
+        <div class="nb org"><div class="nb-tit">⚠️ 마찰손실 등분법 설계 기준</div><div class="nb-txt">일반적으로 0.8~1.5 Pa/m 범위에서 설계합니다. (실무 참고값 — 별표 9 · KDS 31 25 30에는 마찰손실 기준 수치가 없고, KDS 31 25 30 : 2026 4.1은 설비공학편람 · ASHRAE 계산 절차 참조)</div></div>
         <div class="twrap">
           <table class="rtbl">
             <thead><tr><th>설계방법</th><th>마찰손실</th><th>적용</th><th>특징</th></tr></thead>
             <tbody>
               <tr><td>저속 설계</td><td>0.5~0.8 Pa/m</td><td>주거, 병원</td><td>저소음, 대구경</td></tr>
-              <tr><td class="highlight">표준 설계</td><td class="highlight">1.0 Pa/m</td><td class="highlight">일반 공조</td><td class="highlight">표준 기준</td></tr>
+              <tr><td class="highlight">실무 기본값</td><td class="highlight">1.0 Pa/m</td><td class="highlight">일반 공조</td><td class="highlight">실무 기본값(프로젝트별 조정)</td></tr>
               <tr><td>중속 설계</td><td>1.0~1.5 Pa/m</td><td>사무소, 상업</td><td>중간 절충</td></tr>
               <tr><td>고속 설계</td><td>1.5~2.5 Pa/m</td><td>소규모 덕트</td><td>소구경 경제적</td></tr>
             </tbody>
@@ -1212,7 +1214,7 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
 
       <!-- 사각덕트 규격 -->
       <div id="g-rect" class="gm-panel">
-        <div class="nb blue"><div class="nb-tit">📐 사각덕트 표준 규격 (실무 표준치수)</div><div class="nb-txt">장단비(AR)는 4:1 이내로 하며, 초과하는 경우 보강조치를 합니다 (별표 9 2.1(1)).</div></div>
+        <div class="nb blue"><div class="nb-tit">📐 사각덕트 표준 규격 (실무 표준치수)</div><div class="nb-txt">장단비(AR)는 4:1 이내로 하며, 초과하는 경우 보강조치를 합니다 (별표 9 2.1(1)).<br/>단면 축소는 30° 이하 · 확대는 15° 이하로 완만하게 하고(별표 9 2.1(4)), 직각으로 꺾이는 부분은 곡률반경 1.5 이상 엘보를 쓰거나 불가피하면 터닝베인을 설치합니다(별표 9 2.1(5)).</div></div>
         <div class="twrap">
           <table class="rtbl">
             <thead><tr><th>폭 W (mm)</th><th>높이 H (mm)</th><th>단면적 (m²)</th><th>수력직경 Dh (mm)</th><th>종횡비</th></tr></thead>
@@ -1251,8 +1253,9 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
           </table>
         </div>
         <div class="nb sky" style="margin-top:8px;"><div class="nb-tit">⭕ 스파이럴 덕트 (별표 9 표 4)</div><div class="nb-txt">저압 : 직경 450 이하 0.5 · 750 이하 0.6 · 1,000 이하 0.8 · 1,000 초과 1.0 mm<br/>고압 : 200 이하 0.5 · 600 이하 0.6 · 800 이하 0.8 · 1,000 이하 1.0 · 1,000 초과 1.2 mm<br/>※ 별표 9 표 2·4는 아연도금강판 기준입니다. 알루미늄·플렉시블은 별표 9에 규정이 없어 같은 값을 <b>참고</b>로 표시합니다.</div></div>
+        <div class="nb org" style="margin-top:8px;"><div class="nb-tit">🔩 스테인리스 강판제 덕트 (별표 9 2.2.2 표 7 · 표 8)</div><div class="nb-txt">적용 조건 : 내부정압 ±500 Pa 이내 · 풍속 15 m/s 이하(저압)<br/>장방형(표 7) : 장변 750 이하 0.5 · 1,500 이하 0.6 · 2,200 이하 0.8 · 2,200 초과 1.0 mm<br/>스파이럴(표 8) : 지름 600 이하 0.5 · 800 이하 0.6 · 1,000 이하 0.8 mm (1,000 초과는 규정 없음)<br/>※ 고압 1 · 2와 표 8 범위 밖은 별표 9 미규정 — 표 2 · 표 4 값을 <b>참고</b>로 표시합니다.</div></div>
         <div class="ref-box" style="margin-top:12px;">
-          <div class="ref-tit">📌 보강 기준 (참고 · 실무)</div>
+          <div class="ref-tit">📌 보강 기준 (참고 · 실무 — 원문은 KCS 31 20 20 표 3.2-16~19 참조)</div>
           <div class="ref-item">장변 750mm 초과: 2.4m 간격 이내 보강재 설치</div>
           <div class="ref-item">장변 1,500mm 초과: 1.8m 간격 이내 보강재 설치</div>
           <div class="ref-item">플랜지 접합: 1,200mm 이하 간격으로 설치</div>
@@ -1285,7 +1288,7 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
     <div data-secwrap>
     <div class="a4-sub" data-sec="덕트 규격 산정 결과">1. 덕트 규격 산정 결과</div>
     <div id="a4-result">
-      <div style="color:#94a3b8;font-size:11px;padding:10px;">단일 덕트 산정 탭에서 먼저 산정을 완료하세요.</div>
+      <div style="color:#94a3b8;font-size:11px;padding:10px;">산정 대기 — 단일 덕트 산정 탭에서 풍량(0보다 큰 값)을 입력해 산정하세요.</div>
     </div>
     </div>
 
@@ -1315,12 +1318,13 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
       <tr><td class="k">설계 방법</td><td>등마찰손실법 (Constant Friction Method) · 마찰손실 Darcy-Weisbach ΔP = λ(L/Dh)(ρV²/2) · 국부저항 ΔP = ζ(ρV²/2)</td></tr>
       <tr><td class="k">공기 밀도</td><td>1.2 kg/m³ (20°C, 1atm 기준)</td></tr>
       <tr><td class="k">마찰계수</td><td id="a4-lam-std">아연도금강판 λ=0.02 / 알루미늄 λ=0.018 / 스테인리스 λ=0.015 / 플렉시블 λ=0.05</td></tr>
-      <tr><td class="k">판두께 · 풍속 상한</td><td>별표 9 표 2(사각) · 표 4(스파이럴) — 아연도금강판 기준 · 표 1 저압 15 m/s · 고압 20 m/s 이하 · 장단비 4:1 이내(초과 시 보강조치)</td></tr>
-      <tr><td class="k">설계·시공기준</td><td>KDS 31 25 30 덕트설비 · KDS 31 25 20 환기설비 · KCS 31 20 20 덕트설비공사 · KCS 31 25 20 환기설비공사 (별표 9 1.3)</td></tr>
-      <tr><td class="k">국부저항계수</td><td>ASHRAE Duct Fitting Database · ADC 플렉시블 덕트 성능기준 대표값(참고) — 제조사 시험값 제출 시 대체</td></tr>
+      <tr><td class="k">판두께 · 풍속 상한</td><td>별표 9 표 2(사각) · 표 4(스파이럴) — 아연도금강판 기준 · 스테인리스 표 7(장방형) · 표 8(스파이럴)(±500 Pa · 15 m/s 이하) · 표 1 유속 범위 저압 15 m/s · 고압 1 · 2 20 m/s 이하 · 장단비 4:1 이내(초과 시 보강조치)</td></tr>
+      <tr><td class="k">설계·시공기준</td><td>KDS 31 25 30 : 2026 덕트설비 · KDS 31 25 20 : 2026 환기설비 · KCS 31 20 20 : 2026 덕트설비공사 · KCS 31 25 20 환기설비공사 (별표 9 1.3)</td></tr>
+      <tr><td class="k">국부저항계수</td><td>ASHRAE Duct Fitting Database · ADC 플렉시블 덕트 성능기준 대표값 — ASHRAE 원문 확인 전 참고값, 제조사 시험값 제출 시 대체 (KDS 31 25 30 : 2026 4.2)</td></tr>
     </table>
     </div>
 
+    <div id="a4-warn"></div>
     <div class="a4-footer">
       <span>공조 덕트 규격 산정 시스템 [MANMIN-Ver6.1]</span>
       <span>기계설비 기술기준 [별표 9] · Darcy-Weisbach 등마찰손실법</span>
@@ -1515,8 +1519,8 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
           <div style="font-size:11px;color:#64748b;line-height:1.8;">
             • 기계설비 기술기준 [별표 9] 덕트설비의 설계 및 시공 기준<br>
             &nbsp;&nbsp;(국토교통부 고시 제2021-851호 · 제2026-360호 타법개정, 2026. 7. 8. 시행)<br>
-            • 설계·시공기준 (별표 9 1.3) : KDS 31 25 30 덕트설비 · KDS 31 25 20 환기설비 · KCS 31 20 20 덕트설비공사 · KCS 31 25 20 환기설비공사<br>
-            • 판두께 : 별표 9 표 2(사각)·표 4(스파이럴) · 풍속 상한 : 표 1 (저압 15 m/s · 고압 20 m/s 이하)<br>
+            • 설계·시공기준 (별표 9 1.3) : KDS 31 25 30 : 2026 덕트설비 · KDS 31 25 20 : 2026 환기설비 · KCS 31 20 20 : 2026 덕트설비공사 · KCS 31 25 20 환기설비공사<br>
+            • 판두께 : 별표 9 표 2(사각)·표 4(스파이럴) · 스테인리스 표 7·표 8 · 유속 범위 : 표 1 (저압 15 m/s · 고압 1 · 2 20 m/s 이하)<br>
             • Darcy-Weisbach : ΔP/L = λ × ρV² / (2·Dh)<br>
             • 연속방정식 : Q = V × A<br>
             • 수력직경 : Dh = 2WH/(W+H) [사각] · D [원형]<br>
@@ -1579,7 +1583,7 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
 
       <!-- ══ 탭2: 풍속 기준 ══ -->
       <div class="gm-panel" id="mp-2" style="display:none;">
-        <div class="nb grn"><div class="nb-tit">✅ 설계 권장 풍속 (실무 권장값 · 별표 9 미규정)</div><div class="nb-txt">덕트 내 과도한 풍속은 소음, 압력손실, 구조 불안정을 유발합니다.<br/>법정 상한 : 별표 9 표 1 — 저압덕트 15 m/s 이하 · 고압덕트 20 m/s 이하.<br/>루버 면풍속 : 외기 도입 2 m/s 이하 · 배기 2.5 m/s 이하 (별표 9 2.1(10)).</div></div>
+        <div class="nb grn"><div class="nb-tit">✅ 설계 권장 풍속 (실무 권장값 · 별표 9 미규정)</div><div class="nb-txt">덕트 내 과도한 풍속은 소음, 압력손실, 구조 불안정을 유발합니다.<br/>유속 범위 : 별표 9 표 1 — 저압덕트 15 m/s 이하 · 고압 1 · 2덕트 20 m/s 이하.<br/>루버 면풍속 : 외기 도입 2 m/s 이하 · 배기 2.5 m/s 이하 (별표 9 2.1(10)).</div></div>
         <div class="twrap" style="margin-top:10px;">
           <table class="rtbl">
             <thead><tr><th>구분</th><th>저속 (m/s)</th><th>권장 (m/s)</th><th>최대 (m/s)</th><th>소음 기준</th><th>비고</th></tr></thead>
@@ -1591,7 +1595,7 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
               <tr><td>배기 주덕트</td><td>3~5</td><td>5~7</td><td>10</td><td>NC-40</td><td>외기 배출</td></tr>
               <tr><td>배기 분기덕트</td><td>2~3</td><td>3~5</td><td>7</td><td>NC-35</td><td>국소 배기</td></tr>
               <tr><td>외기덕트</td><td>2~4</td><td>3~5</td><td>6</td><td>NC-30</td><td>외기 취입</td></tr>
-              <tr><td>플렉시블덕트</td><td>1~2</td><td>2~4</td><td>5</td><td>NC-25</td><td>최대 1.5m</td></tr>
+              <tr><td>플렉시블덕트</td><td>1~2</td><td>2~4</td><td>5</td><td>NC-25</td><td>길이 2.0 m 이하 (KDS · KCS)</td></tr>
             </tbody>
           </table>
         </div>
@@ -1611,7 +1615,7 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
             <thead><tr><th>설계방법</th><th>마찰손실 (Pa/m)</th><th>적용 건물</th><th>특징</th></tr></thead>
             <tbody>
               <tr><td>저속 설계</td><td>0.5~0.8</td><td>주거·병원·호텔</td><td>저소음, 대구경</td></tr>
-              <tr class="highlight"><td style="font-weight:900;">표준 설계 ★</td><td class="mono" style="font-weight:900;">1.0</td><td>일반 공조 (기준)</td><td>표준 설계기준</td></tr>
+              <tr class="highlight"><td style="font-weight:900;">실무 기본값 ★</td><td class="mono" style="font-weight:900;">1.0</td><td>일반 공조</td><td>실무 기본값(프로젝트별 조정)</td></tr>
               <tr><td>중속 설계</td><td>1.0~1.5</td><td>사무소·상업시설</td><td>절충형</td></tr>
               <tr><td>고속 설계</td><td>1.5~2.5</td><td>소규모·단거리</td><td>소구경, 경제적</td></tr>
             </tbody>
@@ -1622,7 +1626,7 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
           <div class="ref-item">아연도금강판 (기본) : λ = 0.020</div>
           <div class="ref-item">알루미늄 덕트 : λ = 0.018 (약 10% 저감)</div>
           <div class="ref-item">스테인리스 (위생·주방용) : λ = 0.015</div>
-          <div class="ref-item">플렉시블 덕트 : λ = 0.050 (마찰 2.5배 — 1.5m 이내 사용)</div>
+          <div class="ref-item">플렉시블 덕트 : λ = 0.050 (마찰 2.5배 — 길이 2.0 m 이하, KDS 31 25 30 : 2026 4.8)</div>
         </div>
       </div><!-- /mp-3 -->
 
@@ -1634,7 +1638,7 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
           <button class="seg-btn" id="rs-th" onclick="switchRuleTab('th',this)" style="flex:1;min-width:100px;">🔩 판두께</button>
         </div>
         <div id="rule-sq">
-          <div class="nb blue"><div class="nb-tit">📐 표준 사각덕트 규격 — 장단비 4:1 이내 (별표 9 2.1(1))</div></div>
+          <div class="nb blue"><div class="nb-tit">📐 표준 사각덕트 규격 — 장단비 4:1 이내 (별표 9 2.1(1))</div><div class="nb-txt">축소 30° · 확대 15° 이하(별표 9 2.1(4)) · 직각 곡관은 곡률반경 1.5 이상 엘보 또는 터닝베인(별표 9 2.1(5))</div></div>
           <div class="twrap" style="margin-top:8px;">
             <table class="rtbl"><thead><tr><th>W×H (mm)</th><th>단면적 (m²)</th><th>Dh (mm)</th><th>AR</th></tr></thead>
             <tbody id="modal-rect-tbody"></tbody></table>
@@ -1665,12 +1669,13 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
             </table>
           </div>
           <div class="nb sky" style="margin-top:8px;"><div class="nb-tit">⭕ 스파이럴 덕트 (별표 9 표 4)</div><div class="nb-txt">저압 : 직경 450 이하 0.5 · 750 이하 0.6 · 1,000 이하 0.8 · 1,000 초과 1.0 mm<br/>고압 : 200 이하 0.5 · 600 이하 0.6 · 800 이하 0.8 · 1,000 이하 1.0 · 1,000 초과 1.2 mm<br/>※ 별표 9 표 2·4는 아연도금강판 기준입니다. 알루미늄·플렉시블은 별표 9에 규정이 없어 같은 값을 <b>참고</b>로 표시합니다.</div></div>
+        <div class="nb org" style="margin-top:8px;"><div class="nb-tit">🔩 스테인리스 강판제 덕트 (별표 9 2.2.2 표 7 · 표 8)</div><div class="nb-txt">적용 조건 : 내부정압 ±500 Pa 이내 · 풍속 15 m/s 이하(저압)<br/>장방형(표 7) : 장변 750 이하 0.5 · 1,500 이하 0.6 · 2,200 이하 0.8 · 2,200 초과 1.0 mm<br/>스파이럴(표 8) : 지름 600 이하 0.5 · 800 이하 0.6 · 1,000 이하 0.8 mm (1,000 초과는 규정 없음)<br/>※ 고압 1 · 2와 표 8 범위 밖은 별표 9 미규정 — 표 2 · 표 4 값을 <b>참고</b>로 표시합니다.</div></div>
           <div class="ref-box" style="margin-top:10px;">
-            <div class="ref-tit">📌 보강 및 접합 기준 (참고 · 실무)</div>
+            <div class="ref-tit">📌 보강 및 접합 기준 (참고 · 실무 — 원문은 KCS 31 20 20 표 3.2-16~19 참조)</div>
             <div class="ref-item">장변 750mm 초과 : 간격 2.4m 이내 보강재 설치</div>
             <div class="ref-item">장변 1,500mm 초과 : 간격 1.8m 이내 보강재 설치</div>
             <div class="ref-item">플랜지 접합 : 간격 1,200mm 이하</div>
-            <div class="ref-item">플렉시블 덕트 : 직선 1.5m 이내, 굴곡반경 D의 1.5배 이상</div>
+            <div class="ref-item">플렉시블 덕트 : 길이 2.0 m 이하 · 직선 시공 (KDS 31 25 30 : 2026 4.8 · KCS 31 20 20 3.6.9 — 별표 9 3.1(2)의 「1.5 m 이하」와 달라 별표 9 1.3에 따라 KDS · KCS를 따름), 굴곡반경 D의 1.5배 이상</div>
           </div>
         </div>
       </div><!-- /mp-4 -->
@@ -1892,9 +1897,12 @@ function calcDuct(){
   // friction
   var fb = document.getElementById('frictionBase').value;
   var fr_row = document.getElementById('manualFrictionRow');
+  var frBad = false;
   if(fb === 'manual'){
     fr_row.style.display = '';
-    state.frictionBase = parseFloat(document.getElementById('manualFriction').value) || 1.0;
+    // v6.1.5 — 유한 양수가 아니면 산정 중단(종전: 0 · 빈 값 → 1.0, 음수 → NaN 계산서)(교차검증 P4)
+    var mfv = parseFloat(document.getElementById('manualFriction').value);
+    if(isFinite(mfv) && mfv > 0) state.frictionBase = mfv; else frBad = true;
   } else {
     fr_row.style.display = 'none';
     state.frictionBase = parseFloat(fb);
@@ -1914,7 +1922,11 @@ function calcDuct(){
   var cmh = getFlowCmh();
   state.flowCmh = cmh;
 
-  if(cmh <= 0){ renderResultPlaceholder(); return; }
+  // v6.1.5 — STEP 2(재질 · 압력 구분 · λ 방식 · 플렉시블 보정)가 바뀌면 다중 결과도 같은 설정으로 다시 산정(교차검증 P12)
+  mmMultiResync();
+  // v6.1.5 — 풍량 0 이하 · 빈 값 · 마찰손실 잘못 입력이면 옛 결과를 지우고 요약 · A4 「산정 대기」, 인쇄 · JPG 막음(교차검증 P2 · P4)
+  if(frBad){ mmClearSingle('마찰손실 직접입력값을 0보다 큰 수로 입력하세요'); return; }
+  if(cmh <= 0){ var _fv = (document.getElementById('flowInput').value || '').trim(); mmClearSingle(_fv === '' ? null : '풍량을 0보다 크게 입력하세요'); return; }
 
   // 단위변환 표시
   document.getElementById('convBox').style.display = '';
@@ -1939,10 +1951,30 @@ function calcDuct(){
   res.spaceType = state.spaceType;
   res.dtype = state.dtype;
   res.velStd = vs;
+  // v6.1.5 — 목록 밖 고정 치수 대체 표기(교차검증 P17) — 산정 값 불변
+  if(state.dtype !== 'circ'){
+    var _fx = [], _fw = parseFloat(document.getElementById('fixW').value) || 0, _fh = parseFloat(document.getElementById('fixH').value) || 0;
+    if(_fw > 0 && getBestStdSize(_fw) !== _fw) _fx.push('W 입력 ' + _fw + ' → 적용 ' + getBestStdSize(_fw));
+    if(_fh > 0 && getBestStdSize(_fh) !== _fh) _fx.push('H 입력 ' + _fh + ' → 적용 ' + getBestStdSize(_fh));
+    if(_fx.length) res.fixNote = _fx.join(' · ') + ' mm (표준 치수 목록으로 대체)';
+  }
   state.result = res;
 
   renderResult(res);
   updateStep(4);
+}
+
+// v6.1.5 — 단일 결과 지우기(교차검증 P2 — 24 펌프 mmInvalid · 22 냉온수 clearResult 방식)
+function mmClearSingle(msg){
+  state.result = null;
+  var cb = document.getElementById('convBox'); if(cb) cb.style.display = 'none';
+  renderResultPlaceholder(msg);
+  updateA4();
+}
+// v6.1.5 — 다중 결과의 STEP 2 설정 표식(교차검증 P12)
+function mmMultiSnap(){ return [state.material, state.pressClass, state.lamMode, flexCF()].join('|'); }
+function mmMultiResync(){
+  if(state.multiResults && state.multiResults.length && state.multiSnap && state.multiSnap !== mmMultiSnap()) calcMulti(true);
 }
 
 // ── 사각덕트 산정 ──
@@ -2088,7 +2120,7 @@ function calcCircDuct(cms, lambda, friction_pa_m, fixD){
   var lamR = lambdaOf(state.material, V, Dm2);
   var Fr = lamR * rho * V * V / (2 * Dm2) * cf;
 
-  return {
+  var resC = {
     D: bestD,
     D_calc: D_mm,
     A: A,
@@ -2100,6 +2132,9 @@ function calcCircDuct(cms, lambda, friction_pa_m, fixD){
     fixed: fixed,
     thickness: getCircThickness(bestD, state.material)
   };
+  // v6.1.5 — 소요 구경이 표준 최대(Φ1250)를 넘으면 표시 · 경고(교차검증 P6) — 채택 값 불변
+  if(!fixed && D_mm > CIRC_SIZES[CIRC_SIZES.length - 1] + 0.05){ resC.overMax = true; resC.overFr = Fr > targetFr * 1.0001; }
+  return resC;
 }
 
 // ── 표준 치수 찾기 ──
@@ -2113,15 +2148,27 @@ function getBestStdSize(val){
   return best;
 }
 
-// ── 판두께 ── 기계설비 기술기준 별표 9 표 2(사각·앵글플랜지) · 표 4(스파이럴)
-//   표는 아연도금강판 기준. 알루미늄·플렉시블은 별표 9 미규정 → 같은 값을 참고로 표시
+// ── 판두께 ── 기계설비 기술기준 별표 9 표 2(사각·앵글플랜지) · 표 4(스파이럴) — 아연도금강판
+//   v6.1.5 — 스테인리스는 별표 9 2.2.2 표 7(장방형) · 표 8(스파이럴)(내부정압 ±500 Pa · 15 m/s 이하 = 저압)(교차검증 P3)
+//   알루미늄·플렉시블, 스테인리스 고압 1·2 · 표 8 범위 밖(Φ1,000 초과)은 별표 9 미규정 → 표 2 · 4 값을 참고로 표시
 function vLegal(){ return (state.pressClass === 'high') ? 20 : 15; } // 별표 9 표 1
-function thkNote(mat){
-  var pc = (state.pressClass === 'high') ? '고압' : '저압';
-  return (mat === 'alum' || mat === 'flex') ? pc + ' · 참고(별표 9 미규정)' : pc + ' · 별표 9';
+function thkNote(mat, r){
+  var hi = (state.pressClass === 'high'), pc = hi ? '고압 1 · 2' : '저압';
+  if(mat === 'alum' || mat === 'flex') return pc + ' · 참고(별표 9 미규정)';
+  if(mat === 'ss'){
+    var circ = r && r.dtype === 'circ';
+    if(hi) return pc + ' · 미규정 · 참고(별표 9 표 7 · 8은 ±500 Pa · 15 m/s 이하만 — 표 ' + (circ ? '4' : '2') + ' 값)';
+    if(circ && r.D > 1000) return pc + ' · 미규정 · 참고(별표 9 표 8은 Φ1,000 이하만 — 표 4 값)';
+    return pc + ' · 별표 9 표 ' + (circ ? '8' : '7') + '(스테인리스)';
+  }
+  return pc + ' · 별표 9';
 }
 function getThickness(maxSide, mat){
   var t;
+  if(mat === 'ss' && state.pressClass !== 'high'){   // v6.1.5 — 별표 9 2.2.2 표 7
+    if(maxSide <= 750) t = 0.5; else if(maxSide <= 1500) t = 0.6; else if(maxSide <= 2200) t = 0.8; else t = 1.0;
+    return t.toFixed(1);
+  }
   if(state.pressClass === 'high'){
     if(maxSide <= 450) t = 0.8; else if(maxSide <= 1200) t = 1.0; else t = 1.2;
   } else {
@@ -2132,6 +2179,10 @@ function getThickness(maxSide, mat){
 }
 function getCircThickness(d, mat){
   var t;
+  if(mat === 'ss' && state.pressClass !== 'high' && d <= 1000){   // v6.1.5 — 별표 9 2.2.2 표 8(Φ1,000 초과는 규정 없음 → 표 4 참고)
+    if(d <= 600) t = 0.5; else if(d <= 800) t = 0.6; else t = 0.8;
+    return t.toFixed(1);
+  }
   if(state.pressClass === 'high'){
     if(d <= 200) t = 0.5; else if(d <= 600) t = 0.6; else if(d <= 800) t = 0.8;
     else if(d <= 1000) t = 1.0; else t = 1.2;
@@ -2144,18 +2195,18 @@ function getCircThickness(d, mat){
 // ══════════════════════════════════════════
 //  RENDER RESULT
 // ══════════════════════════════════════════
-function renderResultPlaceholder(){
+function renderResultPlaceholder(msg){
   var rb = document.getElementById('resultBody');
   if(rb){
     rb.innerHTML =
       '<div class="result-placeholder" id="resultPlaceholder">' +
-        '<div class="rph-ico">💨</div>' +
-        '<div class="rph-tit">풍량을 입력하고 산정하세요</div>' +
+        '<div class="rph-ico">' + (msg ? '⚠️' : '💨') + '</div>' +
+        '<div class="rph-tit">' + (msg ? '산정 대기 — ' + msg : '풍량을 입력하고 산정하세요') + '</div>' +
         '<div class="rph-sub">STEP 2 덕트 조건 설정 후<br/>STEP 3에서 풍량을 입력하세요</div>' +
       '</div>';
   }
   var badge = document.getElementById('resultBadge');
-  if(badge){ badge.textContent = 'RESULT'; badge.className = 'cbadge pur'; }
+  if(badge){ badge.textContent = msg ? '⚠ 입력 확인' : 'RESULT'; badge.className = msg ? 'cbadge org' : 'cbadge pur'; }
 }
 
 function renderResult(r){
@@ -2169,6 +2220,10 @@ function renderResult(r){
 
   var badge = velOk ? 'cbadge grn' : (velHi ? 'cbadge red' : 'cbadge sky');
   var badgeTxt = velOk ? '✅ 적정' : (velHi ? '⚠️ 초과' : '🔵 여유');
+  // v6.1.5 — 종합 판정: 표 1 유속 범위 → 마찰손실 기준 초과 → 장단비 보강 순으로 배지에 반영(교차검증 P14)
+  if(r.V > vLegal()){ badge = 'cbadge red'; badgeTxt = '⛔ 유속 범위 초과'; }
+  else if(r.Fr > state.frictionBase * 1.0001){ badge = 'cbadge red'; badgeTxt = '⚠️ 마찰 초과'; }
+  else if(r.dtype !== 'circ' && r.ar > 4.0001){ badge = 'cbadge org'; badgeTxt = velOk ? '🔧 보강 필요' : badgeTxt + ' · 🔧 보강'; }
   document.getElementById('resultBadge').className = badge;
   document.getElementById('resultBadge').textContent = badgeTxt;
 
@@ -2199,7 +2254,7 @@ function renderResult(r){
         <div class="drh-lbl">${r.dtype==='flat'?'편평':'사각'}덕트 규격</div>
         <div class="drh-val" style="font-size:24px;">${r.W}×${r.H}</div>
         <div class="drh-unit">mm × mm</div>
-        <div class="drh-sub">종횡비 ${r.ar.toFixed(1)}:1</div>
+        <div class="drh-sub">종횡비 ${r.ar.toFixed(1)}:1${r.freeCalc?' · 비표준(50 mm 올림)':''}</div>
       </div>
       <div class="drh-box vel">
         <div class="drh-lbl">실제 풍속</div>
@@ -2242,7 +2297,9 @@ function renderResult(r){
     html += `
     <div class="crow"><span class="ck">폭 W</span><span class="cv">${r.W} mm</span></div>
     <div class="crow"><span class="ck">높이 H</span><span class="cv">${r.H} mm</span></div>
-    <div class="crow"><span class="ck">종횡비 W/H</span><span class="cv">${r.ar.toFixed(1)} : 1</span></div>`;
+    <div class="crow"><span class="ck">종횡비 W/H</span><span class="cv">${r.ar.toFixed(1)} : 1</span></div>
+    ${r.freeCalc?`<div class="crow"><span class="ck">규격 구분</span><span class="cv">비표준(50 mm 올림)</span></div>`:''}
+    ${r.fixNote?`<div class="crow"><span class="ck">고정 치수</span><span class="cv">${r.fixNote}</span></div>`:''}`;
   }
   html += `
     <div class="crow"><span class="ck">풍량 Q</span><span class="cv">${(r.cms).toFixed(4)} m³/s</span></div>
@@ -2252,8 +2309,8 @@ function renderResult(r){
     <div class="crow"><span class="ck">마찰계수 λ (${state.lamMode==='cole'?'Swamee-Jain, ε '+ROUGH_MM[state.material]+' mm':'고정'})</span><span class="cv">${(r.lam!==undefined?r.lam:LAMBDA[state.material]).toFixed(4)}</span></div>
     <div class="crow"><span class="ck">레이놀즈수 Re</span><span class="cv">${r.Re!==undefined?fmt(r.Re,0):'—'}</span></div>
     ${state.material==='flex'&&flexCF()!==1?`<div class="crow"><span class="ck">플렉시블 압축 보정 CF</span><span class="cv">×${flexCF().toFixed(1)}</span></div>`:''}
-    <div class="crow"><span class="ck">판두께 (${MAT_LABEL[state.material]} · ${thkNote(state.material)})</span><span class="cv">${r.thickness} mm</span></div>
-    <div class="crow"><span class="ck">법정 풍속 상한 (별표 9 표 1)</span><span class="cv">${vLegal()} m/s 이하 — ${r.V<=vLegal()?'적합':'초과'}</span></div>
+    <div class="crow"><span class="ck">판두께 (${MAT_LABEL[state.material]} · ${thkNote(state.material, r)})</span><span class="cv">${r.thickness} mm</span></div>
+    <div class="crow"><span class="ck">유속 범위 (별표 9 표 1)</span><span class="cv">${vLegal()} m/s 이하 — ${r.V<=vLegal()?'적합':'초과'}</span></div>
   </div>`;
 
   // 인접 규격 비교표
@@ -2271,12 +2328,15 @@ function renderResult(r){
   }
 
   if(r.V > vLegal()){
-    html += `<div class="nb red" style="margin-top:10px;"><div class="nb-tit">⛔ 법정 풍속 상한 초과</div><div class="nb-txt">실제 풍속 ${r.V.toFixed(2)} m/s &gt; ${state.pressClass==='high'?'고압':'저압'}덕트 상한 ${vLegal()} m/s (기계설비 기술기준 별표 9 표 1). 덕트 치수를 키우세요.</div></div>`;
+    html += `<div class="nb red" style="margin-top:10px;"><div class="nb-tit">⛔ 별표 9 표 1 유속 범위 초과</div><div class="nb-txt">실제 풍속 ${r.V.toFixed(2)} m/s &gt; ${state.pressClass==='high'?'고압 1 · 2':'저압'}덕트 유속 범위 ${vLegal()} m/s 이하 (기계설비 기술기준 별표 9 표 1). 덕트 치수를 키우세요.</div></div>`;
   }
   if(r.dtype !== 'circ' && r.ar > 4.0001){
     html += `<div class="nb org" style="margin-top:10px;"><div class="nb-tit">🔧 장단비 4:1 초과 — 보강조치</div><div class="nb-txt">장단비 ${r.ar.toFixed(2)} : 1 — 별표 9 2.1(1)에 따라 4:1을 초과하는 경우 보강조치를 해야 합니다.</div></div>`;
   }
-  if(r.overFr){
+  if(r.overMax){
+    html += `<div class="nb red" style="margin-top:10px;"><div class="nb-tit">📏 표준 최대 Φ${CIRC_SIZES[CIRC_SIZES.length-1]} 초과 — 사각 · 복수 덕트 검토</div><div class="nb-txt">소요 구경 Φ${r.D_calc.toFixed(1)} mm가 표준 최대 Φ${CIRC_SIZES[CIRC_SIZES.length-1]}을 넘어 최대 구경으로 표시합니다. ΔP/L ${r.Fr.toFixed(3)} Pa/m${r.overFr?' &gt; 기준 '+state.frictionBase+' Pa/m (마찰 초과)':''}. 사각덕트 또는 복수 덕트로 나누어 검토하세요.</div></div>`;
+  }
+  if(r.overFr && !r.overMax){
     html += `<div class="nb org" style="margin-top:10px;"><div class="nb-tit">📏 치수 고정(검증)</div><div class="nb-txt">고정 치수 조건에서 ΔP/L ≤ ${state.frictionBase} Pa/m를 만족하는 표준 규격이 없어 최근접 규격을 표시합니다.</div></div>`;
   }
 
@@ -2285,7 +2345,7 @@ function renderResult(r){
 
 // v5.1.2 — 인접 규격 판정: 법정 풍속 상한(별표 9 표 1) → 마찰손실 기준 초과 → 설계 권장 풍속 순
 function nbJudge(V, Fr, vs){
-  if(V > vLegal()) return '⛔ 법정 초과';
+  if(V > vLegal()) return '⛔ 유속 범위 초과';
   if(Fr > state.frictionBase * 1.0001) return '⚠ 마찰 초과';
   if(V >= vs.min && V <= vs.max) return '✓ 적정';
   return V > vs.max ? '⚠ 풍속 초과' : '🔵 저속';
@@ -2452,9 +2512,10 @@ function removeMultiItem(id){
   if(el) el.remove();
 }
 
-function calcMulti(){
-  var items = document.querySelectorAll('.multi-item');
-  if(!items.length){ showToast('❌ 구간을 먼저 추가하세요'); return; }
+function calcMulti(quiet){
+  // v6.1.5 — 다중 구간만 읽음(종전 '.multi-item' 은 정압 탭 구간 sps_ · spf_ 까지 읽어 TypeError)(교차검증 P1)
+  var items = document.querySelectorAll('#multiItems .multi-item');
+  if(!items.length){ if(!quiet) showToast('❌ 구간을 먼저 추가하세요'); return; }
 
   var results = [];
   items.forEach(function(item){
@@ -2462,10 +2523,12 @@ function calcMulti(){
     var name  = document.getElementById(id+'_name').value || id;
     var dtype = document.getElementById(id+'_dtype').value;
     var space = document.getElementById(id+'_space').value;
-    var flow  = parseFloat(document.getElementById(id+'_flow').value) || 0;
-    var fr    = parseFloat(document.getElementById(id+'_fr').value) || 1.0;
+    var flowV = (document.getElementById(id+'_flow').value || '').trim();
+    var flow  = parseFloat(flowV) || 0;
+    var fr    = parseFloat(document.getElementById(id+'_fr').value);   // v6.1.5 — 0 · 빈 값 → 1.0 대체 · 음수 통과 없앰(교차검증 P4)
 
-    if(flow <= 0){ results.push({name:name, error:'풍량 미입력'}); return; }
+    if(flow <= 0){ results.push({name:name, error: flowV === '' ? '풍량 미입력' : '풍량 0 이하 — 산정 안 함'}); return; }
+    if(!(isFinite(fr) && fr > 0)){ results.push({name:name, error:'마찰손실 0 이하 · 빈 값 — 산정 안 함'}); return; }
 
     var cms = flow / 3600;
     var lambda = LAMBDA[state.material] || LAMBDA['galv']; // BUG-FIX: 단일 산정 재질 연동
@@ -2486,8 +2549,9 @@ function calcMulti(){
   });
 
   state.multiResults = results;
+  state.multiSnap = mmMultiSnap();
   renderMultiResult(results);
-  showToast('✅ ' + results.length + '개 구간 산정 완료');
+  if(!quiet) showToast('✅ ' + results.length + '개 구간 산정 완료');
 }
 
 function calcRectDuct_multi(cms, lambda, friction_pa_m, arLimit, dtype){
@@ -2517,7 +2581,7 @@ function renderMultiResult(results){
       <td class="mono">${r.V.toFixed(2)}</td>
       <td class="mono">${r.Fr.toFixed(3)}</td>
       <td class="mono">${r.thickness}</td>
-      <td>${r.V>vLegal()?'<span class="duct-tag warn">⛔ 법정 초과</span>':ok?'<span class="duct-tag ok">✓ 적정</span>':'<span class="duct-tag warn">⚠ 검토</span>'}</td>
+      <td>${r.V>vLegal()?'<span class="duct-tag warn">⛔ 유속 범위 초과</span>':r.overMax?'<span class="duct-tag warn">⚠ 최대 규격 초과</span>':ok?'<span class="duct-tag ok">✓ 적정</span>':'<span class="duct-tag warn">⚠ 검토</span>'}</td>
     </tr>`;
   });
   html += '</tbody></table></div>';
@@ -2558,7 +2622,7 @@ function spAddSeg(){
   spSegN++;
   var id = 'sps_' + spSegN;
   var html = `<div class="multi-item" id="${id}">
-    <div class="multi-item-head"><div class="multi-item-title">📏 구간 ${spSegN}</div><button class="multi-del" onclick="document.getElementById('${id}').remove()">✕</button></div>
+    <div class="multi-item-head"><div class="multi-item-title">📏 구간 ${spSegN}</div><button class="multi-del" onclick="document.getElementById('${id}').remove();spRefreshFitSegs();">✕</button></div>
     <div class="frow3">
       <div class="fgrp"><label class="flbl">구간명</label><input class="finput" id="${id}_name" type="text" value="구간 ${spSegN}"/></div>
       <div class="fgrp"><label class="flbl">형상</label><select class="fselect" id="${id}_dtype" onchange="spSegShape('${id}')"><option value="circ">원형 Φ</option><option value="rect">사각 W×H</option></select></div>
@@ -2607,7 +2671,11 @@ function spFitType(id){
 function spRefreshFitSegs(){
   var segs = Array.prototype.slice.call(document.querySelectorAll('#spSegs .multi-item'));
   var opts = segs.map(function(s){ var nm = document.getElementById(s.id+'_name'); return `<option value="${s.id}">${nm?nm.value:s.id}</option>`; }).join('');
-  document.querySelectorAll('.sp-fit-seg').forEach(function(sel){ var cur = sel.value; sel.innerHTML = opts; if(cur && Array.prototype.some.call(sel.options,function(o){return o.value===cur;})) sel.value = cur; });
+  // v6.1.5 — 기준 구간이 지워지면 첫 구간으로 몰래 바꾸지 않고 「삭제된 구간」으로 남겨 계산 때 오류(교차검증 P5)
+  document.querySelectorAll('.sp-fit-seg').forEach(function(sel){ var cur = sel.value; sel.innerHTML = opts;
+    if(cur && cur !== '__gone' && !Array.prototype.some.call(sel.options,function(o){return o.value===cur;})) cur = '__gone';
+    if(cur === '__gone') sel.insertAdjacentHTML('afterbegin', '<option value="__gone">⚠ 삭제된 구간 — 다시 선택</option>');
+    if(cur && Array.prototype.some.call(sel.options,function(o){return o.value===cur;})) sel.value = cur; });
 }
 function spReset(){
   var s = document.getElementById('spSegs'), f = document.getElementById('spFits');
@@ -2623,13 +2691,14 @@ function spCalc(){
   var flowEl = document.getElementById('sp_flow');
   var cmh = parseFloat(flowEl.value) || 0;
   if(cmh <= 0 && state.flowCmh > 0){ cmh = state.flowCmh; flowEl.value = Math.round(cmh); }
-  if(cmh <= 0){ showToast('❌ 풍량을 입력하세요'); return; }
+  if(cmh <= 0){ spFail(['풍량을 0보다 크게 입력하세요']); showToast('❌ 풍량을 입력하세요'); return; }
   var cms = cmh / 3600, rho = 1.2;
-  var segs = [], fits = [], err = [];
+  var segs = [], fits = [], err = [], hard = [];   // v6.1.5 — hard: 음수 · 기준 구간 없음 → 계산 안 함(교차검증 P5)
   document.querySelectorAll('#spSegs .multi-item').forEach(function(s){
     var id = s.id, dtype = document.getElementById(id+'_dtype').value, mat = document.getElementById(id+'_mat').value;
     var L = parseFloat(document.getElementById(id+'_len').value) || 0;
     var name = document.getElementById(id+'_name').value || id;
+    if(L < 0){ hard.push(name + ': 길이 L 음수(' + L + ' m)'); return; }
     var A, Dh, dim;
     if(dtype === 'circ'){
       var d = parseFloat(document.getElementById(id+'_d').value) || 0; if(d<=0){ err.push(name+': 직경 미입력'); return; }
@@ -2651,15 +2720,18 @@ function spCalc(){
     var segId = document.getElementById(id+'_seg').value;
     var seg = segs.filter(function(s){return s.id===segId;})[0];
     var lib = ZETA_LIB.filter(function(z){return z.k===k;})[0];
+    if(n < 0){ hard.push((lib ? lib.l : k) + ': 수량 음수(' + n + ')'); return; }
     if(k === 'fixed'){
       var pa = parseFloat(document.getElementById(id+'_pa').value)||0;
+      if(pa < 0){ hard.push('직접입력 손실 음수(' + pa + ' Pa)'); return; }
       var memo = document.getElementById(id+'_memo').value||'';
       fits.push({name:'직접입력'+(memo?' — '+memo:''), n:n, z:null, Pv:null, dp:pa*n, seg:'—'});
     } else {
-      if(!seg){ err.push(lib.l+': 기준 구간 없음'); return; }
+      if(!seg){ hard.push(lib.l + ': 기준 구간 없음' + (segId === '__gone' ? '(삭제된 구간 — 다시 선택)' : '')); return; }
       fits.push({name:lib.l, n:n, z:lib.z, Pv:seg.Pv, dp:lib.z*seg.Pv*n, seg:seg.name});
     }
   });
+  if(hard.length){ spFail(hard); showToast('❌ 입력 오류 — 계산 안 함'); return; }
   if(!segs.length && !fits.length){ showToast('❌ 구간 또는 피팅을 추가하세요'); return; }
   var dpF = segs.reduce(function(a,s){return a+s.dp;},0), dpZ = fits.reduce(function(a,f){return a+f.dp;},0);
   var total = dpF + dpZ;
@@ -2671,6 +2743,13 @@ function spCalc(){
   spRender(res);
   updateA4();
   showToast('✅ 정압 계산 완료 — 총 ' + total.toFixed(1) + ' Pa');
+}
+function spFail(list){   // v6.1.5 — 정압 결과 지우고 오류 표시(교차검증 P5)
+  spState.res = null;
+  var rb = document.getElementById('spResult');
+  if(rb) rb.innerHTML = '<div class="nb red"><div class="nb-tit">⛔ 입력 오류 — 계산 안 함</div><div class="nb-txt">' + list.join('<br/>') + '</div></div>';
+  var bd = document.getElementById('spBadge'); if(bd){ bd.className = 'cbadge red'; bd.textContent = '⚠ 입력 확인'; }
+  updateA4();
 }
 function spTable(res, forA4){
   var tcls = forA4 ? 'a4-meta-table' : 'rtbl';
@@ -2701,7 +2780,7 @@ function spRender(res){
     h += ok ? `<div class="nb grn" style="margin-top:10px;"><div class="nb-tit">✅ 적정</div><div class="nb-txt">장비 기외정압 ${res.esp} Pa ≥ 소요 정압 ${res.total.toFixed(1)} Pa (여유 ${(res.esp-res.total).toFixed(1)} Pa)</div></div>`
              : `<div class="nb red" style="margin-top:10px;"><div class="nb-tit">⚠️ 정압 초과</div><div class="nb-txt">소요 정압 ${res.total.toFixed(1)} Pa 가 장비 기외정압 ${res.esp} Pa 를 초과합니다. ΔP∝Q² 가정 시 추정 풍량 약 ${Math.round(res.qEst)} m³/h (정격의 ${Math.round(res.qEst/res.cmh*100)}%). 실제 운전점은 제조사 P-Q 곡선으로 확정하세요.</div></div>`;
   }
-  h += `<div style="font-size:11px;color:#64748b;margin-top:8px;">※ ζ 는 ASHRAE Fundamentals Ch.21 · Duct Fitting Database · ADC 대표값(참고). 플렉시블 압축 보정 CF 는 STEP 2 설정값(현재 ×${flexCF().toFixed(1)}).</div>`;
+  h += `<div style="font-size:11px;color:#64748b;margin-top:8px;">※ ζ 는 ASHRAE Fundamentals Ch.21 · Duct Fitting Database · ADC 대표값 — ASHRAE 원문 확인 전 참고값(KDS 31 25 30 : 2026 4.2 — 설비공학편람 · ASHRAE 저항계수 참조). 플렉시블 압축 보정 CF 는 STEP 2 설정값(현재 ×${flexCF().toFixed(1)}).</div>`;
   document.getElementById('spResult').innerHTML = h;
 }
 function spRenderA4(){
@@ -2761,11 +2840,13 @@ function updateA4(){
       <tr><td class="k">설계 풍량</td><td>${fmt(r.cmh,0)} m³/h (${r.cms.toFixed(4)} m³/s)</td><td class="k">마찰손실 기준</td><td>${state.frictionBase} Pa/m</td></tr>
       <tr><td class="k">산정 규격</td><td style="font-weight:900;font-size:13px;">${size}</td><td class="k">풍속 판정</td><td style="color:${velOk?'#16a34a':'#dc2626'};font-weight:800;">${r.V.toFixed(2)} m/s (${velOk?'적정':(r.V>vs.max?'초과':'저속')})</td></tr>
       <tr><td class="k">수력직경 Dh</td><td>${r.Dh.toFixed(1)} mm</td><td class="k">실제 ΔP/L</td><td>${r.Fr.toFixed(3)} Pa/m</td></tr>
-      <tr><td class="k">단면적</td><td>${(r.A*10000).toFixed(2)} cm²</td><td class="k">판두께</td><td>${r.thickness} mm (${thkNote(state.material)})</td></tr>
-      <tr><td class="k">압력 구분</td><td>${state.pressClass==='high'?'고압덕트':'저압덕트'} (별표 9 표 1 · KCS 31 20 20 표 3.2-1)</td><td class="k">법정 풍속 상한</td><td style="color:${r.V<=vLegal()?'#16a34a':'#dc2626'};font-weight:800;">${vLegal()} m/s 이하 — ${r.V<=vLegal()?'적합':'초과'}</td></tr>
+      <tr><td class="k">단면적</td><td>${(r.A*10000).toFixed(2)} cm²</td><td class="k">판두께</td><td>${r.thickness} mm (${thkNote(state.material, r)})</td></tr>
+      <tr><td class="k">압력 구분</td><td>${state.pressClass==='high'?'고압 1 · 2덕트':'저압덕트'} (별표 9 표 1 · KCS 31 20 20 표 3.2-1)</td><td class="k">유속 범위(표 1)</td><td style="color:${r.V<=vLegal()?'#16a34a':'#dc2626'};font-weight:800;">${vLegal()} m/s 이하 — ${r.V<=vLegal()?'적합':'초과'}</td></tr>
       ${(r.dtype!=='circ'&&r.ar>4.0001)?`<tr><td class="k">장단비</td><td colspan="3" style="color:#c2410c;font-weight:800;">${r.ar.toFixed(2)} : 1 — 4:1 초과, 보강조치 필요 (별표 9 2.1(1))</td></tr>`:''}
       <tr><td class="k">마찰계수 λ</td><td>${(r.lam!==undefined?r.lam:LAMBDA[state.material]).toFixed(4)} (${state.lamMode==='cole'?'Swamee-Jain · ε '+ROUGH_MM[state.material]+' mm':'고정값'})</td><td class="k">레이놀즈수 Re</td><td>${r.Re!==undefined?fmt(r.Re,0):'—'}${(state.material==='flex'&&flexCF()!==1)?' · 플렉시블 CF ×'+flexCF().toFixed(1):''}</td></tr>
       ${r.fixed?`<tr><td class="k">산정 모드</td><td colspan="3">Φ 고정(검증) — 입력 구경 Φ${r.D} mm 기준 산정. 등마찰 ${state.frictionBase} Pa/m 소요 구경 Φ${r.D_calc.toFixed(1)} mm</td></tr>`:''}
+      ${r.overMax?`<tr><td class="k">최대 규격</td><td colspan="3" style="color:#dc2626;font-weight:800;">표준 최대 Φ${r.D} 초과 — 소요 Φ${r.D_calc.toFixed(1)} mm · ΔP/L ${r.Fr.toFixed(3)} Pa/m${r.overFr?' &gt; '+state.frictionBase+' Pa/m':''} — 사각 · 복수 덕트 검토</td></tr>`:''}
+      ${(r.freeCalc||r.fixNote)?`<tr><td class="k">규격 구분</td><td colspan="3">${[r.freeCalc?'비표준(50 mm 올림 — 표준 조합으로 기준 미충족)':'', r.fixNote||''].filter(Boolean).join(' · ')}</td></tr>`:''}
     </table>`;
     document.getElementById('a4-result').innerHTML = html;
     // v5.1 §5 — 인접 규격 비교표를 산정서에 포함
@@ -2773,6 +2854,10 @@ function updateA4(){
     nb = nb.replace('class="twrap" style="margin-top:10px;"','class="a4-nb"').replace(/class="rtbl"/,'class="a4-meta-table" style="text-align:center;"');
     var nbEl = document.getElementById('a4-nearby-result'); if(nbEl) nbEl.innerHTML = nb;
     var nbSec = document.getElementById('a4-nearby-section'); if(nbSec) nbSec.style.display = '';
+  } else {
+    // v6.1.5 — 결과가 없으면(풍량 0 · 빈 값 등) 1 · 2절을 「산정 대기」로(교차검증 P2)
+    document.getElementById('a4-result').innerHTML = '<div style="color:#94a3b8;font-size:11px;padding:10px;">산정 대기 — 단일 덕트 산정 탭에서 풍량(0보다 큰 값)을 입력해 산정하세요.</div>';
+    var nbSec0 = document.getElementById('a4-nearby-section'); if(nbSec0) nbSec0.style.display = 'none';
   }
 
   if(state.multiResults && state.multiResults.length){
@@ -2782,7 +2867,7 @@ function updateA4(){
       if(r.error){ html2+=`<tr><td>${r.name}</td><td colspan="5" style="color:#dc2626;">${r.error}</td></tr>`; return; }
       var vs=r.velStd, ok=r.V>=vs.min&&r.V<=vs.max;
       var size=r.dtype==='circ'?('Φ'+r.D):(r.W+'×'+r.H);
-      html2+=`<tr><td>${r.name}</td><td>${fmt(r.cmh,0)} m³/h</td><td style="font-weight:800;">${size} mm</td><td>${r.V.toFixed(2)} m/s</td><td>${r.thickness} mm</td><td style="color:${(ok&&r.V<=vLegal())?'#16a34a':'#dc2626'};font-weight:800;">${r.V>vLegal()?'법정 초과':ok?'적정':'검토'}</td></tr>`;
+      html2+=`<tr><td>${r.name}</td><td>${fmt(r.cmh,0)} m³/h</td><td style="font-weight:800;">${size} mm</td><td>${r.V.toFixed(2)} m/s</td><td>${r.thickness} mm</td><td style="color:${(ok&&r.V<=vLegal()&&!r.overMax)?'#16a34a':'#dc2626'};font-weight:800;">${r.V>vLegal()?'유속 범위 초과':r.overMax?'최대 규격 초과':ok?'적정':'검토'}</td></tr>`;
     });
     html2+='</table>';
     document.getElementById('a4-multi-result').innerHTML = html2;
@@ -2806,6 +2891,7 @@ function updateA4(){
       ? 'Colebrook 근사(Swamee-Jain) — 절대조도 ε: 아연도금강판 0.09 / 알루미늄 0.03 / 스테인리스 0.03 / 플렉시블(완전 신장) 3.0 mm (ASHRAE Fundamentals Ch.21)'
       : '아연도금강판 λ=0.02 / 알루미늄 λ=0.018 / 스테인리스 λ=0.015 / 플렉시블 λ=0.05 (고정값)';
   }
+  if(window.MMWarn) try{ MMWarn.run(); }catch(e){}   // v6.1.5 — 「⚠ 입력 확인」 줄을 계산서 · 인쇄 · JPG에(교차검증 P9)
 }
 
 // ══════════════════════════════════════════
@@ -3631,6 +3717,88 @@ window.exportA4Jpg = function(){
     window.addEventListener('afterprint', function () { printing = false; req(); });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+</script>
+<!-- 입력값 경고(공통 mm-warn — 20 우수 v6.1.6 본체 그대로 · 설정만 공조덕트용, v6.1.5 2026-11-24 교차검증 P9)(원문 정밀검토 B10 · 2026-11-12 · 작업지시서 §25-6-79) — 빈 값 · 0 이 기본값으로 바뀌거나 음수가 그대로 계산에 들어가는 칸에 빨간 테두리와 안내, 계산서 끝에 「입력 확인」 줄. 계산 값은 바꾸지 않음 -->
+<style id="mm-warn-css">
+input[data-mm-warn]{outline:2px solid #d32f2f!important;outline-offset:1px;background:#fff5f5!important;}
+.mm-warn-msg{display:block;flex-basis:100%;width:100%;color:#d32f2f;font-size:11px;font-weight:700;line-height:1.35;margin-top:3px;}
+[data-mm-warn-after]::after{content:attr(data-mm-warn-after);display:block;color:#d32f2f;font-size:11px;font-weight:700;line-height:1.35;margin-top:3px;}
+.mm-warn-note{margin-top:8px;padding:5px 8px;border:1px solid #d32f2f;border-radius:3px;color:#b71c1c;background:#fff5f5;font-size:9pt;line-height:1.5;text-align:left;}
+@media print{input[data-mm-warn]{outline:none!important;background:transparent!important;}.mm-warn-msg{display:none!important;}[data-mm-warn-after]::after{content:none!important;}
+.mm-warn-note{-webkit-print-color-adjust:exact;print-color-adjust:exact;break-inside:avoid;}}
+</style>
+<script id="mm-warn-cfg">
+/* v6.1.5 (2026-11-24) — 공조덕트 입력 확인(교차검증 P9 · P17) · all:true(숨은 탭 칸도 판정 → A4 · 인쇄 · JPG에 「⚠ 입력 확인」 줄) · 계산 값은 바꾸지 않음 */
+(function(){
+  var circ=function(){return typeof state!=='undefined'&&state.dtype==='circ';};
+  var z=function(t){return function(el,n){return n===0?t:null;};};
+  var nm=function(lab,re){return function(el){var b=el.id.replace(re,'');var e=document.getElementById(b+'_name');return ((e&&e.value)||b)+' '+lab;};};
+  var fx=function(el,n){if(n>0&&typeof getBestStdSize==='function'){var g=getBestStdSize(n);if(g!==n)return '목록 밖 → '+g+' mm 적용';}return null;};
+  window.MM_WARN_CFG={report:'#a4-warn',all:true,rules:[
+   {sel:'#flowInput',name:'풍량',neg:'음수 — 산정 안 함',extra:z('0 — 산정 안 함')},
+   {sel:'#manualFriction',name:'마찰손실 직접입력',neg:'음수 — 산정 안 함',extra:z('0 — 산정 안 함'),cond:function(){var f=document.getElementById('frictionBase');return !!f&&f.value==='manual';}},
+   {sel:'#fixW',name:'폭(W) 고정',neg:'음수 — 고정 안 함',extra:fx,cond:function(){return !circ();}},
+   {sel:'#fixH',name:'높이(H) 고정',neg:'음수 — 고정 안 함',extra:fx,cond:function(){return !circ();}},
+   {sel:'#fixD',name:'직경 Φ 고정',neg:'음수 — 고정 안 함',cond:circ},
+   {sel:'#multiItems input[id$="_flow"]',name:nm('풍량',/_flow$/),neg:'음수 — 산정 안 함',extra:z('0 — 산정 안 함')},
+   {sel:'#multiItems input[id$="_fr"]',name:nm('마찰손실',/_fr$/),neg:'음수 — 산정 안 함',extra:z('0 — 산정 안 함')},
+   {sel:'#sp_flow',name:'정압 풍량',neg:'음수 — 계산 안 함'},
+   {sel:'#sp_esp',name:'장비 기외정압',neg:'음수 — 판정 생략'},
+   {sel:'#spSegs input[id$="_len"]',name:nm('길이 L',/_len$/),neg:'음수 — 계산 안 함'},
+   {sel:'#spSegs input[id$="_d"],#spSegs input[id$="_w"],#spSegs input[id$="_h"]',name:nm('치수',/_[dwh]$/),neg:'음수 — 미입력 처리'},
+   {sel:'#spFits input[id$="_n"]',name:'피팅 수량',neg:'음수 — 계산 안 함'},
+   {sel:'#spFits input[id$="_pa"]',name:'피팅 직접입력 손실',neg:'음수 — 계산 안 함',cond:function(el){var t=document.getElementById(el.id.replace(/_pa$/,'_type'));return !!t&&t.value==='fixed';}}]};
+})();
+</script>
+<script id="mm-warn-js">
+(function(){
+  var C=window.MM_WARN_CFG; if(!C) return;
+  var A=function(x){return Array.prototype.slice.call(x);};
+  function els(s){try{return (typeof s==='function'?s():A(document.querySelectorAll(s))).filter(Boolean);}catch(e){return [];}}
+  function vis(el){return !!(el.offsetWidth||el.offsetHeight||el.getClientRects().length);}
+  function lbl(el){var p=el;for(var i=0;i<4&&p;i++){p=p.parentElement;if(!p)break;var l=p.querySelector('label,.lbl,.flbl,.field-label');if(l&&!l.contains(el))return l.textContent.replace(/\s+/g,' ').trim().slice(0,30);}return el.id||'입력값';}
+  function judge(r,el){
+    if(r.cond&&!r.cond(el))return null;
+    var v=String(el.value==null?'':el.value).trim();
+    if(v==='')return r.empty!=null?'빈 값 → 기본값 '+r.empty+' 적용':null;
+    if(r.text&&!/^-?\d+(\.\d+)?$/.test(v)){var p=parseFloat(v);return '숫자 외 글자 — '+(isNaN(p)?0:p)+'(으)로 계산';}
+    var n=parseFloat(v);if(isNaN(n))return r.empty!=null?'빈 값 → 기본값 '+r.empty+' 적용':null;
+    if(n<0&&r.neg)return typeof r.neg==='string'?r.neg:'음수 입력 — 확인';
+    if(n===0&&r.zero!=null)return '0 → 기본값 '+r.zero+' 적용';
+    if(r.int&&n%1)return '소수 → '+Math.floor(n)+r.int+' 적용';
+    return r.extra?r.extra(el,n):null;}
+  function show(r,el,m){
+    var t=m?'⚠ '+m:'';
+    if(m){if(el.getAttribute('data-mm-warn')!=='1')el.setAttribute('data-mm-warn','1');}else if(el.hasAttribute('data-mm-warn'))el.removeAttribute('data-mm-warn');
+    if(C.react){var at=r.at?r.at(el):el.parentElement;if(!at)return;
+      if(m){if(at.getAttribute('data-mm-warn-after')!==t)at.setAttribute('data-mm-warn-after',t);}else if(at.hasAttribute('data-mm-warn-after'))at.removeAttribute('data-mm-warn-after');return;}
+    var h=el.closest('.input-sfx,.inp-wrap,.flex-row,.dstp')||el,s=h.nextElementSibling,has=!!(s&&s.classList.contains('mm-warn-msg'));
+    if(m){if(!has){s=document.createElement('span');s.className='mm-warn-msg';h.parentNode.insertBefore(s,h.nextSibling);}if(s.textContent!==t)s.textContent=t;}
+    else if(has)s.parentNode.removeChild(s);}
+  function note(list){
+    var txt=list.length?'⚠ 입력 확인 — 다음 값은 입력 그대로가 아니거나 확인이 필요함(기본값 적용 · 음수 입력): '+list.join(' · '):'';
+    [].concat(C.report).forEach(function(sel){els(sel).forEach(function(box){
+      var n=A(box.children).filter(function(c){return c.classList.contains('mm-warn-note');})[0];
+      if(!txt){if(n)box.removeChild(n);return;}
+      if(!n){n=document.createElement('div');n.className='mm-warn-note';}
+      if(n.textContent!==txt)n.textContent=txt;
+      if(box.lastElementChild!==n)box.appendChild(n);});});}
+  function run(){var list=[];
+    C.rules.forEach(function(r){var es=els(r.sel),got=[];
+      if(!es.length&&C.keep&&r._last){got=r._last;}
+      es.forEach(function(el){
+        var m=null;try{m=(C.all||vis(el))?judge(r,el):null;}catch(e){}
+        show(r,el,m);
+        if(m)got.push((typeof r.name==='function'?r.name(el):(r.name||lbl(el)))+' '+m);});
+      if(es.length)r._last=got;
+      got.forEach(function(s){if(list.indexOf(s)<0)list.push(s);});});
+    note(list);}
+  window.MMWarn={version:'1.0',run:run};
+  var q=function(){setTimeout(run,0);};
+  document.addEventListener('input',q,true);document.addEventListener('change',q,true);document.addEventListener('click',q,true);
+  window.addEventListener('beforeprint',run);
+  setTimeout(run,600);setInterval(run,1000);
 })();
 </script>
 <!-- MM-PROJECT:BEGIN v1.3 -->
