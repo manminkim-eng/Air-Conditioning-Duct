@@ -826,7 +826,7 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
 
           <div class="nb blue" style="margin-bottom:10px;">
             <div class="nb-tit">📌 덕트 형상 선택</div>
-            <div class="nb-txt">사각덕트: W×H 치수 산정 / 원형덕트: Φ 직경 산정</div>
+            <div class="nb-txt">사각덕트: W×H 치수 산정 / 원형(스파이럴) 덕트: Φ 직경 산정 — 원형은 스파이럴 덕트 전제(판두께 별표 9 2.2.1(2)③ 표 4 · KS D 3506 · 호칭 안지름)</div>
           </div>
 
           <div class="dtype-grid" id="dtypeGrid">
@@ -837,7 +837,7 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
             </div>
             <div class="dtype-card" data-dtype="circ" onclick="selectDtype(this)">
               <div class="dt-ico">⬤</div>
-              <div class="dt-nm">원형덕트</div>
+              <div class="dt-nm">원형(스파이럴)</div>
               <div class="dt-cat">CIRC</div>
             </div>
             <div class="dtype-card" data-dtype="flat" onclick="selectDtype(this)">
@@ -1063,7 +1063,7 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
 <div id="tab-multi" class="tab-panel">
   <div class="nb blue" style="margin-bottom:13px;">
     <div class="nb-tit">📋 다중 덕트 일괄 산정</div>
-    <div class="nb-txt">여러 구간의 덕트를 한 번에 산정합니다. 각 구간별 덕트 조건과 풍량을 입력하세요.</div>
+    <div class="nb-txt">여러 구간의 덕트를 한 번에 산정합니다. 각 구간별 덕트 조건과 풍량을 입력하세요.<br/>※ 사각 · 편평 구간은 종횡비 4:1 고정(별표 9 2.1(1) 장단비 4:1 이내 · 편평은 3:1~4:1) — 단일 산정의 「종횡비 제한」 설정은 적용되지 않습니다.</div>
   </div>
 
   <div class="two-col">
@@ -1318,7 +1318,7 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
       <tr><td class="k">설계 방법</td><td>등마찰손실법 (Constant Friction Method) · 마찰손실 Darcy-Weisbach ΔP = λ(L/Dh)(ρV²/2) · 국부저항 ΔP = ζ(ρV²/2)</td></tr>
       <tr><td class="k">공기 밀도</td><td>1.2 kg/m³ (20°C, 1atm 기준)</td></tr>
       <tr><td class="k">마찰계수</td><td id="a4-lam-std">아연도금강판 λ=0.02 / 알루미늄 λ=0.018 / 스테인리스 λ=0.015 / 플렉시블 λ=0.05</td></tr>
-      <tr><td class="k">판두께 · 풍속 상한</td><td>별표 9 표 2(사각) · 표 4(스파이럴) — 아연도금강판 기준 · 스테인리스 표 7(장방형) · 표 8(스파이럴)(±500 Pa · 15 m/s 이하) · 표 1 유속 범위 저압 15 m/s · 고압 1 · 2 20 m/s 이하 · 장단비 4:1 이내(초과 시 보강조치)</td></tr>
+      <tr><td class="k">판두께 · 풍속 상한</td><td>별표 9 표 2(사각) · 표 4(스파이럴 — 원형은 스파이럴 덕트 전제, 2.2.1(2)③) — 아연도금강판 기준 · 스테인리스 표 7(장방형) · 표 8(스파이럴)(±500 Pa · 15 m/s 이하) · 표 1 유속 범위 저압 15 m/s · 고압 1 · 2 20 m/s 이하 · 장단비 4:1 이내(초과 시 보강조치)</td></tr>
       <tr><td class="k">설계·시공기준</td><td>KDS 31 25 30 : 2026 덕트설비 · KDS 31 25 20 : 2026 환기설비 · KCS 31 20 20 : 2026 덕트설비공사 · KCS 31 25 20 환기설비공사 (별표 9 1.3)</td></tr>
       <tr><td class="k">국부저항계수</td><td>ASHRAE Duct Fitting Database · ADC 플렉시블 덕트 성능기준 대표값 — ASHRAE 원문 확인 전 참고값, 제조사 시험값 제출 시 대체 (KDS 31 25 30 : 2026 4.2)</td></tr>
     </table>
@@ -1520,7 +1520,7 @@ footer.mm-foot{position:relative;z-index:1;border-top:1px solid #e4e9f0;backgrou
             • 기계설비 기술기준 [별표 9] 덕트설비의 설계 및 시공 기준<br>
             &nbsp;&nbsp;(국토교통부 고시 제2021-851호 · 제2026-360호 타법개정, 2026. 7. 8. 시행)<br>
             • 설계·시공기준 (별표 9 1.3) : KDS 31 25 30 : 2026 덕트설비 · KDS 31 25 20 : 2026 환기설비 · KCS 31 20 20 : 2026 덕트설비공사 · KCS 31 25 20 환기설비공사<br>
-            • 판두께 : 별표 9 표 2(사각)·표 4(스파이럴) · 스테인리스 표 7·표 8 · 유속 범위 : 표 1 (저압 15 m/s · 고압 1 · 2 20 m/s 이하)<br>
+            • 판두께 : 별표 9 표 2(사각)·표 4(스파이럴 — 원형은 스파이럴 덕트 전제) · 스테인리스 표 7·표 8 · 유속 범위 : 표 1 (저압 15 m/s · 고압 1 · 2 20 m/s 이하)<br>
             • Darcy-Weisbach : ΔP/L = λ × ρV² / (2·Dh)<br>
             • 연속방정식 : Q = V × A<br>
             • 수력직경 : Dh = 2WH/(W+H) [사각] · D [원형]<br>
@@ -2149,6 +2149,7 @@ function getBestStdSize(val){
 }
 
 // ── 판두께 ── 기계설비 기술기준 별표 9 표 2(사각·앵글플랜지) · 표 4(스파이럴) — 아연도금강판
+//   v6.1.6 — 원형 = 스파이럴 덕트 전제(별표 9 2.2.1(2)③ KS D 3506 · 호칭 안지름)를 화면 · A4에 표기(판단 항목 23-J1) — 값 불변
 //   v6.1.5 — 스테인리스는 별표 9 2.2.2 표 7(장방형) · 표 8(스파이럴)(내부정압 ±500 Pa · 15 m/s 이하 = 저압)(교차검증 P3)
 //   알루미늄·플렉시블, 스테인리스 고압 1·2 · 표 8 범위 밖(Φ1,000 초과)은 별표 9 미규정 → 표 2 · 4 값을 참고로 표시
 function vLegal(){ return (state.pressClass === 'high') ? 20 : 15; } // 별표 9 표 1
@@ -2234,7 +2235,7 @@ function renderResult(r){
     html += `
     <div class="duct-result-hero">
       <div class="drh-box circ">
-        <div class="drh-lbl">${r.fixed?'원형덕트 직경 Φ (고정·검증)':'원형덕트 직경 Φ'}</div>
+        <div class="drh-lbl">${r.fixed?'원형(스파이럴) 직경 Φ (고정·검증)':'원형(스파이럴) 직경 Φ'}</div>
         <div class="drh-val">${r.D}</div>
         <div class="drh-unit">mm</div>
         <div class="drh-sub">${r.fixed?('등마찰 '+state.frictionBase+' Pa/m 기준 소요: '+r.D_calc.toFixed(1)+' mm'):('계산치: '+r.D_calc.toFixed(1)+' mm')}</div>
@@ -2463,7 +2464,7 @@ function addMultiItem(){
 
   var dtypeOpts = [
     {v:'rect',l:'사각'},
-    {v:'circ',l:'원형'},
+    {v:'circ',l:'원형(스파이럴)'},   // v6.1.6 — 스파이럴 전제 표기(판단 항목 23-J1)
     {v:'flat',l:'편평'}
   ].map(function(o){ return `<option value="${o.v}">${o.l}</option>`; }).join('');
 
@@ -2585,6 +2586,7 @@ function renderMultiResult(results){
     </tr>`;
   });
   html += '</tbody></table></div>';
+  html += '<div style="font-size:11px;color:#64748b;margin-top:6px;">※ 사각 · 편평 구간 종횡비 4:1 고정(별표 9 2.1(1))</div>';   // v6.1.6 — 판단 항목 23-J2
   if(container) container.innerHTML = html;
   updateA4();
 }
@@ -2836,7 +2838,7 @@ function updateA4(){
     var size = r.dtype === 'circ' ? ('Φ' + r.D + ' mm') : (r.W + ' × ' + r.H + ' mm');
     var html = `
     <table class="a4-meta-table">
-      <tr><td class="k">덕트 형상</td><td>${r.dtype==='circ'?'원형':r.dtype==='flat'?'편평':'사각'}</td><td class="k">설치 장소</td><td>${document.getElementById('spaceType').options[document.getElementById('spaceType').selectedIndex].text}</td></tr>
+      <tr><td class="k">덕트 형상</td><td>${r.dtype==='circ'?'원형(스파이럴)':r.dtype==='flat'?'편평':'사각'}</td><td class="k">설치 장소</td><td>${document.getElementById('spaceType').options[document.getElementById('spaceType').selectedIndex].text}</td></tr>
       <tr><td class="k">설계 풍량</td><td>${fmt(r.cmh,0)} m³/h (${r.cms.toFixed(4)} m³/s)</td><td class="k">마찰손실 기준</td><td>${state.frictionBase} Pa/m</td></tr>
       <tr><td class="k">산정 규격</td><td style="font-weight:900;font-size:13px;">${size}</td><td class="k">풍속 판정</td><td style="color:${velOk?'#16a34a':'#dc2626'};font-weight:800;">${r.V.toFixed(2)} m/s (${velOk?'적정':(r.V>vs.max?'초과':'저속')})</td></tr>
       <tr><td class="k">수력직경 Dh</td><td>${r.Dh.toFixed(1)} mm</td><td class="k">실제 ΔP/L</td><td>${r.Fr.toFixed(3)} Pa/m</td></tr>
@@ -2870,6 +2872,7 @@ function updateA4(){
       html2+=`<tr><td>${r.name}</td><td>${fmt(r.cmh,0)} m³/h</td><td style="font-weight:800;">${size} mm</td><td>${r.V.toFixed(2)} m/s</td><td>${r.thickness} mm</td><td style="color:${(ok&&r.V<=vLegal()&&!r.overMax)?'#16a34a':'#dc2626'};font-weight:800;">${r.V>vLegal()?'유속 범위 초과':r.overMax?'최대 규격 초과':ok?'적정':'검토'}</td></tr>`;
     });
     html2+='</table>';
+    html2+='<div style="font-size:9.5px;color:#475569;margin-top:3px;">※ 사각 · 편평 구간 종횡비 4:1 고정(별표 9 2.1(1) 장단비 4:1 이내)</div>';   // v6.1.6 — 판단 항목 23-J2
     document.getElementById('a4-multi-result').innerHTML = html2;
   } else {
     var ms = document.getElementById('a4-multi-section'); if(ms) ms.style.display = 'none';
@@ -3553,7 +3556,7 @@ window.exportA4Jpg = function(){
     var R=(typeof state!=='undefined'&&state.result)||null;
     var f=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
     if(!R){['sb-type','sb-flow','sb-size','sb-vel','sb-fr','sb-th'].forEach(function(id){f(id,'—');});return;}
-    f('sb-type', R.dtype==='circ'?'원형':R.dtype==='flat'?'편평':'사각');
+    f('sb-type', R.dtype==='circ'?'원형(스파이럴)':R.dtype==='flat'?'편평':'사각');   // v6.1.6 — 판단 항목 23-J1
     f('sb-flow', Math.round(R.cmh).toLocaleString()+' m³/h');
     f('sb-size', R.dtype==='circ'?('Φ'+R.D+' mm'):(R.W+'×'+R.H+' mm'));
     f('sb-vel', R.V.toFixed(2)+' m/s');
