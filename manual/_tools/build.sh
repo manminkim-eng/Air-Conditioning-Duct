@@ -11,5 +11,5 @@ for f in sorted(glob.glob(raw+'/s*.png')): Image.open(f).convert('RGB').save(M+'
 shutil.copy(raw+'/_marks.json',M+'/images/_marks.json'); shutil.copy(raw+'/_example.json',M+'/_tools/_example.json')
 PY
 MANUAL_DIR="$M" python3 gen_manual_duct.py
-node pdf_duct.js "$M" 공조덕트_사용자매뉴얼_Ver-5.1.1.pdf "공조 덕트 규격 산정 시스템 사용자 매뉴얼 Ver-5.1.1"
+node pdf_duct.js "$M" 공조덕트_사용자매뉴얼_Ver-6.1.pdf "공조 덕트 규격 산정 시스템 사용자 매뉴얼 Ver-6.1"
 node audit_responsive.js "$M/index.html" > "$RAW/_audit.json"

@@ -6,7 +6,9 @@ const VW=1440,VH=900,DSF=1.25,PORT=8897;
 /* 예제 A = 업무시설 AHU-1 급기 주덕트 — 사각 · 급기 주덕트 · 1.0 Pa/m · 아연도금강판 · 고정 λ · 저압 · 4:1 · 12,000 m³/h
    예제 B = 급기 분기 원형덕트 1,500 m³/h (그 외 A와 같음)
    예제 C = 천장 속 높이 제약 — 사각 H 300 고정 · 8:1(보강조치 전제) · 12,000 m³/h
-   다중 = 주덕트 12,000 · 분기 3,000(사각) · 분기 1,200(원형) / 정압 = AHU-1 급기 계통 12,000 m³/h · ESP 400 Pa */
+   예제 D = 예제 A 조건 + 스테인리스(v6.1.5 별표 9 2.2.2 표 7 판두께 확인)
+   다중 = 주덕트 12,000 · 분기 3,000(사각) · 분기 1,200(원형) / 정압 = AHU-1 급기 계통 12,000 m³/h · ESP 400 Pa
+   v6.1.5(2026-11-24) — 산정 대기(풍량 0) · A4 「산정 대기」 · 「⚠ 입력 확인」 줄 · 스테인리스 · 375 px 다중 탭 장면 추가 */
 const FREEZE=`(()=>{const T=new Date(2026,9,14,10,0,0).getTime();const D=Date;class F extends D{constructor(...a){if(a.length)super(...a);else super(T);}static now(){return T;}}window.Date=F;window.alert=()=>{};window.confirm=()=>true;try{localStorage.clear();['pwa-dismissed','pwa-banner-dismissed','pwa-welcome','duct-pwa-dismissed','mm-master-seen','duct-guide-seen'].forEach(k=>localStorage.setItem(k,'1'))}catch(e){}})()`;
 const HIDE='#pwaBanner,.pwa-banner,#iosModal,.ios-modal,#toastEl,.toast,#netToast,.net-toast,.pwa-update-bar,#toast{display:none!important}.calc-col-right{position:static!important;max-height:none!important;overflow:visible!important}';
 const HELP=`window.__vis=e=>e&&e.getClientRects().length>0;
@@ -24,7 +26,13 @@ window.__F={
  A:()=>__run('rect',{flowInput:12000}),
  B:()=>__run('circ',{spaceType:'supply_branch',flowInput:1500}),
  C:()=>__run('rect',{arLimit:'8',fixH:300,flowInput:12000}),
+ D:()=>__run('rect',{ductMaterial:'ss',flowInput:12000}),
 };
+window.__wait=()=>__quiet(()=>{__tab(0);__S({flowInput:0});calcDuct();if(window.MMWarn)MMWarn.run();window.scrollTo(0,0);});
+window.__exW=()=>{__tab(4);const p=document.getElementById('a4Page');const t=p.innerText.replace(/\\s+/g,' ');__tab(0);
+ return {res:!!state.result,badge:document.getElementById('resultBadge').textContent.trim(),body:document.getElementById('resultBody').innerText.replace(/\\s+/g,' ').trim(),
+  sum:[...document.querySelectorAll('.sum-bar .sum-item')].map(e=>e.textContent.trim()),warnMsg:[...document.querySelectorAll('.mm-warn-msg')].map(e=>e.textContent.trim()),
+  a4wait:t.includes('산정 대기'),a4warn:((p.querySelector('.mm-warn-note')||{}).textContent||''),a4nearby:t.includes('인접 규격')};};
 window.__quiet=f=>{const si=Element.prototype.scrollIntoView;Element.prototype.scrollIntoView=function(){};try{f();}finally{setTimeout(()=>{Element.prototype.scrollIntoView=si;},300);}};
 window.__multi=()=>{const mi=document.getElementById('multiItems');mi.innerHTML='';multiCount=0;addMultiItem();addMultiItem();addMultiItem();
  const D=[['AHU-1 급기 주덕트','rect','supply_main',12000],['3층 급기 분기','rect','supply_branch',3000],['회의실 급기 분기','circ','supply_branch',1200]];
@@ -40,7 +48,7 @@ window.__sp=()=>{spReset();__S({sp_name:'AHU-1 급기 계통',sp_flow:12000,sp_e
 window.__A=()=>__quiet(()=>{__closeM();resetAll();__tab(0);__S({projName:'만민 건축사 사옥 신축공사',projDate:'2026-10-14',projAuthor:'김만민'});updateStep(1);__F.A();window.scrollTo(0,0);});
 window.__show=k=>__quiet(()=>{__tab(0);__F[k]();window.scrollTo(0,0);});
 window.__ex=()=>{const r=state.result;if(!r)return null;const body=document.getElementById('resultBody').innerText;
- return {W:r.W||null,H:r.H||null,D:r.D||null,A:+r.A.toFixed(6),Dh:+r.Dh.toFixed(3),V:+r.V.toFixed(4),Fr:+r.Fr.toFixed(4),ar:r.ar?+r.ar.toFixed(3):null,lam:+((r.lam!==undefined?r.lam:LAMBDA[state.material])).toFixed(5),Re:r.Re?Math.round(r.Re):null,th:String(r.thickness),thNote:thkNote(state.material),
+ return {W:r.W||null,H:r.H||null,D:r.D||null,A:+r.A.toFixed(6),Dh:+r.Dh.toFixed(3),V:+r.V.toFixed(4),Fr:+r.Fr.toFixed(4),ar:r.ar?+r.ar.toFixed(3):null,lam:+((r.lam!==undefined?r.lam:LAMBDA[state.material])).toFixed(5),Re:r.Re?Math.round(r.Re):null,th:String(r.thickness),thNote:thkNote(state.material,r),badge:document.getElementById('resultBadge').textContent.trim(),
   vStd:[r.velStd.min,r.velStd.max],vLegal:vLegal(),legalOver:r.V>vLegal(),arWarn:body.includes('보강조치'),free:!!r.freeCalc,
   sum:[...document.querySelectorAll('.sum-bar .sum-item')].map(e=>e.textContent.trim())};};
 window.__exM=()=>(state.multiResults||[]).map(r=>({name:r.name,size:r.dtype==='circ'?('Φ'+r.D):(r.W+'×'+r.H),V:+r.V.toFixed(3),Fr:+r.Fr.toFixed(3),th:String(r.thickness),ok:r.V>=r.velStd.min&&r.V<=r.velStd.max}));
@@ -52,14 +60,17 @@ const SHOTS=[
  {id:'s04_step3',clip:'card:STEP 3',m:[['.seg-ctrl','① 풍량 단위'],['up:#flowInput|.input-sfx','② 풍량'],['#convBox','③ 단위 환산'],['nth:.btn-g|0','④ 빠른 선택'],['#fixDimBox','⑤ 치수 제한(선택)']]},
  {id:'s05_result',clip:'card:STEP 4',m:[['.duct-result-hero','채택 규격 · 실제 풍속'],['.vel-gauge','풍속 게이지'],['.stat-grid','풍량 · 단면적 · 수력직경'],['nth:#resultBody .cbox|0','산정 상세'],['nth:#resultBody .rtbl|0','인접 규격 비교']]},
  {id:'s06_result_b',pre:"__show('B')",clip:'card:STEP 4',m:[['.duct-result-hero','Φ 채택 · 풍속'],['nth:#resultBody .cbox|0','산정 상세']]},
- {id:'s07_result_c',pre:"__show('C')",clip:'card:STEP 4',m:[['.duct-result-hero','1800×300 · 풍속'],['nth:#resultBody .cbox|0','판두께 1.0 · 법정 상한'],['nth:#resultBody .rtbl|0','인접 규격'],['nth:#resultBody .nb.org|0','장단비 4:1 초과 — 보강조치']]},
+ {id:'s07_result_c',pre:"__show('C')",clip:'card:STEP 4',m:[['.duct-result-hero','1800×300 · 풍속'],['nth:#resultBody .cbox|0','판두께 1.0 · 유속 범위'],['nth:#resultBody .rtbl|0','인접 규격'],['nth:#resultBody .nb.org|0','장단비 4:1 초과 — 보강조치'],['#resultBadge','🔧 보강 필요']]},
  {id:'s08_multi',pre:"__quiet(()=>{__show('A');__tab(1);__multi();scrollTo(0,0);})",wait:900,clip:'#tab-multi',m:[['#multiItems','구간 입력'],['.add-item-btn','구간 추가'],['nth:#tab-multi .btn-b|0','일괄 산정'],['card:일괄 산정 결과','일괄 산정 결과']]},
  {id:'s09_sp',pre:"__quiet(()=>{__tab(2);__sp();scrollTo(0,0);})",wait:900,clip:'#tab-sp',crop:1150,m:[['card:계통 조건','계통 조건 · ESP'],['card:직관 구간','직관 구간'],['card:피팅','피팅 · ζ'],['card:정압 계산 결과','정압 계산 결과']]},
- {id:'s10_guide_vel',pre:"__tab(3);switchGmTab('g-vel',document.querySelectorAll('.gm-tab')[0]);scrollTo(0,0)",wait:700,clip:'card:덕트 설계 기준표',m:[['nth:.gm-tab|0','기준표 5종'],['nth:#g-vel .nb|0','법정 상한 · 루버'],['nth:#g-vel .rtbl|0','설계 권장 풍속']]},
- {id:'s11_guide_th',pre:"switchGmTab('g-material',document.querySelectorAll('.gm-tab')[4]);scrollTo(0,0)",wait:700,clip:'card:덕트 설계 기준표',m:[['nth:#g-material .rtbl|0','사각 판두께(표 2)'],['nth:#g-material .nb.sky|0','스파이럴(표 4)'],['nth:#g-material .ref-box|0','보강 기준(참고)']]},
+ {id:'s10_guide_vel',pre:"__tab(3);switchGmTab('g-vel',document.querySelectorAll('.gm-tab')[0]);scrollTo(0,0)",wait:700,clip:'card:덕트 설계 기준표',m:[['nth:.gm-tab|0','기준표 5종'],['nth:#g-vel .nb|0','유속 범위 · 루버'],['nth:#g-vel .rtbl|0','설계 권장 풍속']]},
+ {id:'s11_guide_th',pre:"switchGmTab('g-material',document.querySelectorAll('.gm-tab')[4]);scrollTo(0,0)",wait:700,clip:'card:덕트 설계 기준표',m:[['nth:#g-material .rtbl|0','사각 판두께(표 2)'],['nth:#g-material .nb.sky|0','스파이럴(표 4)'],['nth:#g-material .nb.org|0','스테인리스(표 7 · 8)'],['nth:#g-material .ref-box|0','보강 기준(참고)']]},
  {id:'s12_modal',pre:"__tab(0);openMasterModal(1)",wait:900,fixed:true,post:"__closeM()",clip:'.master-modal-box',m:[]},
  {id:'s13_a4',pre:"__A();__tab(4);scrollTo(0,0)",wait:1500,clip:'viewport',m:[['.mm-btn-print','인쇄 / PDF'],['.mm-btn-jpg','JPG 저장'],['#a4Page','A4 산정서']]},
  {id:'s14_a4page',clip:'#a4Page',crop:2400,m:[['nth:.a4-meta-table|0','산정 결과표'],['nth:#a4Page .a4-meta-table|1','인접 규격']]},
+ {id:'s18_wait',pre:"__wait()",wait:900,clip:'card:STEP 3',union:'card:STEP 4',m:[['up:#flowInput|.input-sfx','풍량 0 — 빨간 테두리'],['.mm-warn-msg','⚠ 0 — 산정 안 함'],['#resultBadge','⚠ 입력 확인'],['#resultPlaceholder','산정 대기 — 결과 지움']]},
+ {id:'s19_a4_wait',pre:"__tab(4);scrollTo(0,0)",wait:1200,clip:'#a4Page',crop:560,m:[['#a4-result','1절 「산정 대기」'],['.mm-warn-note','⚠ 입력 확인 줄']]},
+ {id:'s20_ss',pre:"__show('D')",wait:800,clip:'card:STEP 4',crop:1150,m:[['.duct-result-hero','700×600 · 풍속'],['nth:#resultBody .cbox|0','판두께 0.5 · 별표 9 표 7(스테인리스)']]},
 ];
 (async()=>{
  const s=await server(repo,PORT);const b=await chromium.launch();
@@ -80,6 +91,7 @@ const SHOTS=[
   if(S.id==='s08_multi')ex.M=await pg.evaluate('__exM()');
   if(S.id==='s09_sp')ex.SP=await pg.evaluate('__exS()');
   if(S.id==='s14_a4page')ex.A_a4=await pg.evaluate(()=>document.getElementById('a4Page').innerText.replace(/\s+/g,' '));
+  if(S.id==='s20_ss')ex.D=await pg.evaluate('__ex()');
   const info=await pg.evaluate(({S,VW,VH})=>{
    const abs=e=>{const r=e.getBoundingClientRect();return {x:r.left+scrollX,y:r.top+scrollY,w:r.width,h:r.height};};
    let clip;
@@ -99,6 +111,7 @@ const SHOTS=[
   meta[S.id]={w:Math.round(cl.width),h:Math.round(Math.min(cl.height,S.fixed?VH:1e9)),marks:info.marks};
   if(S.post){try{await pg.evaluate(S.post);}catch(e){errs.push(S.id+' post '+e.message);}await pg.waitForTimeout(400);}
  }
+ await pg.evaluate('__wait()');await pg.waitForTimeout(500);ex.wait=await pg.evaluate('__exW()');
  await pg.evaluate('__A()');await pg.waitForTimeout(500);ex.after=await pg.evaluate('__ex()');
  const mctx=await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,serviceWorkers:'block',isMobile:true,hasTouch:true});await setup(mctx);
  const mp=await mctx.newPage();await mp.addInitScript(FREEZE);
@@ -109,11 +122,18 @@ const SHOTS=[
  await mp.screenshot({path:path.join(out,'s16_mobile_result.png')});meta['s16_mobile_result']={w:390,h:844,marks:[]};
  await mp.evaluate(()=>{__tab(4);window.scrollTo(0,0);});await mp.waitForTimeout(1200);
  await mp.screenshot({path:path.join(out,'s17_mobile_a4.png')});meta['s17_mobile_a4']={w:390,h:844,marks:[]};
+// v6.1.5 — 375 px 다중 탭(교차검증 P7 가로 넘침 수정 확인)
+ const m3=await b.newContext({viewport:{width:375,height:812},deviceScaleFactor:2,serviceWorkers:'block',isMobile:true,hasTouch:true});await setup(m3);
+ const p3=await m3.newPage();await p3.addInitScript(FREEZE);await p3.goto(`http://127.0.0.1:${PORT}/index.html`);await p3.waitForTimeout(2500);
+ await p3.addStyleTag({content:HIDE});await p3.evaluate(HELP);await p3.evaluate("__A();__quiet(()=>{__tab(1);__multi();window.scrollTo(0,0);})");await p3.waitForTimeout(1200);
+ await p3.evaluate(()=>{const e=__card('일괄 산정 결과');const y=e.getBoundingClientRect().top+window.scrollY-12;window.scrollTo(0,y);});await p3.waitForTimeout(800);
+ await p3.screenshot({path:path.join(out,'s21_mobile_multi.png')});meta['s21_mobile_multi']={w:375,h:812,marks:[]};
+ ex.m375=await p3.evaluate(()=>({page:document.documentElement.scrollWidth,vw:innerWidth,multi:document.getElementById('tab-multi').scrollWidth}));
  ex.mobile=await mp.evaluate(()=>({page:document.documentElement.scrollWidth,tabbar:document.querySelector('.tab-bar-inner').scrollWidth,vw:innerWidth,tabRows:new Set([...document.querySelectorAll('.tab-bar-inner .tb')].map(e=>Math.round(e.getBoundingClientRect().top))).size}));
  fs.writeFileSync(path.join(out,'_marks.json'),JSON.stringify(meta,null,1));fs.writeFileSync(path.join(out,'_example.json'),JSON.stringify(ex,null,1));
  const miss=[];Object.entries(meta).forEach(([k,v])=>v.marks.forEach(m=>{if(m.miss)miss.push(k+':'+m.miss);else if(m.x<0||m.y<0||m.x+m.w>100.5||m.y+m.h>100.5||m.w<=0||m.h<=0)miss.push(k+':OUT '+m.label+' '+m.x+','+m.y+','+m.w+','+m.h);}));
  const strip=o=>JSON.stringify(o);
  const sh=o=>o&&[o.W?o.W+'x'+o.H:'Φ'+o.D,o.V,o.Fr,o.th,o.thNote,o.arWarn,o.legalOver];
- console.log(JSON.stringify({A:sh(ex.A),B:sh(ex.B),C:sh(ex.C),M:ex.M,SP:ex.SP&&ex.SP.text.slice(0,300),same:strip(ex.A)===strip(ex.after),mobile:ex.mobile,sizes:Object.fromEntries(Object.entries(meta).map(([k,v])=>[k,v.w+'x'+v.h])),miss,errs:errs.slice(0,15)},null,1));
+ console.log(JSON.stringify({A:sh(ex.A),B:sh(ex.B),C:sh(ex.C),D:sh(ex.D),badgeC:ex.C&&ex.C.badge,wait:ex.wait,m375:ex.m375,M:ex.M,SP:ex.SP&&ex.SP.text.slice(0,300),same:strip(ex.A)===strip(ex.after),mobile:ex.mobile,sizes:Object.fromEntries(Object.entries(meta).map(([k,v])=>[k,v.w+'x'+v.h])),miss,errs:errs.slice(0,15)},null,1));
  await b.close();s.close();
 })();
